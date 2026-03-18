@@ -34,16 +34,49 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       }
 
       switch (template) {
-        case 'grid':
+        case 'grid': {
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const blanks = Array.from({ length: firstDay });
+          const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
           return (
-            <div className="grid grid-cols-3 gap-3 max-w-[380px]">
-              {books.slice(0, 9).map((book) => (
-                <div key={book.key} className="shadow-lg">
-                  <img src={book.coverUrl} alt={book.title} className="w-full object-cover" style={{ aspectRatio: '2/3' }} crossOrigin="anonymous" />
-                </div>
-              ))}
+            <div style={{ width: '100%', maxWidth: 480, padding: '0 8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
+                {WEEKDAYS.map((d) => (
+                  <div key={d} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.1em', opacity: 0.35, padding: '2px 0' }}>
+                    {d}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+                {blanks.map((_, i) => <div key={`b${i}`} />)}
+                {days.map((day) => {
+                  const book = entries[day];
+                  return (
+                    <div
+                      key={day}
+                      style={{
+                        aspectRatio: '3/4',
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: `1px solid ${moodConfig.textColor}15`,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {book ? (
+                        <img src={book.coverUrl} alt={book.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+                      ) : (
+                        <span style={{ fontSize: 10, opacity: 0.25 }}>{day}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
+        }
 
         case 'collage':
           return (

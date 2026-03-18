@@ -37,12 +37,10 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       <div className="flex-1 max-w-md mx-auto w-full pt-2">
         <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-2">Step 2</p>
         <h2 className="font-display text-2xl font-bold tracking-tight mb-4">
-          무드 & 템플릿
+          템플릿 선택
         </h2>
 
-        <MoodSelector selected={mood} onChange={onMoodChange} />
-
-        <div className="grid grid-cols-2 gap-3 mt-4 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {TEMPLATES.map((t) => (
             <button
               key={t.id}

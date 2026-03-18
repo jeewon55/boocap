@@ -40,7 +40,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     const readDays = Object.keys(entries).length;
     const baseStyle: React.CSSProperties = {
       width: 600,
-      aspectRatio: '9/16',
+      aspectRatio: '4/5',
       backgroundColor: moodConfig.bgColor,
       color: moodConfig.textColor,
       fontFamily: "'Instrument Sans', sans-serif",

@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react';
 import { StepIndicator } from '@/components/StepIndicator';
 import { WizardStep } from '@/components/WizardStep';
-import { Step1MonthMood } from '@/components/Step1MonthMood';
-import { Step2AddBooks } from '@/components/Step2AddBooks';
-import { Step3Template } from '@/components/Step3Template';
-import { Step4Download } from '@/components/Step4Download';
+import { Step1AddBooks } from '@/components/Step1AddBooks';
+import { Step2Template } from '@/components/Step2Template';
+import { Step3Download } from '@/components/Step3Download';
 import { Book, MoodType, TemplateType } from '@/types/book';
 
 const now = new Date();
@@ -47,49 +46,39 @@ export default function Index() {
       <StepIndicator current={step} />
 
       <WizardStep visible={step === 0}>
-        <Step1MonthMood
+        <Step1AddBooks
           year={year}
           month={month}
-          mood={mood}
+          entries={entries}
           onMonthChange={handleMonthChange}
-          onMoodChange={setMood}
+          onAddBook={handleAddBook}
+          onRemoveBook={handleRemoveBook}
           onNext={() => setStep(1)}
         />
       </WizardStep>
 
       <WizardStep visible={step === 1}>
-        <Step2AddBooks
+        <Step2Template
           year={year}
           month={month}
           entries={entries}
-          onAddBook={handleAddBook}
-          onRemoveBook={handleRemoveBook}
+          mood={mood}
+          template={template}
+          onMoodChange={setMood}
+          onTemplateChange={setTemplate}
           onBack={() => setStep(0)}
-          onNext={() => setStep(2)}
+          onGenerate={() => setStep(2)}
         />
       </WizardStep>
 
       <WizardStep visible={step === 2}>
-        <Step3Template
+        <Step3Download
           year={year}
           month={month}
           entries={entries}
           mood={mood}
           template={template}
-          onTemplateChange={setTemplate}
           onBack={() => setStep(1)}
-          onGenerate={() => setStep(3)}
-        />
-      </WizardStep>
-
-      <WizardStep visible={step === 3}>
-        <Step4Download
-          year={year}
-          month={month}
-          entries={entries}
-          mood={mood}
-          template={template}
-          onBack={() => setStep(2)}
           onReset={handleReset}
         />
       </WizardStep>

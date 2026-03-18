@@ -19,7 +19,7 @@ interface Step4Props {
   onReset: () => void;
 }
 
-export function Step4Download({ year, month, entries, mood, template, onBack, onReset }: Step4Props) {
+export function Step3Download({ year, month, entries, mood, template, onBack, onReset }: Step4Props) {
   const posterRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);

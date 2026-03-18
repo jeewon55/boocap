@@ -54,7 +54,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
               <button
                 key={day}
                 onClick={() => setSelectedDay(day)}
-                className="relative aspect-square flex items-center justify-center border border-border hover:bg-secondary/50 transition-colors group rounded-sm overflow-hidden"
+                className="relative aspect-[3/4] flex items-center justify-center border border-border hover:bg-secondary/50 transition-colors group rounded-sm overflow-hidden"
               >
                 {book ? (
                   <>

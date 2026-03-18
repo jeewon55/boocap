@@ -65,7 +65,6 @@ export default function Index() {
           mood={mood}
           template={template}
           onTemplateChange={setTemplate}
-          onTemplateChange={setTemplate}
           onBack={() => setStep(0)}
           onGenerate={() => setStep(2)}
         />

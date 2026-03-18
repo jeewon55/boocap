@@ -1,4 +1,4 @@
-const STEPS = ['Month & Mood', 'Add Books', 'Template', 'Download'];
+const STEPS = ['Add Books', 'Template & Mood', 'Download'];
 
 interface StepIndicatorProps {
   current: number;

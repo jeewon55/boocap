@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import { Download } from 'lucide-react';
 import { MonthSelector } from '@/components/MonthSelector';
@@ -22,7 +22,22 @@ export default function Index() {
   const [mood, setMood] = useState<MoodType>('minimal');
   const [searchDay, setSearchDay] = useState<number | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [scale, setScale] = useState(1);
   const posterRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth;
+        setScale(Math.min(w / 600, 1));
+      }
+    };
+    updateScale();
+    const obs = new ResizeObserver(updateScale);
+    if (containerRef.current) obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   const handleMonthChange = useCallback((y: number, m: number) => {
     setYear(y);
@@ -68,7 +83,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row min-h-screen">
         {/* Left: Controls */}
-        <div className="w-full lg:w-[380px] lg:border-r border-border p-6 lg:p-8 flex-shrink-0">
+        <div className="w-full lg:w-[380px] lg:border-r border-border p-6 lg:p-8 flex-shrink-0 overflow-y-auto">
           <h1 className="font-display text-lg font-bold tracking-tight mb-1">Book Recap</h1>
           <p className="text-xs text-muted-foreground font-body mb-6">Your monthly reading, visualized.</p>
 
@@ -94,36 +109,15 @@ export default function Index() {
 
         {/* Right: Poster Preview */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-secondary/30">
-          <div className="w-full max-w-[600px]" style={{ aspectRatio: '3/4' }}>
-            <div className="w-full h-full" style={{ transform: 'scale(1)', transformOrigin: 'top center' }}>
-              <div className="w-full" style={{ position: 'relative' }}>
-                <div style={{ transform: `scale(${1})`, transformOrigin: 'top left', width: '100%' }}>
-                  <div className="shadow-2xl" style={{ width: '100%' }}>
-                    <div style={{ position: 'relative', paddingBottom: '133.33%' }}>
-                      <div style={{ position: 'absolute', inset: 0 }}>
-                        <div style={{ transform: 'scale(var(--poster-scale, 1))', transformOrigin: 'top left', width: 600 }} ref={(el) => {
-                          if (el) {
-                            const parent = el.parentElement;
-                            if (parent) {
-                              const scale = parent.clientWidth / 600;
-                              el.style.setProperty('--poster-scale', String(scale));
-                              el.style.transform = `scale(${scale})`;
-                            }
-                          }
-                        }}>
-                          <PosterCanvas
-                            ref={posterRef}
-                            year={year}
-                            month={month}
-                            entries={entries}
-                            mood={mood}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div ref={containerRef} className="w-full max-w-[600px]">
+            <div className="shadow-2xl origin-top-left" style={{ width: 600, transform: `scale(${scale})` }}>
+              <PosterCanvas
+                ref={posterRef}
+                year={year}
+                month={month}
+                entries={entries}
+                mood={mood}
+              />
             </div>
           </div>
         </div>

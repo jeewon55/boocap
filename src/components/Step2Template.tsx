@@ -1,5 +1,5 @@
 import { Book, MoodType, TemplateType, TEMPLATES } from '@/types/book';
-import { MoodSelector } from '@/components/MoodSelector';
+import { ArrowLeft } from 'lucide-react';
 import { ArrowLeft } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect } from 'react';

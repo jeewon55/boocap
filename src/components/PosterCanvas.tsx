@@ -1,4 +1,5 @@
 import { forwardRef, useMemo } from 'react';
+const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 import { Book, MOODS, MoodType, TemplateType } from '@/types/book';
 
 const MONTHS = [

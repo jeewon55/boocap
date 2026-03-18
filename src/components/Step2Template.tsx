@@ -10,13 +10,12 @@ interface Step2Props {
   entries: Record<number, Book>;
   mood: MoodType;
   template: TemplateType;
-  onMoodChange: (m: MoodType) => void;
   onTemplateChange: (t: TemplateType) => void;
   onBack: () => void;
   onGenerate: () => void;
 }
 
-export function Step2Template({ year, month, entries, mood, template, onMoodChange, onTemplateChange, onBack, onGenerate }: Step2Props) {
+export function Step2Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step2Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
 

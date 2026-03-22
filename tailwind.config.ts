@@ -61,7 +61,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-      },
+        hero: {
+          DEFAULT: "hsl(var(--hero-bg))",
+          foreground: "hsl(var(--hero-fg))",
+          sub: "hsl(var(--hero-sub))",
+          btn: "hsl(var(--hero-btn))",
+          "btn-foreground": "hsl(var(--hero-btn-fg))",
+        },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -79,7 +85,11 @@ export default {
         "accordion-up": {
           from: {
             height: "var(--radix-accordion-content-height)",
-          },
+        },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
           to: {
             height: "0",
           },
@@ -88,6 +98,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
       },
     },
   },

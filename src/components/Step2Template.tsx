@@ -123,15 +123,18 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-2"
+                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-3 flex items-center justify-center"
                   style={{
-                    transform: isActive ? 'scale(1.05)' : 'scale(0.82)',
+                    transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
+                    transform: isActive ? 'scale(1.08)' : 'scale(0.85)',
                     opacity: isActive ? 1 : 0.35,
                     filter: isActive ? 'none' : 'brightness(0.5)',
-                    transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
                   }}
                 >
-                  <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30">
+                  <div
+                    className="w-full overflow-hidden shadow-2xl border border-border/30"
+                    style={{ aspectRatio: '4/5', borderRadius: 24 }}
+                  >
                     <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
                 </div>

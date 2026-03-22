@@ -1,7 +1,31 @@
 import { Book, MoodType, TemplateType, TEMPLATES } from '@/types/book';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+
+function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / 600);
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5', overflow: 'hidden' }}>
+      <div style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
+      </div>
+    </div>
+  );
+}
 
 interface Step2Props {
   year: number;
@@ -15,69 +39,128 @@ interface Step2Props {
 }
 
 export function Step2Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step2Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.4);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'center',
+    loop: true,
+    skipSnaps: false,
+  });
+  const [activeIndex, setActiveIndex] = useState(
+    TEMPLATES.findIndex((t) => t.id === template) || 0
+  );
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const idx = emblaApi.selectedScrollSnap();
+    setActiveIndex(idx);
+    onTemplateChange(TEMPLATES[idx].id);
+  }, [emblaApi, onTemplateChange]);
 
   useEffect(() => {
-    const update = () => {
-      if (containerRef.current) {
-        const w = containerRef.current.clientWidth;
-        setScale(Math.min(w / 600, 0.55));
-      }
-    };
-    update();
-    const obs = new ResizeObserver(update);
-    if (containerRef.current) obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, []);
+    if (!emblaApi) return;
+    emblaApi.on('select', onSelect);
+    onSelect();
+    return () => { emblaApi.off('select', onSelect); };
+  }, [emblaApi, onSelect]);
+
+  // Sync initial template
+  useEffect(() => {
+    if (!emblaApi) return;
+    const idx = TEMPLATES.findIndex((t) => t.id === template);
+    if (idx >= 0 && idx !== emblaApi.selectedScrollSnap()) {
+      emblaApi.scrollTo(idx, true);
+    }
+  }, [emblaApi, template]);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  const activeTemplate = TEMPLATES[activeIndex];
 
   return (
-    <div className="flex-1 flex flex-col px-6">
-      <div className="flex-1 max-w-md mx-auto w-full pt-2">
-        <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-2">Step 2</p>
-        <h2 className="font-display text-2xl font-bold tracking-tight mb-4">
+    <div className="flex-1 flex flex-col">
+      {/* Header */}
+      <div className="px-6 pt-2 max-w-lg mx-auto w-full">
+        <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-1">Step 2</p>
+        <h2 className="font-display text-2xl font-bold tracking-tight mb-1">
           템플릿 선택
         </h2>
+        <p className="text-xs text-muted-foreground font-body mb-4">
+          좌우로 스와이프하여 템플릿을 선택하세요
+        </p>
+      </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onTemplateChange(t.id)}
-              className={`p-4 border text-left transition-all ${
-                template === t.id
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'border-border hover:border-foreground/30'
-              }`}
-            >
-              <p className="text-sm font-display font-semibold">{t.label}</p>
-              <p className={`text-[10px] mt-0.5 ${template === t.id ? 'opacity-70' : 'text-muted-foreground'}`}>
-                {t.description}
-              </p>
-            </button>
-          ))}
+      {/* Carousel */}
+      <div className="flex-1 flex flex-col justify-center relative">
+        {/* Nav arrows - desktop */}
+        <button
+          onClick={scrollPrev}
+          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+        <button
+          onClick={scrollNext}
+          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors"
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
+
+        <div ref={emblaRef} className="overflow-hidden px-4">
+          <div className="flex touch-pan-y">
+            {TEMPLATES.map((t, index) => {
+              const isActive = index === activeIndex;
+              return (
+                <div
+                  key={t.id}
+                  className="flex-[0_0_75%] md:flex-[0_0_50%] min-w-0 px-3 transition-all duration-500 ease-out"
+                  style={{
+                    transform: isActive ? 'scale(1.05)' : 'scale(0.88)',
+                    opacity: isActive ? 1 : 0.5,
+                    filter: isActive ? 'none' : 'brightness(0.7)',
+                    transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
+                  }}
+                >
+                  <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30">
+                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
+                  </div>
+                  {/* Label under card */}
+                  <div className={`text-center mt-3 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+                    <p className="font-display font-bold text-sm">{t.label}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div ref={containerRef} className="w-full flex justify-center">
-          <div className="origin-top shadow-xl" style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top center' }}>
-            <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
-          </div>
+        {/* Dots */}
+        <div className="flex justify-center gap-2 mt-4">
+          {TEMPLATES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => emblaApi?.scrollTo(i)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                i === activeIndex ? 'bg-foreground w-6' : 'bg-foreground/20'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      <div className="py-6 max-w-md mx-auto w-full flex gap-3">
+      {/* Bottom action bar */}
+      <div className="py-6 px-6 max-w-lg mx-auto w-full flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 flex items-center justify-center gap-2 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+          className="flex items-center justify-center gap-2 px-6 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back
         </button>
         <button
           onClick={onGenerate}
-          className="flex-[2] flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+          className="flex-1 flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
         >
-          Generate Poster
+          Try This Template
         </button>
       </div>
     </div>

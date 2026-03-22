@@ -22,6 +22,7 @@ interface Step2Props {
 
 export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, onBack, onNext }: Step2Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [isReplacing, setIsReplacing] = useState(false);
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();

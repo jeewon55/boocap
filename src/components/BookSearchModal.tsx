@@ -22,7 +22,6 @@ function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
           alt={alt}
           className={`w-full h-full object-cover transition-opacity duration-200 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
           referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
           onLoad={() => setStatus('loaded')}
           onError={() => setStatus('error')}
         />

@@ -15,7 +15,6 @@ function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.Mou
           alt={book.title}
           className="absolute inset-0 w-full h-full object-cover"
           referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
           onError={() => setImgOk(false)}
         />
       ) : (

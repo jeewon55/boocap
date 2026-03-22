@@ -85,18 +85,17 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
+      {/* Header - consistent position with Step1 */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
-        className="px-6 pt-2 max-w-lg mx-auto w-full"
+        className="px-6 pt-2 max-w-md mx-auto w-full"
       >
-        
-        <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mb-1">
+        <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
           Pick a vessel for your {monthName} memories.
         </h2>
-        <p className="text-xs text-muted-foreground font-body mb-3">
+        <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
           좌우로 스와이프하여 템플릿을 선택하세요
         </p>
       </motion.div>

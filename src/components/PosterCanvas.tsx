@@ -180,7 +180,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
                   </div>
                   <p style={{
-                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
                     fontSize: 11,
                     color: '#2C2C2C',
                     opacity: 0.65,

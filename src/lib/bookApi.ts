@@ -41,8 +41,9 @@ async function searchOpenLibrary(query: string): Promise<Book[]> {
 
 async function searchGoogleBooks(query: string): Promise<Book[]> {
   try {
+    const langRestrict = hasCJK(query) ? '&langRestrict=ko,zh,ja' : '';
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12${langRestrict}`
     );
     if (!res.ok) return [];
     const data = await res.json();

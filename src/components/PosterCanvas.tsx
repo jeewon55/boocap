@@ -98,70 +98,111 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── STACK ───
+    // ─── STACK (Creative Collage) ───
     if (template === 'stack') {
       const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      // Split books into rows: top 3, bottom 2 (centered with overlap)
-      const topRow = books.slice(0, Math.min(3, books.length));
-      const bottomRow = books.length > 3 ? books.slice(3, 5) : [];
+
+      // Sparkle SVG component
+      const Sparkle = ({ x, y, size = 28, color = '#C8A2C8', opacity = 0.6 }: { x: number; y: number; size?: number; color?: string; opacity?: number }) => (
+        <svg style={{ position: 'absolute', left: x, top: y, width: size, height: size, opacity }} viewBox="0 0 24 24" fill={color}>
+          <path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z" />
+        </svg>
+      );
+
+      // Layout positions based on book count
+      const getPositions = (count: number) => {
+        if (count <= 2) return [
+          { left: '8%', top: '30%', rotate: -4, w: 160, h: 230 },
+          { left: '52%', top: '28%', rotate: 3, w: 160, h: 230 },
+        ];
+        if (count <= 3) return [
+          { left: '5%', top: '28%', rotate: -5, w: 145, h: 208 },
+          { left: '36%', top: '32%', rotate: 2, w: 145, h: 208 },
+          { left: '65%', top: '26%', rotate: -3, w: 145, h: 208 },
+        ];
+        return [
+          { left: '4%', top: '27%', rotate: -4, w: 125, h: 180 },
+          { left: '30%', top: '30%', rotate: 3, w: 125, h: 180 },
+          { left: '56%', top: '25%', rotate: -2, w: 125, h: 180 },
+          { left: '12%', top: '54%', rotate: 5, w: 125, h: 180 },
+          { left: '42%', top: '52%', rotate: -3, w: 125, h: 180 },
+          { left: '68%', top: '56%', rotate: 4, w: 125, h: 180 },
+        ];
+      };
+
+      const positions = getPositions(books.length);
 
       return (
-        <div ref={ref} style={{ ...baseStyle, fontFamily: "'Courier New', 'Space Mono', monospace" }}>
-          {/* Paper texture background */}
-          <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(240,240,240,0.15)' }} />
+        <div ref={ref} style={{ ...baseStyle, backgroundColor: '#F5F3EE' }}>
+          {/* Paper texture overlay */}
+          <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5, mixBlendMode: 'multiply' }} />
 
-          {/* Year - top right */}
-          <p style={{ position: 'absolute', top: 32, right: 36, fontSize: 14, opacity: 0.3, color: '#2C2C2C', letterSpacing: '0.05em' }}>{year}</p>
+          {/* Sparkle decorations */}
+          <Sparkle x={60} y={20} size={32} color="#D4A0D4" opacity={0.5} />
+          <Sparkle x={340} y={8} size={22} color="#A8D8A8" opacity={0.45} />
+          <Sparkle x={480} y={50} size={18} color="#A8D8A8" opacity={0.35} />
+          <Sparkle x={520} y={620} size={24} color="#D4A0D4" opacity={0.3} />
+          <Sparkle x={30} y={680} size={16} color="#A8D8A8" opacity={0.35} />
 
-          {/* Title - top left */}
-          <div style={{ position: 'absolute', top: 40, left: 44, color: '#1A1A1A' }}>
-            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>the</p>
-            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>{monthName}</p>
-            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>book recap</p>
+          {/* Title section */}
+          <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 38, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+              what I read
+            </p>
+            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 42, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
+              in {monthName}
+            </p>
           </div>
 
-          {/* Book covers - 3/2 centered stack */}
-          <div style={{ position: 'absolute', left: 0, right: 0, top: 240, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {books.length === 0 ? (
-              <p style={{ fontSize: 13, opacity: 0.25, letterSpacing: '0.15em', color: '#2C2C2C' }}>ADD BOOKS TO PREVIEW</p>
-            ) : (
-              <>
-                {/* Top row */}
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                  {topRow.map((book) => (
-                    <div key={book.key} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 2 }}>
-                      <BookImg src={book.coverUrl} alt={book.title} style={{ width: 120, height: 172, borderRadius: 2 }} />
-                    </div>
-                  ))}
-                </div>
-                {/* Bottom row - overlaps upward */}
-                {bottomRow.length > 0 && (
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: -20, zIndex: 10 }}>
-                    {bottomRow.map((book) => (
-                      <div key={book.key} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 2 }}>
-                        <BookImg src={book.coverUrl} alt={book.title} style={{ width: 120, height: 172, borderRadius: 2 }} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Book list - bottom, Korean gothic style */}
-          {books.length > 0 && (
-            <div style={{ position: 'absolute', left: 44, right: 44, bottom: 36, color: '#2C2C2C', fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif" }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {books.slice(0, 5).map((book) => (
-                  <div key={book.key}>
-                    <p style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.4, opacity: 0.8 }}>{book.title}</p>
-                    <p style={{ fontSize: 10, opacity: 0.35, marginTop: 1 }}>{book.author}</p>
-                  </div>
-                ))}
-              </div>
+          {/* Book covers - free collage */}
+          {books.length === 0 ? (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ fontSize: 13, opacity: 0.25, letterSpacing: '0.15em', color: '#2C2C2C', fontFamily: "'Inter', sans-serif" }}>ADD BOOKS TO PREVIEW</p>
             </div>
+          ) : (
+            books.slice(0, 6).map((book, i) => {
+              const pos = positions[Math.min(i, positions.length - 1)];
+              return (
+                <div key={book.key} style={{
+                  position: 'absolute',
+                  left: pos.left,
+                  top: pos.top,
+                  transform: `rotate(${pos.rotate}deg)`,
+                  zIndex: 10 + i,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}>
+                  <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden' }}>
+                    <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
+                  </div>
+                  <p style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 11,
+                    color: '#2C2C2C',
+                    opacity: 0.65,
+                    marginTop: 6,
+                    textAlign: 'center',
+                    maxWidth: pos.w + 10,
+                    lineHeight: 1.3,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {book.title}
+                  </p>
+                </div>
+              );
+            })
           )}
+
+          {/* Small decorative arrows between items */}
+          <svg style={{ position: 'absolute', left: '48%', top: '48%', width: 16, height: 16, opacity: 0.2, zIndex: 5 }} viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
+
+          {/* Year small text */}
+          <p style={{ position: 'absolute', bottom: 24, right: 32, fontSize: 12, opacity: 0.25, color: '#2C2C2C', fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em' }}>{year}</p>
         </div>
       );
     }

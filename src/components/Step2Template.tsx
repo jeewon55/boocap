@@ -116,7 +116,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        <div ref={emblaRef} className="overflow-visible px-4">
+        <div ref={emblaRef} className="overflow-hidden px-4">
           <div className="flex touch-pan-y items-center">
             {TEMPLATES.map((t, index) => {
               const isActive = index === activeIndex;
@@ -134,28 +134,29 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                   <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30">
                     <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
-                  {/* Label under card */}
-                  <div className={`text-center mt-1.5 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-                    <p className="font-display font-bold text-sm text-primary">{t.label}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
-                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Dots */}
-        <div className="flex justify-center gap-1.5 mt-2">
-          {TEMPLATES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => emblaApi?.scrollTo(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                i === activeIndex ? 'bg-primary w-5' : 'bg-muted'
-              }`}
-            />
-          ))}
+        {/* Template name + dots combined below carousel */}
+        <div className="flex flex-col items-center mt-3 gap-2">
+          <div className="text-center h-10">
+            <p className="font-display font-bold text-sm text-primary">{activeTemplate.label}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{activeTemplate.description}</p>
+          </div>
+          <div className="flex justify-center gap-1.5">
+            {TEMPLATES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => emblaApi?.scrollTo(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'bg-primary w-5' : 'bg-muted'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

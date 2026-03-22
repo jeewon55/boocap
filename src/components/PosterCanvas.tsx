@@ -19,7 +19,6 @@ const BookImg = ({ src, alt, style }: { src: string; alt: string; style?: React.
   <img
     src={src}
     alt={alt}
-    crossOrigin="anonymous"
     referrerPolicy="no-referrer"
     style={{ objectFit: 'cover', ...style }}
     onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}

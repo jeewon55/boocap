@@ -1,6 +1,70 @@
 import { Book } from '@/types/book';
 
-// Check if query contains CJK characters
+// ── API Keys ──────────────────────────────────────────────
+// 카카오 REST API 키 (https://developers.kakao.com)
+const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY as string | undefined;
+// 알라딘 TTBKey (https://www.aladin.co.kr/ttb/wblog_manage.aspx)
+const ALADIN_TTB_KEY = import.meta.env.VITE_ALADIN_TTB_KEY as string | undefined;
+
+// ── Kakao Book Search (primary) ───────────────────────────
+async function searchKakao(query: string): Promise<Book[]> {
+  if (!KAKAO_REST_KEY) return [];
+  try {
+    const res = await fetch(
+      `https://dapi.kakao.com/v3/search/book?query=${encodeURIComponent(query)}&size=12`,
+      {
+        headers: { Authorization: `KakaoAK ${KAKAO_REST_KEY}` },
+      }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.documents || [])
+      .filter((doc: any) => doc.thumbnail)
+      .map((doc: any) => ({
+        title: doc.title?.replace(/<[^>]*>/g, '') || '',
+        author: (doc.authors?.[0] || '').replace(/<[^>]*>/g, ''),
+        coverUrl: doc.thumbnail.replace('/R120x174', '/R256x0'), // 고화질 표지
+        key: doc.isbn || doc.url || `kakao-${Date.now()}-${Math.random()}`,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+// ── Aladin Search (fallback) ──────────────────────────────
+// Note: 알라딘 API는 브라우저 CORS 제한이 있을 수 있습니다.
+// CORS 문제 발생 시 Edge Function 프록시가 필요합니다.
+async function searchAladin(query: string): Promise<Book[]> {
+  if (!ALADIN_TTB_KEY) return [];
+  try {
+    const params = new URLSearchParams({
+      ttbkey: ALADIN_TTB_KEY,
+      Query: query,
+      QueryType: 'Keyword',
+      MaxResults: '12',
+      start: '1',
+      SearchTarget: 'Book',
+      output: 'js',
+      Version: '20131101',
+      Cover: 'Big', // 고화질 표지
+    });
+    const res = await fetch(`https://www.aladin.co.kr/ttb/api/ItemSearch.aspx?${params}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.item || [])
+      .filter((item: any) => item.cover)
+      .map((item: any) => ({
+        title: item.title || '',
+        author: item.author?.split('(')[0]?.trim() || '',
+        coverUrl: item.cover,
+        key: item.isbn13 || item.isbn || `aladin-${Date.now()}-${Math.random()}`,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+// ── Google Books (last resort, no key needed) ─────────────
 function hasCJK(text: string): boolean {
   return /[\u3000-\u9fff\uac00-\ud7af\uf900-\ufaff]/.test(text);
 }
@@ -8,35 +72,12 @@ function hasCJK(text: string): boolean {
 function getGoogleCoverUrl(item: any): string | null {
   const links = item.volumeInfo?.imageLinks;
   if (!links) return null;
-  // Prefer higher quality, fallback chain
   const url = links.medium || links.small || links.thumbnail || links.smallThumbnail;
   if (!url) return null;
-  // Force https, remove curl edge effect, increase zoom
   return url
     .replace('http://', 'https://')
     .replace('&edge=curl', '')
     .replace(/&zoom=\d/, '&zoom=1');
-}
-
-async function searchOpenLibrary(query: string): Promise<Book[]> {
-  if (query.length < 3) return [];
-  try {
-    const res = await fetch(
-      `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&fields=title,author_name,cover_i,key`
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.docs || [])
-      .filter((doc: any) => doc.cover_i)
-      .map((doc: any) => ({
-        title: doc.title,
-        author: doc.author_name?.[0] || 'Unknown',
-        coverUrl: `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`,
-        key: doc.key,
-      }));
-  } catch {
-    return [];
-  }
 }
 
 async function searchGoogleBooks(query: string): Promise<Book[]> {
@@ -53,7 +94,7 @@ async function searchGoogleBooks(query: string): Promise<Book[]> {
         if (!coverUrl) return null;
         return {
           title: item.volumeInfo.title,
-          author: item.volumeInfo.authors?.[0] || 'Unknown',
+          author: item.volumeInfo.authors?.[0] || '',
           coverUrl,
           key: item.id,
         };
@@ -64,29 +105,19 @@ async function searchGoogleBooks(query: string): Promise<Book[]> {
   }
 }
 
+// ── Unified Search ────────────────────────────────────────
+// 우선순위: 카카오 → 알라딘 → Google Books
 export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
-  // For CJK queries, prioritize Google Books which has better coverage
-  if (hasCJK(query)) {
-    const google = await searchGoogleBooks(query);
-    if (google.length > 0) return google;
-    return searchOpenLibrary(query);
-  }
+  // 1) 카카오 검색 (primary)
+  const kakao = await searchKakao(query);
+  if (kakao.length > 0) return kakao;
 
-  const [openLib, google] = await Promise.all([
-    searchOpenLibrary(query),
-    searchGoogleBooks(query),
-  ]);
+  // 2) 알라딘 검색 (fallback)
+  const aladin = await searchAladin(query);
+  if (aladin.length > 0) return aladin;
 
-  const seen = new Set<string>();
-  const merged: Book[] = [];
-  for (const book of [...google, ...openLib]) {
-    const key = book.title.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      merged.push(book);
-    }
-  }
-  return merged.slice(0, 10);
+  // 3) Google Books (last resort)
+  return searchGoogleBooks(query);
 }

@@ -4,53 +4,53 @@
 
 @layer base {
   :root {
-    --background: 50 20% 97%;
-    --foreground: 0 0% 10%;
+    --background: 160 38% 17%;
+    --foreground: 0 0% 100%;
 
-    --card: 50 20% 97%;
-    --card-foreground: 0 0% 10%;
+    --card: 160 30% 20%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 50 20% 97%;
-    --popover-foreground: 0 0% 10%;
+    --popover: 160 30% 20%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 10%;
-    --primary-foreground: 50 20% 97%;
+    --primary: 68 100% 50%;
+    --primary-foreground: 160 38% 12%;
 
-    --secondary: 50 7% 90%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 160 25% 22%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 50 7% 90%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 160 20% 25%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 50 7% 90%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 68 100% 50%;
+    --accent-foreground: 160 38% 12%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 50 7% 88%;
-    --input: 50 7% 88%;
-    --ring: 0 0% 10%;
+    --border: 160 15% 28%;
+    --input: 160 15% 28%;
+    --ring: 68 100% 50%;
 
-    --radius: 2px;
+    --radius: 8px;
 
-    --sidebar-background: 50 20% 97%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 0 0% 10%;
-    --sidebar-primary-foreground: 50 20% 97%;
-    --sidebar-accent: 50 7% 90%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 50 7% 88%;
-    --sidebar-ring: 0 0% 10%;
+    --sidebar-background: 160 38% 17%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 68 100% 50%;
+    --sidebar-primary-foreground: 160 38% 12%;
+    --sidebar-accent: 160 25% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 160 15% 28%;
+    --sidebar-ring: 68 100% 50%;
 
     --font-display: 'Instrument Sans', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    --hero-bg: 137 45% 16%;
-    --hero-fg: 80 100% 75%;
-    --hero-sub: 137 15% 70%;
-    --hero-btn: 80 100% 60%;
-    --hero-btn-fg: 137 45% 10%;
+    --hero-bg: 160 38% 17%;
+    --hero-fg: 68 100% 50%;
+    --hero-sub: 0 0% 75%;
+    --hero-btn: 68 100% 50%;
+    --hero-btn-fg: 160 38% 10%;
   }
 }
 

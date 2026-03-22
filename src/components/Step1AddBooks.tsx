@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { BookSearchModal } from '@/components/BookSearchModal';
 import { MonthSelector } from '@/components/MonthSelector';
 import { X, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const MONTHS = [
@@ -29,61 +30,75 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
   const blanks = Array.from({ length: firstDay });
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const bookCount = Object.keys(entries).length;
+  const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
 
   return (
-    <div className="flex-1 flex flex-col px-6">
-      <div className="flex-1 max-w-md mx-auto w-full pt-2">
+    <div className="flex-1 flex flex-col px-6 overflow-hidden">
+      <div className="flex-1 max-w-md mx-auto w-full pt-2 flex flex-col min-h-0">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
+            Which days defined your {monthName}?
+          </h2>
+          <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
+            Tap dates to add books you read · {bookCount} added
+          </p>
+        </motion.div>
+
         <MonthSelector year={year} month={month} onChange={onMonthChange} />
 
-        <p className="text-xs text-muted-foreground font-body mt-3 mb-4">
-          날짜를 눌러 읽은 책을 추가하세요 · {bookCount}권 추가됨
-        </p>
-
         {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-px mb-1">
-          {WEEKDAYS.map((d) => (
-            <div key={d} className="text-center text-[9px] tracking-[0.15em] text-muted-foreground font-body py-1.5">
-              {d}
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-1">
-          {blanks.map((_, i) => <div key={`b${i}`} />)}
-          {days.map((day) => {
-            const book = entries[day];
-            return (
-              <button
-                key={day}
-                onClick={() => setSelectedDay(day)}
-                className="relative aspect-[3/4] flex items-center justify-center border border-border hover:bg-secondary/50 transition-colors group rounded-sm overflow-hidden"
-              >
-                {book ? (
-                  <>
-                    <img
-                      src={book.coverUrl}
-                      alt={book.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div
-                      className="absolute top-0 right-0 p-0.5 bg-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
-                      onClick={(e) => { e.stopPropagation(); onRemoveBook(day); }}
-                    >
-                      <X className="w-2.5 h-2.5 text-background" />
-                    </div>
-                  </>
-                ) : (
-                  <span className="text-[11px] text-muted-foreground font-body">{day}</span>
-                )}
-              </button>
-            );
-          })}
+        <div className="flex-1 min-h-0 flex flex-col mt-2">
+          <div className="grid grid-cols-7 gap-px mb-1">
+            {WEEKDAYS.map((d) => (
+              <div key={d} className="text-center text-[9px] tracking-[0.15em] text-muted-foreground font-body py-1">
+                {d}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1 flex-1">
+            {blanks.map((_, i) => <div key={`b${i}`} />)}
+            {days.map((day) => {
+              const book = entries[day];
+              return (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`relative aspect-[3/4] flex items-center justify-center border transition-colors group rounded-sm overflow-hidden ${
+                    book ? 'border-primary/40' : 'border-border hover:border-primary/30'
+                  }`}
+                >
+                  {book ? (
+                    <>
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div
+                        className="absolute top-0 right-0 p-0.5 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
+                        onClick={(e) => { e.stopPropagation(); onRemoveBook(day); }}
+                      >
+                        <X className="w-2.5 h-2.5 text-primary-foreground" />
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground font-body">{day}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="py-6 max-w-md mx-auto w-full">
+      <div className="py-4 max-w-md mx-auto w-full">
         <button
           onClick={onNext}
-          className="w-full flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+          className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
         >
           Choose Template
           <ArrowRight className="w-3.5 h-3.5" />
@@ -92,9 +107,11 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
 
       {/* View existing book detail */}
       {selectedDay !== null && entries[selectedDay] && !isReplacing && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
-          <div
-            className="bg-background border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-lg animate-fade-in"
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-border">
@@ -110,7 +127,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
               <img
                 src={entries[selectedDay].coverUrl}
                 alt={entries[selectedDay].title}
-                className="w-28 h-40 object-cover shadow-lg"
+                className="w-28 h-40 object-cover shadow-lg rounded"
               />
               <div className="text-center">
                 <p className="text-sm font-medium font-body">{entries[selectedDay].title}</p>
@@ -123,18 +140,18 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
             <div className="p-5 pt-0 flex gap-3">
               <button
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
-                className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+                className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
               >
                 삭제
               </button>
               <button
                 onClick={() => setIsReplacing(true)}
-                className="flex-1 py-3 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+                className="flex-1 py-3 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
               >
                 변경
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 

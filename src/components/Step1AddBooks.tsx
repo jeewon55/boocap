@@ -72,19 +72,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
                   }`}
                 >
                   {book ? (
-                    <>
-                      <img
-                        src={book.coverUrl}
-                        alt={book.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                      <div
-                        className="absolute top-0 right-0 p-0.5 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
-                        onClick={(e) => { e.stopPropagation(); onRemoveBook(day); }}
-                      >
-                        <X className="w-2.5 h-2.5 text-primary-foreground" />
-                      </div>
-                    </>
+                    <CalendarCover book={book} onRemove={(e) => { e.stopPropagation(); onRemoveBook(day); }} />
                   ) : (
                     <span className="text-[11px] text-muted-foreground font-body">{day}</span>
                   )}

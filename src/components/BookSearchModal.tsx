@@ -216,6 +216,33 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               )}
             </div>
 
+            {/* Title */}
+            <div>
+              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
+                책 제목 *
+              </label>
+              <input
+                autoFocus={mode === 'manual'}
+                value={manualTitle}
+                onChange={(e) => setManualTitle(e.target.value)}
+                placeholder="예: 데미안"
+                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* Author */}
+            <div>
+              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
+                저자
+              </label>
+              <input
+                value={manualAuthor}
+                onChange={(e) => setManualAuthor(e.target.value)}
+                placeholder="예: 헤르만 헤세"
+                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+              />
+            </div>
+
             {/* Cover URL (alternative) */}
             {!manualCoverUrl && (
               <div>

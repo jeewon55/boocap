@@ -1,9 +1,34 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, PenLine, Upload } from 'lucide-react';
-import { useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
+
+function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+
+  return (
+    <div className="w-10 h-[60px] flex-shrink-0 rounded overflow-hidden bg-secondary relative">
+      {status === 'loading' && (
+        <div className="absolute inset-0 animate-pulse bg-secondary" />
+      )}
+      {status === 'error' ? (
+        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#1a1a1a' }}>
+          <BookOpen className="w-4 h-4" style={{ color: '#DFFF00' }} />
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          className={`w-full h-full object-cover transition-opacity duration-200 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+          referrerPolicy="no-referrer"
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('error')}
+        />
+      )}
+    </div>
+  );
+}
 
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
@@ -126,14 +151,9 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   onClick={() => onSelect(book)}
                   className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0"
                 >
-                  <img
-                    src={book.coverUrl}
-                    alt={book.title}
-                    className="w-10 h-14 object-cover flex-shrink-0 shadow-sm rounded"
-                    referrerPolicy="no-referrer"
-                  />
+                  <BookCoverThumb src={book.coverUrl} alt={book.title} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{book.title}</p>
+                    <p className="text-sm font-medium truncate text-foreground">{book.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{book.author}</p>
                   </div>
                 </button>

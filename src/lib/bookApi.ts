@@ -23,7 +23,7 @@ async function searchKakao(query: string): Promise<Book[]> {
       .map((doc: any) => ({
         title: doc.title?.replace(/<[^>]*>/g, '') || '',
         author: (doc.authors?.[0] || '').replace(/<[^>]*>/g, ''),
-        coverUrl: doc.thumbnail.replace(/\/R120x174\.q85\//, '/R256x0.q85/'),
+        coverUrl: doc.thumbnail,
         key: doc.isbn || doc.url || `kakao-${Date.now()}-${Math.random()}`,
       }));
   } catch {

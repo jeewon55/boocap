@@ -127,16 +127,16 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-2 flex items-center justify-center"
+                  className="flex-[0_0_60%] md:flex-[0_0_40%] min-w-0 px-3 flex items-center justify-center"
                   style={{
-                    transform: isActive ? 'scale(1.05)' : 'scale(0.82)',
-                    opacity: isActive ? 1 : 0.35,
-                    filter: isActive ? 'none' : 'brightness(0.5)',
+                    transform: isActive ? 'scale(1.08)' : 'scale(0.78)',
+                    opacity: isActive ? 1 : 0.3,
+                    filter: isActive ? 'none' : 'brightness(0.45)',
                     transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
                   }}
                 >
-                  <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30 max-h-[60vh]">
-                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} maxH="max-h-[60vh]" />
+                  <div className="rounded-2xl overflow-hidden shadow-2xl border border-border/30">
+                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} maxH="max-h-[70vh]" />
                   </div>
                 </div>
               );
@@ -145,7 +145,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </div>
 
         {/* Template name + dots */}
-        <div className="flex flex-col items-center mt-2 gap-1.5 shrink-0">
+        <div className="flex flex-col items-center mt-3 gap-1.5 shrink-0 pb-1">
           <div className="text-center h-9">
             <p className="font-display font-bold text-sm text-primary">{activeTemplate.label}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">{activeTemplate.description}</p>

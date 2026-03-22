@@ -137,19 +137,22 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           {/* Paper texture overlay */}
           <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5, mixBlendMode: 'multiply' }} />
 
-          {/* Sparkle decorations */}
-          <Sparkle x={60} y={20} size={32} color="#D4A0D4" opacity={0.5} />
-          <Sparkle x={340} y={8} size={22} color="#A8D8A8" opacity={0.45} />
-          <Sparkle x={480} y={50} size={18} color="#A8D8A8" opacity={0.35} />
-          <Sparkle x={520} y={620} size={24} color="#D4A0D4" opacity={0.3} />
-          <Sparkle x={30} y={680} size={16} color="#A8D8A8" opacity={0.35} />
+          {/* Sparkle decorations - larger and more */}
+          <Sparkle x={50} y={15} size={56} color="#D4A0D4" opacity={0.5} />
+          <Sparkle x={340} y={5} size={42} color="#A8D8A8" opacity={0.45} />
+          <Sparkle x={500} y={40} size={36} color="#A8D8A8" opacity={0.35} />
+          <Sparkle x={530} y={600} size={48} color="#D4A0D4" opacity={0.35} />
+          <Sparkle x={20} y={670} size={38} color="#A8D8A8" opacity={0.4} />
+          <Sparkle x={280} y={680} size={32} color="#D4A0D4" opacity={0.3} />
+          <Sparkle x={440} y={350} size={28} color="#A8D8A8" opacity={0.25} />
+          <Sparkle x={10} y={380} size={34} color="#D4A0D4" opacity={0.28} />
 
           {/* Title section */}
           <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 38, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 57, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
               what I read
             </p>
-            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 42, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
+            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 63, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
               in {monthName}
             </p>
           </div>
@@ -177,7 +180,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
                   </div>
                   <p style={{
-                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
                     fontSize: 11,
                     color: '#2C2C2C',
                     opacity: 0.65,

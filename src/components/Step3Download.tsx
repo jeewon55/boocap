@@ -89,7 +89,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
             className="origin-top rounded-xl overflow-hidden"
             style={{
               width: 600,
-              height: 750,
+              aspectRatio: '4/5',
               transform: `scale(${scale})`,
               transformOrigin: 'top center',
               boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',

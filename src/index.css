@@ -45,6 +45,12 @@
 
     --font-display: 'Instrument Sans', sans-serif;
     --font-body: 'Inter', sans-serif;
+
+    --hero-bg: 137 45% 16%;
+    --hero-fg: 80 100% 75%;
+    --hero-sub: 137 15% 70%;
+    --hero-btn: 80 100% 60%;
+    --hero-btn-fg: 137 45% 10%;
   }
 }
 

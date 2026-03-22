@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookEntryModal } from '@/components/BookEntryModal';
+import { BookSearchModal } from '@/components/BookSearchModal';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];

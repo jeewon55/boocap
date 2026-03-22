@@ -16,6 +16,7 @@ interface BookEntryModalProps {
 
 export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModalProps) {
   const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [previewError, setPreviewError] = useState(false);
 
@@ -23,7 +24,7 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
     if (!title.trim() || !coverUrl.trim()) return;
     onConfirm({
       title: title.trim(),
-      author: '',
+      author: author.trim(),
       coverUrl: coverUrl.trim(),
       key: `manual-${day}-${Date.now()}`,
     });

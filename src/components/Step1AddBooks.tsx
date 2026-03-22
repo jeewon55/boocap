@@ -59,7 +59,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-x-1 gap-y-[2px] flex-1">
+          <div className="grid grid-cols-7 gap-x-1 gap-y-0.5 flex-1">
             {blanks.map((_, i) => <div key={`b${i}`} />)}
             {days.map((day) => {
               const book = entries[day];

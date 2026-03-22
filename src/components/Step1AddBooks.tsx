@@ -5,6 +5,34 @@ import { MonthSelector } from '@/components/MonthSelector';
 import { X, ArrowRight, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.MouseEvent) => void }) {
+  const [imgOk, setImgOk] = useState(true);
+  return (
+    <>
+      {imgOk ? (
+        <img
+          src={book.coverUrl}
+          alt={book.title}
+          className="absolute inset-0 w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+          crossOrigin="anonymous"
+          onError={() => setImgOk(false)}
+        />
+      ) : (
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center" style={{ backgroundColor: '#1a1a1a' }}>
+          <BookOpen className="w-3.5 h-3.5" style={{ color: '#DFFF00' }} />
+        </div>
+      )}
+      <div
+        className="absolute top-0 right-0 p-0.5 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
+        onClick={onRemove}
+      >
+        <X className="w-2.5 h-2.5 text-primary-foreground" />
+      </div>
+    </>
+  );
+}
+
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',

@@ -4,6 +4,29 @@ import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 
+function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / 600);
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5', overflow: 'hidden' }}>
+      <div style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
+      </div>
+    </div>
+  );
+}
+
 interface Step2Props {
   year: number;
   month: number;

@@ -101,44 +101,63 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     // ─── STACK ───
     if (template === 'stack') {
       const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      // Split books into rows: top 3, bottom 2 (centered with overlap)
+      const topRow = books.slice(0, Math.min(3, books.length));
+      const bottomRow = books.length > 3 ? books.slice(3, 5) : [];
+
       return (
         <div ref={ref} style={{ ...baseStyle, fontFamily: "'Courier New', 'Space Mono', monospace" }}>
           {/* Paper texture background */}
-          <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(245,240,230,0.35)' }} />
+          <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(240,240,240,0.15)' }} />
 
           {/* Year - top right */}
-          <p style={{ position: 'absolute', top: 32, right: 36, fontSize: 14, opacity: 0.35, color: '#2C2C2C', letterSpacing: '0.05em' }}>{year}</p>
+          <p style={{ position: 'absolute', top: 32, right: 36, fontSize: 14, opacity: 0.3, color: '#2C2C2C', letterSpacing: '0.05em' }}>{year}</p>
 
           {/* Title - top left */}
-          <div style={{ position: 'absolute', top: 40, left: 40, color: '#1A1A1A' }}>
+          <div style={{ position: 'absolute', top: 40, left: 44, color: '#1A1A1A' }}>
             <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>the</p>
             <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>{monthName}</p>
             <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>book recap</p>
           </div>
 
-          {/* Book covers - flat grid */}
-          <div style={{ position: 'absolute', left: 40, right: 40, top: 250 }}>
+          {/* Book covers - 3/2 centered stack */}
+          <div style={{ position: 'absolute', left: 0, right: 0, top: 240, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {books.length === 0 ? (
               <p style={{ fontSize: 13, opacity: 0.25, letterSpacing: '0.15em', color: '#2C2C2C' }}>ADD BOOKS TO PREVIEW</p>
             ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-                {books.slice(0, 6).map((book) => (
-                  <div key={book.key} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 2 }}>
-                    <BookImg src={book.coverUrl} alt={book.title} style={{ width: 110, height: 158, borderRadius: 2 }} />
+              <>
+                {/* Top row */}
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  {topRow.map((book) => (
+                    <div key={book.key} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 2 }}>
+                      <BookImg src={book.coverUrl} alt={book.title} style={{ width: 120, height: 172, borderRadius: 2 }} />
+                    </div>
+                  ))}
+                </div>
+                {/* Bottom row - overlaps upward */}
+                {bottomRow.length > 0 && (
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: -20, zIndex: 10 }}>
+                    {bottomRow.map((book) => (
+                      <div key={book.key} style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.06)', borderRadius: 2 }}>
+                        <BookImg src={book.coverUrl} alt={book.title} style={{ width: 120, height: 172, borderRadius: 2 }} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
 
-          {/* Book list - bottom section */}
+          {/* Book list - bottom, Korean gothic style */}
           {books.length > 0 && (
-            <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, color: '#2C2C2C' }}>
-              <p style={{ fontSize: 12, opacity: 0.4, marginBottom: 10, letterSpacing: '0.08em' }}>read books:</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {books.slice(0, 6).map((book) => (
-                  <p key={book.key} style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.5 }}>{book.title.toLowerCase()}</p>
+            <div style={{ position: 'absolute', left: 44, right: 44, bottom: 36, color: '#2C2C2C', fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif" }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {books.slice(0, 5).map((book) => (
+                  <div key={book.key}>
+                    <p style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.4, opacity: 0.8 }}>{book.title}</p>
+                    <p style={{ fontSize: 10, opacity: 0.35, marginTop: 1 }}>{book.author}</p>
+                  </div>
                 ))}
               </div>
             </div>

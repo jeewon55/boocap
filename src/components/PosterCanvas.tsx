@@ -109,26 +109,45 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         </svg>
       );
 
-      // Layout positions based on book count
+      // Layout positions based on book count — generous spacing to prevent overlap
       const getPositions = (count: number) => {
-        if (count <= 2) return [
-          { left: '8%', top: '30%', rotate: -4, w: 160, h: 230 },
-          { left: '52%', top: '28%', rotate: 3, w: 160, h: 230 },
+        if (count === 1) return [
+          { left: '20%', top: '28%', rotate: -3, w: 200, h: 286 },
         ];
-        if (count <= 3) return [
-          { left: '5%', top: '28%', rotate: -5, w: 145, h: 208 },
-          { left: '36%', top: '32%', rotate: 2, w: 145, h: 208 },
-          { left: '65%', top: '26%', rotate: -3, w: 145, h: 208 },
+        if (count === 2) return [
+          { left: '8%', top: '28%', rotate: -4, w: 170, h: 243 },
+          { left: '54%', top: '30%', rotate: 3, w: 170, h: 243 },
+        ];
+        if (count === 3) return [
+          { left: '4%', top: '27%', rotate: -5, w: 150, h: 215 },
+          { left: '36%', top: '30%', rotate: 2, w: 150, h: 215 },
+          { left: '67%', top: '26%', rotate: -3, w: 150, h: 215 },
+        ];
+        if (count === 4) return [
+          { left: '4%', top: '26%', rotate: -4, w: 130, h: 186 },
+          { left: '30%', top: '24%', rotate: 3, w: 130, h: 186 },
+          { left: '18%', top: '56%', rotate: 2, w: 130, h: 186 },
+          { left: '56%', top: '28%', rotate: -2, w: 130, h: 186 },
+        ];
+        if (count === 5) return [
+          { left: '3%', top: '25%', rotate: -4, w: 120, h: 172 },
+          { left: '28%', top: '23%', rotate: 3, w: 120, h: 172 },
+          { left: '55%', top: '26%', rotate: -2, w: 120, h: 172 },
+          { left: '10%', top: '54%', rotate: 5, w: 120, h: 172 },
+          { left: '42%', top: '56%', rotate: -3, w: 120, h: 172 },
         ];
         return [
-          { left: '4%', top: '27%', rotate: -4, w: 125, h: 180 },
-          { left: '30%', top: '30%', rotate: 3, w: 125, h: 180 },
-          { left: '56%', top: '25%', rotate: -2, w: 125, h: 180 },
-          { left: '12%', top: '54%', rotate: 5, w: 125, h: 180 },
-          { left: '42%', top: '52%', rotate: -3, w: 125, h: 180 },
-          { left: '68%', top: '56%', rotate: 4, w: 125, h: 180 },
+          { left: '3%', top: '24%', rotate: -4, w: 110, h: 158 },
+          { left: '27%', top: '22%', rotate: 3, w: 110, h: 158 },
+          { left: '53%', top: '25%', rotate: -2, w: 110, h: 158 },
+          { left: '8%', top: '52%', rotate: 5, w: 110, h: 158 },
+          { left: '36%', top: '54%', rotate: -3, w: 110, h: 158 },
+          { left: '62%', top: '51%', rotate: 4, w: 110, h: 158 },
         ];
       };
+
+      // Adaptive font size: smaller when more books
+      const titleFontSize = books.length <= 3 ? 11 : books.length <= 5 ? 10 : 9;
 
       const positions = getPositions(books.length);
 
@@ -148,7 +167,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <Sparkle x={10} y={380} size={34} color="#D4A0D4" opacity={0.28} />
 
           {/* Title section */}
-          <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 30 }}>
             <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 57, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
               what I read
             </p>
@@ -171,26 +190,32 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   left: pos.left,
                   top: pos.top,
                   transform: `rotate(${pos.rotate}deg)`,
-                  zIndex: 10 + i,
+                  zIndex: 10 + i * 2,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  padding: 4,
                 }}>
                   <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden' }}>
                     <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
                   </div>
                   <p style={{
                     fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
-                    fontSize: 11,
+                    fontSize: titleFontSize,
                     color: '#2C2C2C',
                     opacity: 0.65,
                     marginTop: 6,
                     textAlign: 'center',
-                    maxWidth: pos.w + 10,
+                    maxWidth: pos.w,
                     lineHeight: 1.3,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    position: 'relative',
+                    zIndex: 10 + i * 2 + 1,
+                    backgroundColor: 'rgba(245,243,238,0.85)',
+                    padding: '1px 4px',
+                    borderRadius: 2,
                   }}>
                     {book.title}
                   </p>
@@ -198,7 +223,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               );
             })
           )}
-
           {/* Small decorative arrows between items */}
           <svg style={{ position: 'absolute', left: '48%', top: '48%', width: 16, height: 16, opacity: 0.2, zIndex: 5 }} viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" strokeWidth="2">
             <path d="M7 17L17 7M17 7H7M17 7V17" />

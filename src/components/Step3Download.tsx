@@ -48,15 +48,32 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     if (!posterRef.current) return;
     setDownloading(true);
     try {
-      const canvas = await html2canvas(posterRef.current, {
-        scale: 2,
+      // Fixed 4:5 ratio output: 1080x1350
+      const TARGET_W = 1080;
+      const TARGET_H = 1350;
+      const srcW = posterRef.current.scrollWidth;
+      const srcH = posterRef.current.scrollHeight;
+      const renderScale = TARGET_W / srcW;
+
+      const raw = await html2canvas(posterRef.current, {
+        scale: renderScale,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
+        width: srcW,
+        height: srcH,
       });
+
+      // Crop/fit to exact 1080x1350
+      const out = document.createElement('canvas');
+      out.width = TARGET_W;
+      out.height = TARGET_H;
+      const ctx = out.getContext('2d')!;
+      ctx.drawImage(raw, 0, 0, TARGET_W, TARGET_H, 0, 0, TARGET_W, TARGET_H);
+
       const link = document.createElement('a');
       link.download = `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = out.toDataURL('image/png');
       link.click();
     } catch (e) {
       console.error('Export failed', e);

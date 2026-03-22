@@ -73,8 +73,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           transition={{ delay: 0.1, duration: 0.4 }}
           className="self-start mb-4"
         >
-          <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-1">Step 3</p>
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary">
+          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
             Your {monthName}, beautifully visualized.
           </h2>
         </motion.div>

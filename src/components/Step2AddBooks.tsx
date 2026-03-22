@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookEntryModal } from '@/components/BookEntryModal';
+import { BookSearchModal } from '@/components/BookSearchModal';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
@@ -21,6 +22,7 @@ interface Step2Props {
 
 export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, onBack, onNext }: Step2Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [isReplacing, setIsReplacing] = useState(false);
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -97,15 +99,65 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
         </button>
       </div>
 
-      {selectedDay !== null && (
-        <BookEntryModal
+      {/* View existing book detail */}
+      {selectedDay !== null && entries[selectedDay] && !isReplacing && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
+          <div
+            className="bg-background border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-lg animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
+                {MONTHS[month]} {selectedDay}
+              </span>
+              <button onClick={() => setSelectedDay(null)} className="p-1 hover:bg-secondary transition-colors rounded">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 flex flex-col items-center gap-4">
+              <img
+                src={entries[selectedDay].coverUrl}
+                alt={entries[selectedDay].title}
+                className="w-28 h-40 object-cover shadow-lg"
+              />
+              <div className="text-center">
+                <p className="text-sm font-medium font-body">{entries[selectedDay].title}</p>
+                {entries[selectedDay].author && (
+                  <p className="text-xs text-muted-foreground font-body mt-1">{entries[selectedDay].author}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-5 pt-0 flex gap-3">
+              <button
+                onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
+                className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+              >
+                삭제
+              </button>
+              <button
+                onClick={() => setIsReplacing(true)}
+                className="flex-1 py-3 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+              >
+                변경
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add new book or replace existing */}
+      {selectedDay !== null && (!entries[selectedDay] || isReplacing) && (
+        <BookSearchModal
           day={selectedDay}
           month={month}
-          onConfirm={(book) => {
+          onSelect={(book) => {
             onAddBook(selectedDay, book);
             setSelectedDay(null);
+            setIsReplacing(false);
           }}
-          onClose={() => setSelectedDay(null)}
+          onClose={() => { setSelectedDay(null); setIsReplacing(false); }}
         />
       )}
     </div>

@@ -92,7 +92,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         transition={{ delay: 0.1, duration: 0.4 }}
         className="px-6 pt-2 max-w-lg mx-auto w-full"
       >
-        <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-1">Step 2</p>
+        
         <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mb-1">
           Pick a vessel for your {monthName} memories.
         </h2>

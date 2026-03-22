@@ -126,14 +126,9 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   onClick={() => onSelect(book)}
                   className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0"
                 >
-                  <img
-                    src={book.coverUrl}
-                    alt={book.title}
-                    className="w-10 h-14 object-cover flex-shrink-0 shadow-sm rounded"
-                    referrerPolicy="no-referrer"
-                  />
+                  <BookCoverThumb src={book.coverUrl} alt={book.title} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{book.title}</p>
+                    <p className="text-sm font-medium truncate text-foreground">{book.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{book.author}</p>
                   </div>
                 </button>

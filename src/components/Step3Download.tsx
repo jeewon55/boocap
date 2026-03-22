@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import html2canvas from 'html2canvas';
+import domtoimage from 'dom-to-image-more';
 import { Download, ArrowLeft } from 'lucide-react';
 import { Book, MoodType, TemplateType } from '@/types/book';
 import { PosterCanvas } from './PosterCanvas';

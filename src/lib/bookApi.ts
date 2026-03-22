@@ -2,7 +2,7 @@ import { Book } from '@/types/book';
 
 // ── API Keys ──────────────────────────────────────────────
 // 카카오 REST API 키 (https://developers.kakao.com)
-const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY as string | undefined;
+const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY || 'e8dc40eabf2634c9bfe393fb82b38b47';
 // 알라딘 TTBKey (https://www.aladin.co.kr/ttb/wblog_manage.aspx)
 const ALADIN_TTB_KEY = import.meta.env.VITE_ALADIN_TTB_KEY as string | undefined;
 

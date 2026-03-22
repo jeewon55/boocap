@@ -66,6 +66,7 @@ async function searchGoogleBooks(query: string): Promise<Book[]> {
 export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
+  // For CJK queries, prioritize Google Books which has better coverage
   if (hasCJK(query)) {
     const google = await searchGoogleBooks(query);
     if (google.length > 0) return google;
@@ -79,7 +80,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   const seen = new Set<string>();
   const merged: Book[] = [];
-  for (const book of [...openLib, ...google]) {
+  for (const book of [...google, ...openLib]) {
     const key = book.title.toLowerCase();
     if (!seen.has(key)) {
       seen.add(key);

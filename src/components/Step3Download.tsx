@@ -84,12 +84,13 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
           ref={containerRef}
-          className="w-full flex justify-center"
+          className="w-full flex justify-center flex-1 min-h-0"
         >
           <div
             className="origin-top rounded-xl overflow-hidden"
             style={{
               width: 600,
+              height: 750,
               transform: `scale(${scale})`,
               transformOrigin: 'top center',
               boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',

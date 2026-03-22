@@ -102,7 +102,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </motion.div>
 
       {/* Carousel */}
-      <div className="flex-1 flex flex-col justify-center relative min-h-0">
+      <div className="flex-1 flex flex-col justify-center relative min-h-0 py-2">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}
@@ -117,17 +117,17 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        <div ref={emblaRef} className="overflow-hidden px-4">
-          <div className="flex touch-pan-y">
+        <div ref={emblaRef} className="overflow-visible px-4">
+          <div className="flex touch-pan-y items-center">
             {TEMPLATES.map((t, index) => {
               const isActive = index === activeIndex;
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_60%] md:flex-[0_0_40%] min-w-0 px-2 transition-all duration-500 ease-out"
+                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-2"
                   style={{
-                    transform: isActive ? 'scale(1.1)' : 'scale(0.85)',
-                    opacity: isActive ? 1 : 0.4,
+                    transform: isActive ? 'scale(1.05)' : 'scale(0.82)',
+                    opacity: isActive ? 1 : 0.35,
                     filter: isActive ? 'none' : 'brightness(0.5)',
                     transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
                   }}
@@ -136,7 +136,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                     <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
                   {/* Label under card */}
-                  <div className={`text-center mt-2 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+                  <div className={`text-center mt-1.5 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
                     <p className="font-display font-bold text-sm text-primary">{t.label}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
                   </div>
@@ -147,13 +147,13 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center gap-2 mt-3">
+        <div className="flex justify-center gap-1.5 mt-2">
           {TEMPLATES.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                i === activeIndex ? 'bg-primary w-6' : 'bg-muted'
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                i === activeIndex ? 'bg-primary w-5' : 'bg-muted'
               }`}
             />
           ))}

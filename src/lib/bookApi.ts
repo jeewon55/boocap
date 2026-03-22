@@ -41,8 +41,9 @@ async function searchOpenLibrary(query: string): Promise<Book[]> {
 
 async function searchGoogleBooks(query: string): Promise<Book[]> {
   try {
+    const langRestrict = hasCJK(query) ? '&langRestrict=ko,zh,ja' : '';
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12${langRestrict}`
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -66,6 +67,7 @@ async function searchGoogleBooks(query: string): Promise<Book[]> {
 export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
+  // For CJK queries, prioritize Google Books which has better coverage
   if (hasCJK(query)) {
     const google = await searchGoogleBooks(query);
     if (google.length > 0) return google;
@@ -79,7 +81,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
 
   const seen = new Set<string>();
   const merged: Book[] = [];
-  for (const book of [...openLib, ...google]) {
+  for (const book of [...google, ...openLib]) {
     const key = book.title.toLowerCase();
     if (!seen.has(key)) {
       seen.add(key);

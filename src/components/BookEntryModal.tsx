@@ -75,7 +75,18 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
             />
           </div>
 
-          {/* Cover URL */}
+          {/* Author */}
+          <div>
+            <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
+              저자
+            </label>
+            <input
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+              placeholder="예: 헤르만 헤세"
+              className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+            />
+          </div>
           <div>
             <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
               표지 이미지 URL

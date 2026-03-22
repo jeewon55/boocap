@@ -101,7 +101,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </motion.div>
 
       {/* Carousel */}
-      <div className="flex-1 flex flex-col justify-center relative min-h-0 py-2">
+      <div className="flex-1 flex flex-col justify-center relative min-h-0 py-2 min-h-[55vh]">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}

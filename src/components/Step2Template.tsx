@@ -116,24 +116,31 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        <div ref={emblaRef} className="overflow-hidden px-4">
-          <div className="flex touch-pan-y items-center">
+        <div ref={emblaRef} className="overflow-visible px-4" style={{ maxHeight: '62vh' }}>
+          <div className="flex touch-pan-y items-center" style={{ maxHeight: '62vh' }}>
             {TEMPLATES.map((t, index) => {
               const isActive = index === activeIndex;
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-3 flex items-center justify-center"
+                  className="flex-[0_0_55%] md:flex-[0_0_32%] min-w-0 px-4 flex items-center justify-center"
                   style={{
                     transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
-                    transform: isActive ? 'scale(1.08)' : 'scale(0.85)',
+                    transform: isActive ? 'scale(1.05)' : 'scale(0.82)',
                     opacity: isActive ? 1 : 0.35,
                     filter: isActive ? 'none' : 'brightness(0.5)',
                   }}
                 >
                   <div
-                    className="w-full overflow-hidden shadow-2xl border border-border/30"
-                    style={{ aspectRatio: '4/5', borderRadius: 24 }}
+                    className="w-full overflow-hidden border border-border/30"
+                    style={{
+                      aspectRatio: '4/5',
+                      borderRadius: 24,
+                      maxHeight: '60vh',
+                      boxShadow: isActive
+                        ? '0 25px 50px -12px rgba(0,0,0,0.25)'
+                        : '0 10px 30px -10px rgba(0,0,0,0.15)',
+                    }}
                   >
                     <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
@@ -144,7 +151,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </div>
 
         {/* Template name + dots combined below carousel */}
-        <div className="flex flex-col items-center mt-3 gap-2">
+        <div className="flex flex-col items-center mt-4 gap-2 shrink-0">
           <div className="text-center h-10">
             <p className="font-display font-bold text-sm text-primary">{activeTemplate.label}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">{activeTemplate.description}</p>

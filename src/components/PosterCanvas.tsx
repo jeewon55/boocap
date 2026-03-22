@@ -149,10 +149,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
           {/* Title section */}
           <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 20 }}>
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 38, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 57, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
               what I read
             </p>
-            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 42, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
+            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 63, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
               in {monthName}
             </p>
           </div>

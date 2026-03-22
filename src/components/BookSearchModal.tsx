@@ -161,64 +161,62 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
         ) : (
           /* Manual entry form */
           <div className="p-5 space-y-5 overflow-y-auto flex-1">
-            {/* Cover preview */}
-            <div className="flex justify-center">
+            {/* Cover preview & upload */}
+            <div className="flex flex-col items-center gap-3">
               {manualCoverUrl && !previewError ? (
-                <img
-                  src={manualCoverUrl}
-                  alt="Book cover"
-                  className="w-24 h-36 object-cover shadow-lg"
-                  onError={() => setPreviewError(true)}
-                />
-              ) : (
-                <div className="w-24 h-36 bg-secondary flex items-center justify-center border border-border">
-                  <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                <div className="relative group">
+                  <img
+                    src={manualCoverUrl}
+                    alt="Book cover"
+                    className="w-24 h-36 object-cover shadow-lg"
+                    onError={() => setPreviewError(true)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { setManualCoverUrl(''); setPreviewError(false); }}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-foreground text-background rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-24 h-36 bg-secondary flex flex-col items-center justify-center border border-dashed border-border hover:border-foreground transition-colors cursor-pointer gap-1.5"
+                >
+                  <Upload className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-[9px] text-muted-foreground font-body">업로드</span>
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              {!manualCoverUrl && (
+                <p className="text-[10px] text-muted-foreground font-body">
+                  이미지를 업로드하거나 아래에 URL을 입력하세요
+                </p>
               )}
             </div>
 
-            {/* Title */}
-            <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                책 제목 *
-              </label>
-              <input
-                autoFocus={mode === 'manual'}
-                value={manualTitle}
-                onChange={(e) => setManualTitle(e.target.value)}
-                placeholder="예: 데미안"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
-              />
-            </div>
-
-            {/* Author */}
-            <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                저자
-              </label>
-              <input
-                value={manualAuthor}
-                onChange={(e) => setManualAuthor(e.target.value)}
-                placeholder="예: 헤르만 헤세"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
-              />
-            </div>
-
-            {/* Cover URL */}
-            <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                표지 이미지 URL
-              </label>
-              <input
-                value={manualCoverUrl}
-                onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
-                placeholder="https://example.com/cover.jpg (선택사항)"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1.5 font-body">
-                비워두면 기본 플레이스홀더가 사용됩니다
-              </p>
-            </div>
+            {/* Cover URL (alternative) */}
+            {!manualCoverUrl && (
+              <div>
+                <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
+                  또는 이미지 URL
+                </label>
+                <input
+                  value={manualCoverUrl}
+                  onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
+                  placeholder="https://example.com/cover.jpg"
+                  className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+                />
+              </div>
+            )}
 
             {/* Confirm button */}
             <button

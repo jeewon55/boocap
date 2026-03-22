@@ -42,6 +42,6 @@ export const TEMPLATES: TemplateConfig[] = [
   { id: 'list', label: 'List', description: '리스트 타이포그래피' },
   { id: 'spine', label: 'Spine Stack', description: '책등을 쌓은 통계형' },
   { id: 'calendar', label: 'Insight Calendar', description: '잔디형 독서 캘린더' },
-  { id: 'typography', label: 'Typography', description: '텍스트만으로 구성된 포스터' },
+  { id: 'typography', label: 'Bold Type', description: '텍스트가 화면을 압도하는 타이포 포스터' },
   { id: 'archive', label: 'Minimal Archive', description: '미니멀 아카이브 리스트' },
 ];

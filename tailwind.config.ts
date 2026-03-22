@@ -61,7 +61,13 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-      },
+        hero: {
+          DEFAULT: "hsl(var(--hero-bg))",
+          foreground: "hsl(var(--hero-fg))",
+          sub: "hsl(var(--hero-sub))",
+          btn: "hsl(var(--hero-btn))",
+          "btn-foreground": "hsl(var(--hero-btn-fg))",
+        },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

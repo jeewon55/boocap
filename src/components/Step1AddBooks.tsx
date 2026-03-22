@@ -59,7 +59,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-x-1 gap-y-0.5 flex-1">
+          <div className="grid grid-cols-7 gap-x-1 gap-y-px flex-1">
             {blanks.map((_, i) => <div key={`b${i}`} />)}
             {days.map((day) => {
               const book = entries[day];
@@ -67,7 +67,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day)}
-                  className={`relative aspect-square flex items-center justify-center border transition-colors group rounded-sm overflow-hidden ${
+                  className={`relative aspect-[3/4] flex items-center justify-center border transition-colors group rounded-sm overflow-hidden ${
                     book ? 'border-primary/40' : 'border-border hover:border-primary/30'
                   }`}
                 >

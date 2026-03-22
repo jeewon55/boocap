@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookSearchModal } from '@/components/BookSearchModal';
 import { MonthSelector } from '@/components/MonthSelector';
-import { X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];

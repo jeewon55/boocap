@@ -34,22 +34,27 @@ async function searchOpenLibrary(query: string): Promise<Book[]> {
 }
 
 async function searchGoogleBooks(query: string): Promise<Book[]> {
-  const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
-  );
-  const data = await res.json();
-  return (data.items || [])
-    .map((item: any) => {
-      const coverUrl = getGoogleCoverUrl(item);
-      if (!coverUrl) return null;
-      return {
-        title: item.volumeInfo.title,
-        author: item.volumeInfo.authors?.[0] || 'Unknown',
-        coverUrl,
-        key: item.id,
-      };
-    })
-    .filter(Boolean) as Book[];
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=8`
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.items || [])
+      .map((item: any) => {
+        const coverUrl = getGoogleCoverUrl(item);
+        if (!coverUrl) return null;
+        return {
+          title: item.volumeInfo.title,
+          author: item.volumeInfo.authors?.[0] || 'Unknown',
+          coverUrl,
+          key: item.id,
+        };
+      })
+      .filter(Boolean) as Book[];
+  } catch {
+    return [];
+  }
 }
 
 export async function searchBooks(query: string): Promise<Book[]> {

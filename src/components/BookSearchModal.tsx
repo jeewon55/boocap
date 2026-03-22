@@ -31,6 +31,19 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   const [manualAuthor, setManualAuthor] = useState('');
   const [manualCoverUrl, setManualCoverUrl] = useState('');
   const [previewError, setPreviewError] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setManualCoverUrl(reader.result as string);
+      setPreviewError(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) { setResults([]); return; }

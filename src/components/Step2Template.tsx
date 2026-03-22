@@ -10,7 +10,7 @@ const MONTHS = [
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
 ];
 
-function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
+function PosterScaled({ year, month, entries, mood, template, maxH }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType; maxH?: string }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.35);
 
@@ -25,7 +25,11 @@ function PosterScaled({ year, month, entries, mood, template }: { year: number; 
   }, []);
 
   return (
-    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5' }}>
+    <div
+      ref={wrapperRef}
+      className={`w-full ${maxH ?? ''}`}
+      style={{ aspectRatio: '4/5' }}
+    >
       <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
         <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
       </div>

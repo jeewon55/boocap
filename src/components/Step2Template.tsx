@@ -10,7 +10,7 @@ const MONTHS = [
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
 ];
 
-function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
+function PosterScaled({ year, month, entries, mood, template, maxH }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType; maxH?: string }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.35);
 
@@ -25,7 +25,11 @@ function PosterScaled({ year, month, entries, mood, template }: { year: number; 
   }, []);
 
   return (
-    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5' }}>
+    <div
+      ref={wrapperRef}
+      className={`w-full ${maxH ?? ''}`}
+      style={{ aspectRatio: '4/5' }}
+    >
       <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
         <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
       </div>
@@ -84,24 +88,24 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
   const activeTemplate = TEMPLATES[activeIndex];
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header - consistent position with Step1 */}
+    <div className="flex-1 flex flex-col overflow-hidden h-full">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
-        className="px-6 pt-2 max-w-md mx-auto w-full"
+        className="px-6 pt-2 pb-1 max-w-md mx-auto w-full shrink-0"
       >
         <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
           Which days defined your month?
         </h2>
-        <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
+        <p className="text-xs text-muted-foreground font-body mt-1">
           좌우로 스와이프하여 템플릿을 선택하세요
         </p>
       </motion.div>
 
-      {/* Carousel */}
-      <div className="flex-1 flex flex-col justify-center relative min-h-0 py-2 min-h-[55vh]">
+      {/* Carousel – fills remaining space */}
+      <div className="flex-1 flex flex-col justify-center relative min-h-0">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}
@@ -123,7 +127,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-2"
+                  className="flex-[0_0_55%] md:flex-[0_0_35%] min-w-0 px-2 flex items-center justify-center"
                   style={{
                     transform: isActive ? 'scale(1.05)' : 'scale(0.82)',
                     opacity: isActive ? 1 : 0.35,
@@ -131,8 +135,8 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                     transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
                   }}
                 >
-                  <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30">
-                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
+                  <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30 max-h-[60vh]">
+                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} maxH="max-h-[60vh]" />
                   </div>
                 </div>
               );
@@ -140,9 +144,9 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           </div>
         </div>
 
-        {/* Template name + dots combined below carousel */}
-        <div className="flex flex-col items-center mt-3 gap-2">
-          <div className="text-center h-10">
+        {/* Template name + dots */}
+        <div className="flex flex-col items-center mt-2 gap-1.5 shrink-0">
+          <div className="text-center h-9">
             <p className="font-display font-bold text-sm text-primary">{activeTemplate.label}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">{activeTemplate.description}</p>
           </div>
@@ -161,7 +165,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </div>
 
       {/* Bottom action bar */}
-      <div className="py-4 px-6 max-w-lg mx-auto w-full flex gap-3">
+      <div className="py-3 px-6 max-w-lg mx-auto w-full flex gap-3 shrink-0">
         <button
           onClick={onBack}
           className="flex items-center justify-center gap-2 px-6 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"

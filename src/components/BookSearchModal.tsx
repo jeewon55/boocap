@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, PenLine, ImageIcon } from 'lucide-react';
+import { Search, X, Loader2, PenLine, ImageIcon, Upload } from 'lucide-react';
+import { useRef } from 'react';
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 

@@ -121,19 +121,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                   }}
                 >
                   <div className="rounded-xl overflow-hidden shadow-2xl border border-border/30">
-                    <div className="w-full" style={{ aspectRatio: '4/5' }}>
-                      <div className="w-full h-full origin-top-left" style={{ width: 600, transform: 'scale(calc(100% / 600))', transformOrigin: 'top left' }}>
-                        <div style={{ width: 600 }}>
-                          <PosterCanvas
-                            year={year}
-                            month={month}
-                            entries={entries}
-                            mood={mood}
-                            template={t.id}
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
                   {/* Label under card */}
                   <div className={`text-center mt-3 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>

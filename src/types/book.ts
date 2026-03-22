@@ -12,7 +12,7 @@ export interface DayEntry {
 
 export type MoodType = 'minimal' | 'editorial' | 'bold' | 'dark';
 
-export type TemplateType = 'grid' | 'stack' | 'collage' | 'list';
+export type TemplateType = 'grid' | 'stack' | 'collage' | 'list' | 'spine' | 'calendar' | 'typography' | 'archive';
 
 export interface MoodConfig {
   id: MoodType;
@@ -40,4 +40,8 @@ export const TEMPLATES: TemplateConfig[] = [
   { id: 'stack', label: 'Stack', description: '겹쳐진 카드 스타일' },
   { id: 'collage', label: 'Collage', description: '자유로운 콜라주 배치' },
   { id: 'list', label: 'List', description: '리스트 타이포그래피' },
+  { id: 'spine', label: 'Spine Stack', description: '책등을 쌓은 통계형' },
+  { id: 'calendar', label: 'Insight Calendar', description: '잔디형 독서 캘린더' },
+  { id: 'typography', label: 'Typography', description: '텍스트만으로 구성된 포스터' },
+  { id: 'archive', label: 'Minimal Archive', description: '미니멀 아카이브 리스트' },
 ];

@@ -22,16 +22,16 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
   };
 
   return (
-    <div className="flex items-center justify-between py-6 border-b border-border">
-      <button onClick={prev} className="p-2 hover:bg-secondary transition-colors">
-        <ChevronLeft className="w-4 h-4" />
+    <div className="flex items-center justify-between py-4 border-b border-border">
+      <button onClick={prev} className="p-2 hover:bg-secondary transition-colors rounded-lg">
+        <ChevronLeft className="w-4 h-4 text-foreground" />
       </button>
       <div className="text-center">
-        <p className="font-display text-2xl font-bold tracking-tight">{year}</p>
-        <p className="font-display text-sm tracking-[0.3em] text-muted-foreground">{MONTHS[month]}</p>
+        <p className="font-display text-2xl font-bold tracking-tight text-primary">{MONTHS[month]}</p>
+        <p className="font-display text-sm tracking-[0.3em] text-muted-foreground">{year}</p>
       </div>
-      <button onClick={next} className="p-2 hover:bg-secondary transition-colors">
-        <ChevronRight className="w-4 h-4" />
+      <button onClick={next} className="p-2 hover:bg-secondary transition-colors rounded-lg">
+        <ChevronRight className="w-4 h-4 text-foreground" />
       </button>
     </div>
   );

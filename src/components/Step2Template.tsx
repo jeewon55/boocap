@@ -2,11 +2,17 @@ import { Book, MoodType, TemplateType, TEMPLATES } from '@/types/book';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
+
+const MONTHS = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+];
 
 function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.5);
+  const [scale, setScale] = useState(0.35);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -48,6 +54,8 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
     TEMPLATES.findIndex((t) => t.id === template) || 0
   );
 
+  const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     const idx = emblaApi.selectedScrollSnap();
@@ -62,7 +70,6 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
     return () => { emblaApi.off('select', onSelect); };
   }, [emblaApi, onSelect]);
 
-  // Sync initial template
   useEffect(() => {
     if (!emblaApi) return;
     const idx = TEMPLATES.findIndex((t) => t.id === template);
@@ -77,30 +84,35 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
   const activeTemplate = TEMPLATES[activeIndex];
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-6 pt-2 max-w-lg mx-auto w-full">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="px-6 pt-2 max-w-lg mx-auto w-full"
+      >
         <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-1">Step 2</p>
-        <h2 className="font-display text-2xl font-bold tracking-tight mb-1">
-          템플릿 선택
+        <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mb-1">
+          Pick a vessel for your {monthName} memories.
         </h2>
-        <p className="text-xs text-muted-foreground font-body mb-4">
+        <p className="text-xs text-muted-foreground font-body mb-3">
           좌우로 스와이프하여 템플릿을 선택하세요
         </p>
-      </div>
+      </motion.div>
 
       {/* Carousel */}
-      <div className="flex-1 flex flex-col justify-center relative">
+      <div className="flex-1 flex flex-col justify-center relative min-h-0">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}
-          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors"
+          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-secondary hover:bg-muted backdrop-blur-sm transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <button
           onClick={scrollNext}
-          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors"
+          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-secondary hover:bg-muted backdrop-blur-sm transition-colors"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -112,11 +124,11 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex-[0_0_75%] md:flex-[0_0_50%] min-w-0 px-3 transition-all duration-500 ease-out"
+                  className="flex-[0_0_60%] md:flex-[0_0_40%] min-w-0 px-2 transition-all duration-500 ease-out"
                   style={{
-                    transform: isActive ? 'scale(1.05)' : 'scale(0.88)',
-                    opacity: isActive ? 1 : 0.5,
-                    filter: isActive ? 'none' : 'brightness(0.7)',
+                    transform: isActive ? 'scale(1.1)' : 'scale(0.85)',
+                    opacity: isActive ? 1 : 0.4,
+                    filter: isActive ? 'none' : 'brightness(0.5)',
                     transition: 'transform 0.5s cubic-bezier(0.25,1,0.5,1), opacity 0.4s ease, filter 0.4s ease',
                   }}
                 >
@@ -124,8 +136,8 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                     <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
                   </div>
                   {/* Label under card */}
-                  <div className={`text-center mt-3 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-                    <p className="font-display font-bold text-sm">{t.label}</p>
+                  <div className={`text-center mt-2 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+                    <p className="font-display font-bold text-sm text-primary">{t.label}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
                   </div>
                 </div>
@@ -135,13 +147,13 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-3">
           {TEMPLATES.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                i === activeIndex ? 'bg-foreground w-6' : 'bg-foreground/20'
+                i === activeIndex ? 'bg-primary w-6' : 'bg-muted'
               }`}
             />
           ))}
@@ -149,7 +161,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </div>
 
       {/* Bottom action bar */}
-      <div className="py-6 px-6 max-w-lg mx-auto w-full flex gap-3">
+      <div className="py-4 px-6 max-w-lg mx-auto w-full flex gap-3">
         <button
           onClick={onBack}
           className="flex items-center justify-center gap-2 px-6 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
@@ -158,7 +170,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </button>
         <button
           onClick={onGenerate}
-          className="flex-1 flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
+          className="flex-1 flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
         >
           Try This Template
         </button>

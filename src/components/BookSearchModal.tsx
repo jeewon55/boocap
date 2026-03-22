@@ -1,16 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, X, Loader2, PenLine, ImageIcon, Upload } from 'lucide-react';
+import { Search, X, Loader2, PenLine, Upload } from 'lucide-react';
 import { useRef } from 'react';
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
+import { motion } from 'framer-motion';
 
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
-];
-
-const PLACEHOLDER_COVERS = [
-  '/placeholder.svg',
 ];
 
 interface BookSearchModalProps {
@@ -26,7 +23,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'search' | 'manual'>('search');
 
-  // Manual entry state
   const [manualTitle, setManualTitle] = useState('');
   const [manualAuthor, setManualAuthor] = useState('');
   const [manualCoverUrl, setManualCoverUrl] = useState('');
@@ -72,9 +68,11 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="bg-background border border-border w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-lg animate-fade-in"
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -92,7 +90,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           <button
             onClick={() => setMode('search')}
             className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'search' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
+              mode === 'search' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
             }`}
           >
             검색
@@ -100,7 +98,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           <button
             onClick={() => setMode('manual')}
             className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'manual' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
+              mode === 'manual' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
             }`}
           >
             직접 입력
@@ -109,7 +107,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
         {mode === 'search' ? (
           <>
-            {/* Search input */}
             <div className="flex items-center gap-2 p-4 border-b border-border">
               <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <input
@@ -122,7 +119,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
             </div>
 
-            {/* Results */}
             <div className="overflow-y-auto flex-1">
               {results.map((book) => (
                 <button
@@ -133,7 +129,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   <img
                     src={book.coverUrl}
                     alt={book.title}
-                    className="w-10 h-14 object-cover flex-shrink-0 shadow-sm"
+                    className="w-10 h-14 object-cover flex-shrink-0 shadow-sm rounded"
                     referrerPolicy="no-referrer"
                   />
                   <div className="min-w-0">
@@ -147,11 +143,8 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 <div className="p-4 text-center space-y-3">
                   <p className="text-sm text-muted-foreground">검색 결과가 없습니다</p>
                   <button
-                    onClick={() => {
-                      setMode('manual');
-                      setManualTitle(query);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-body text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity"
+                    onClick={() => { setMode('manual'); setManualTitle(query); }}
+                    className="inline-flex items-center gap-1.5 text-xs font-body text-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
                   >
                     <PenLine className="w-3 h-3" />
                     직접 입력하기
@@ -159,7 +152,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 </div>
               )}
 
-              {/* Always show manual entry shortcut at bottom */}
               {(!query || results.length > 0) && (
                 <button
                   onClick={() => setMode('manual')}
@@ -172,22 +164,20 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
             </div>
           </>
         ) : (
-          /* Manual entry form */
           <div className="p-5 space-y-5 overflow-y-auto flex-1">
-            {/* Cover preview & upload */}
             <div className="flex flex-col items-center gap-3">
               {manualCoverUrl && !previewError ? (
                 <div className="relative group">
                   <img
                     src={manualCoverUrl}
                     alt="Book cover"
-                    className="w-24 h-36 object-cover shadow-lg"
+                    className="w-24 h-36 object-cover shadow-lg rounded"
                     onError={() => setPreviewError(true)}
                   />
                   <button
                     type="button"
                     onClick={() => { setManualCoverUrl(''); setPreviewError(false); }}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-foreground text-background rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -196,79 +186,61 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-24 h-36 bg-secondary flex flex-col items-center justify-center border border-dashed border-border hover:border-foreground transition-colors cursor-pointer gap-1.5"
+                  className="w-24 h-36 bg-secondary flex flex-col items-center justify-center border border-dashed border-border hover:border-primary transition-colors cursor-pointer gap-1.5 rounded"
                 >
                   <Upload className="w-5 h-5 text-muted-foreground" />
                   <span className="text-[9px] text-muted-foreground font-body">업로드</span>
                 </button>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
               {!manualCoverUrl && (
-                <p className="text-[10px] text-muted-foreground font-body">
-                  이미지를 업로드하거나 아래에 URL을 입력하세요
-                </p>
+                <p className="text-[10px] text-muted-foreground font-body">이미지를 업로드하거나 아래에 URL을 입력하세요</p>
               )}
             </div>
 
-            {/* Title */}
             <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                책 제목 *
-              </label>
+              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">책 제목 *</label>
               <input
                 autoFocus={mode === 'manual'}
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
                 placeholder="예: 데미안"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
               />
             </div>
 
-            {/* Author */}
             <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                저자
-              </label>
+              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">저자</label>
               <input
                 value={manualAuthor}
                 onChange={(e) => setManualAuthor(e.target.value)}
                 placeholder="예: 헤르만 헤세"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
               />
             </div>
 
-            {/* Cover URL (alternative) */}
             {!manualCoverUrl && (
               <div>
-                <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-                  또는 이미지 URL
-                </label>
+                <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">또는 이미지 URL</label>
                 <input
                   value={manualCoverUrl}
                   onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
                   placeholder="https://example.com/cover.jpg"
-                  className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+                  className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
                 />
               </div>
             )}
 
-            {/* Confirm button */}
             <button
               onClick={handleManualConfirm}
               disabled={!manualTitle.trim()}
-              className="w-full py-3 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity disabled:opacity-30"
+              className="w-full py-3 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity disabled:opacity-30 rounded-lg"
             >
               확인
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 
 interface WizardStepProps {
   children: ReactNode;
@@ -8,8 +9,13 @@ interface WizardStepProps {
 export function WizardStep({ children, visible }: WizardStepProps) {
   if (!visible) return null;
   return (
-    <div className="animate-fade-in w-full min-h-[calc(100dvh-60px)] flex flex-col">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+      className="w-full h-[calc(100dvh-60px)] flex flex-col overflow-hidden"
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

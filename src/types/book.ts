@@ -37,7 +37,7 @@ export const MOODS: MoodConfig[] = [
 
 export const TEMPLATES: TemplateConfig[] = [
   { id: 'grid', label: 'Grid', description: '균일한 그리드 레이아웃' },
-  { id: 'stack', label: 'Stack', description: '겹쳐진 카드 스타일' },
+  { id: 'stack', label: 'Stack', description: '뉴스레터 스타일' },
   { id: 'collage', label: 'Collage', description: '자유로운 콜라주 배치' },
   { id: 'list', label: 'List', description: '리스트 타이포그래피' },
   { id: 'spine', label: 'Spine Stack', description: '책등을 쌓은 통계형' },

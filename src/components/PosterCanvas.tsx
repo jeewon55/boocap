@@ -100,46 +100,49 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── STACK ───
     if (template === 'stack') {
+      const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
       return (
-        <div ref={ref} style={baseStyle}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 32, display: 'flex', justifyContent: 'space-between' }}>
-            <p style={{ fontSize: 13, letterSpacing: '0.3em', opacity: 0.4 }}>MONTHLY RECAP</p>
-            <p style={{ fontSize: 11, opacity: 0.35 }}>{readDays} DAYS · {books.length} BOOKS</p>
+        <div ref={ref} style={{ ...baseStyle, fontFamily: "'Courier New', 'Space Mono', monospace" }}>
+          {/* Paper texture background */}
+          <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9 }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(245,240,230,0.35)' }} />
+
+          {/* Year - top right */}
+          <p style={{ position: 'absolute', top: 32, right: 36, fontSize: 14, opacity: 0.35, color: '#2C2C2C', letterSpacing: '0.05em' }}>{year}</p>
+
+          {/* Title - top left */}
+          <div style={{ position: 'absolute', top: 40, left: 40, color: '#1A1A1A' }}>
+            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>the</p>
+            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>{monthName}</p>
+            <p style={{ fontSize: 52, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em' }}>book recap</p>
           </div>
-          <div style={{ position: 'absolute', left: 32, top: 64, width: 30, height: 2, backgroundColor: moodConfig.accentColor }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-            {books.length === 0 ? emptyState : books.length <= 3 ? (
-              <div style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
-                {books.map((book, i) => (
-                  <div key={book.key} style={{ boxShadow: '0 20px 50px rgba(0,0,0,0.3)', transform: `rotate(${(i - Math.floor(books.length / 2)) * 4}deg)` }}>
-                    <BookImg src={book.coverUrl} alt={book.title} style={{ width: 150, height: 215 }} />
-                  </div>
-                ))}
-              </div>
+
+          {/* Book covers - flat grid */}
+          <div style={{ position: 'absolute', left: 40, right: 40, top: 250 }}>
+            {books.length === 0 ? (
+              <p style={{ fontSize: 13, opacity: 0.25, letterSpacing: '0.15em', color: '#2C2C2C' }}>ADD BOOKS TO PREVIEW</p>
             ) : (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', maxWidth: 420 }}>
-                {books.slice(0, 6).map((book, i) => (
-                  <div key={book.key} style={{ boxShadow: '0 15px 40px rgba(0,0,0,0.25)', transform: `rotate(${i % 2 === 0 ? -2 : 2}deg)` }}>
-                    <BookImg src={book.coverUrl} alt={book.title} style={{ width: 110, height: 158 }} />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                {books.slice(0, 6).map((book) => (
+                  <div key={book.key} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: 2 }}>
+                    <BookImg src={book.coverUrl} alt={book.title} style={{ width: 110, height: 158, borderRadius: 2 }} />
                   </div>
                 ))}
               </div>
             )}
           </div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 32 }}>
-            <p style={{ fontSize: 64, fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.03em' }}>{MONTHS[month]}</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
-              <p style={{ fontSize: 64, fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.03em', color: moodConfig.accentColor }}>{year}</p>
-              {books.length > 0 && (
-                <div style={{ textAlign: 'right', maxWidth: 180 }}>
-                  {books.slice(0, 3).map((b) => (
-                    <p key={b.key} style={{ fontSize: 8, opacity: 0.5, lineHeight: 1.5 }}>{b.title.toUpperCase()}</p>
-                  ))}
-                  {books.length > 3 && <p style={{ fontSize: 8, opacity: 0.3 }}>+{books.length - 3} MORE</p>}
-                </div>
-              )}
+
+          {/* Book list - bottom section */}
+          {books.length > 0 && (
+            <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, color: '#2C2C2C' }}>
+              <p style={{ fontSize: 12, opacity: 0.4, marginBottom: 10, letterSpacing: '0.08em' }}>read books:</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {books.slice(0, 6).map((book) => (
+                  <p key={book.key} style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.5 }}>{book.title.toLowerCase()}</p>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       );
     }

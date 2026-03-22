@@ -430,37 +430,109 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── TYPOGRAPHY POSTER: Text only ───
+    // ─── BOLD TYPOGRAPHY: Text-as-design poster ───
     if (template === 'typography') {
-      return (
-        <div ref={ref} style={baseStyle}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '28px 32px 0' }}>
-            <p style={{ fontSize: 11, letterSpacing: '0.3em', opacity: 0.4 }}>MONTHLY RECAP</p>
-          </div>
+      const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const connectors = ['read', 'and', 'with', 'also', 'then'];
 
-          <div style={{ position: 'absolute', left: 32, right: 32, top: 80, bottom: 120, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            {books.length === 0 ? emptyState : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      // Sticker-like book cover positions scattered among text
+      const stickerPositions = [
+        { right: 20, top: '18%', rotate: 6, size: 62 },
+        { right: 60, top: '42%', rotate: -8, size: 56 },
+        { left: 10, top: '58%', rotate: 10, size: 50 },
+        { right: 30, top: '68%', rotate: -5, size: 58 },
+        { left: 40, top: '36%', rotate: 7, size: 48 },
+        { right: 10, top: '82%', rotate: -4, size: 52 },
+      ];
+
+      // Decorative SVG elements
+      const Barcode = ({ x, y }: { x: number; y: number }) => (
+        <div style={{ position: 'absolute', left: x, top: y, zIndex: 5, opacity: 0.7 }}>
+          <div style={{ display: 'flex', gap: 1, height: 22 }}>
+            {[3,2,1,3,1,2,3,1,2,1,3,2,1,2,3,1].map((w, i) => (
+              <div key={i} style={{ width: w, height: '100%', backgroundColor: '#C8FF00' }} />
+            ))}
+          </div>
+          <p style={{ fontSize: 6, letterSpacing: '0.1em', color: '#999', marginTop: 1, fontFamily: "'Space Mono', monospace" }}>4 902137 891023</p>
+        </div>
+      );
+
+      const Ticket = ({ x, y, rotate = 0 }: { x: number; y: number; rotate?: number }) => (
+        <div style={{
+          position: 'absolute', left: x, top: y, zIndex: 6,
+          width: 42, height: 22,
+          backgroundColor: '#C8FF00',
+          borderRadius: 3,
+          transform: `rotate(${rotate}deg)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <p style={{ fontSize: 5, fontWeight: 700, letterSpacing: '0.08em', color: '#1A1A1A', fontFamily: "'Space Mono', monospace" }}>ADMIT ONE</p>
+        </div>
+      );
+
+      const Seal = ({ x, y, size = 36 }: { x: number; y: number; size?: number }) => (
+        <svg style={{ position: 'absolute', left: x, top: y, width: size, height: size, zIndex: 6 }} viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="18" fill="none" stroke="#C8FF00" strokeWidth="2" />
+          <circle cx="20" cy="20" r="13" fill="none" stroke="#C8FF00" strokeWidth="1" />
+          <text x="20" y="22" textAnchor="middle" fontSize="6" fontWeight="700" fill="#C8FF00" fontFamily="'Space Mono', monospace">READ</text>
+        </svg>
+      );
+
+      // Calculate font sizes based on book count
+      const baseFontSize = books.length <= 2 ? 72 : books.length <= 4 ? 58 : 48;
+
+      return (
+        <div ref={ref} style={{ ...baseStyle, backgroundColor: '#FFFFFF', color: '#1A1A1A' }}>
+          {/* Main typography area */}
+          <div style={{
+            position: 'absolute', left: 28, right: 28, top: 32, bottom: 70,
+            display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
+          }}>
+            {books.length === 0 ? (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ fontSize: 14, opacity: 0.2, letterSpacing: '0.15em' }}>ADD BOOKS TO PREVIEW</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {books.slice(0, 6).map((book, i) => {
-                  const sizes = [56, 42, 36, 30, 26, 22];
-                  const size = sizes[Math.min(i, sizes.length - 1)];
-                  const opacity = 1 - i * 0.12;
+                  const fontSize = Math.max(baseFontSize - i * 4, 36);
+                  const connector = connectors[i % connectors.length];
+                  const isKorean = /[가-힣]/.test(book.title);
                   return (
-                    <div key={book.key}>
+                    <div key={book.key} style={{ position: 'relative' }}>
+                      {/* Connector word between titles */}
+                      {i > 0 && (
+                        <p style={{
+                          fontFamily: "'Playfair Display', Georgia, serif",
+                          fontStyle: 'italic',
+                          fontSize: 14,
+                          color: '#999',
+                          marginBottom: -4,
+                          marginTop: -2,
+                          letterSpacing: '0.05em',
+                        }}>
+                          {connector}
+                        </p>
+                      )}
+                      {/* Book title — huge and bold */}
                       <p style={{
-                        fontSize: size,
-                        fontWeight: 700,
-                        lineHeight: 1.05,
-                        letterSpacing: '-0.02em',
-                        opacity,
+                        fontFamily: isKorean
+                          ? "'Pretendard', 'Noto Sans KR', sans-serif"
+                          : "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        fontSize,
+                        fontWeight: 900,
+                        lineHeight: 0.92,
+                        letterSpacing: '-0.03em',
+                        color: '#1A1A1A',
+                        textTransform: isKorean ? 'none' : 'none',
+                        wordBreak: 'keep-all',
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        marginBottom: 2,
                       }}>
-                        {book.title.toUpperCase()}
-                      </p>
-                      <p style={{ fontSize: 10, opacity: 0.35, marginTop: 1, letterSpacing: '0.1em' }}>
-                        {book.author.toUpperCase()}
+                        {book.title}
                       </p>
                     </div>
                   );
@@ -469,15 +541,46 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             )}
           </div>
 
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 32px 28px' }}>
-            <div style={{ width: 40, height: 2, backgroundColor: moodConfig.accentColor, marginBottom: 12 }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-              <div>
-                <p style={{ fontSize: 40, fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.03em' }}>{MONTHS[month]}</p>
-                <p style={{ fontSize: 40, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em', color: moodConfig.accentColor }}>{year}</p>
+          {/* Book covers as stickers scattered over text */}
+          {books.slice(0, 6).map((book, i) => {
+            const pos = stickerPositions[i];
+            if (!pos) return null;
+            return (
+              <div key={`sticker-${book.key}`} style={{
+                position: 'absolute',
+                ...(pos.left !== undefined ? { left: pos.left } : {}),
+                ...(pos.right !== undefined ? { right: pos.right } : {}),
+                top: pos.top,
+                transform: `rotate(${pos.rotate}deg)`,
+                zIndex: 8,
+                border: '3px solid #fff',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                borderRadius: 2,
+                overflow: 'hidden',
+              }}>
+                <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.size, height: pos.size * 1.4 }} />
               </div>
-              <p style={{ fontSize: 10, opacity: 0.3 }}>{books.length} BOOKS · {readDays} DAYS</p>
+            );
+          })}
+
+          {/* Decorative accents */}
+          <Barcode x={380} y={28} />
+          <Ticket x={28} y={20} rotate={-3} />
+          <Seal x={480} y={520} size={44} />
+          <Seal x={20} y={440} size={30} />
+          <Ticket x={420} y={380} rotate={8} />
+
+          {/* Bottom info */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            padding: '0 28px 24px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+          }}>
+            <div>
+              <p style={{ fontSize: 8, letterSpacing: '0.2em', opacity: 0.35, fontFamily: "'Space Mono', monospace" }}>RECAP BY VISCAP</p>
+              <p style={{ fontSize: 8, letterSpacing: '0.15em', opacity: 0.35, fontFamily: "'Space Mono', monospace", marginTop: 2 }}>{MONTHS[month]} {year}</p>
             </div>
+            <p style={{ fontSize: 8, opacity: 0.25, fontFamily: "'Space Mono', monospace" }}>{books.length} BOOKS · {readDays} DAYS</p>
           </div>
         </div>
       );

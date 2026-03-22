@@ -93,7 +93,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         className="px-6 pt-2 max-w-md mx-auto w-full"
       >
         <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
-          Pick a vessel for your {monthName} memories.
+          Which days defined your month?
         </h2>
         <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
           좌우로 스와이프하여 템플릿을 선택하세요

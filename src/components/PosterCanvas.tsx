@@ -1,5 +1,6 @@
 import { forwardRef, useMemo } from 'react';
 import { Book, MOODS, MoodType, TemplateType } from '@/types/book';
+import paperTexture from '@/assets/paper-texture.jpg';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const MONTHS = [

@@ -34,7 +34,7 @@ export default function Landing() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-5">
         <span className="font-display text-xl font-bold text-hero-foreground tracking-tight">
-          BookRecap
+          Boocap
         </span>
         <button
           onClick={handleCreate}

@@ -22,26 +22,19 @@ interface Step3Props {
 
 export function Step3Download({ year, month, entries, mood, template, onBack, onReset }: Step3Props) {
   const posterRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
   const [downloading, setDownloading] = useState(false);
   const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
 
   useEffect(() => {
-    const update = () => {
-      if (containerRef.current) {
-        const w = containerRef.current.clientWidth;
-        const maxH = window.innerHeight * 0.55;
-        const scaleByW = w / 600;
-        const scaleByH = maxH / 750; // 600 * 5/4 = 750
-        setScale(Math.min(scaleByW, scaleByH, 0.75));
-      }
-    };
+    const el = wrapperRef.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / 600);
     update();
     const obs = new ResizeObserver(update);
-    if (containerRef.current) obs.observe(containerRef.current);
-    window.addEventListener('resize', update);
-    return () => { obs.disconnect(); window.removeEventListener('resize', update); };
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   const handleDownload = async () => {
@@ -105,27 +98,27 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          ref={containerRef}
           className="w-full flex justify-center flex-1 min-h-0"
         >
           <div
-            className="origin-top rounded-xl overflow-hidden"
+            ref={wrapperRef}
+            className="w-full overflow-hidden rounded-xl"
             style={{
-              width: 600,
               aspectRatio: '4/5',
-              transform: `scale(${scale})`,
-              transformOrigin: 'top center',
+              maxWidth: 420,
               boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',
             }}
           >
-            <PosterCanvas
-              ref={posterRef}
-              year={year}
-              month={month}
-              entries={entries}
-              mood={mood}
-              template={template}
-            />
+            <div style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+              <PosterCanvas
+                ref={posterRef}
+                year={year}
+                month={month}
+                entries={entries}
+                mood={mood}
+                template={template}
+              />
+            </div>
           </div>
         </motion.div>
       </div>

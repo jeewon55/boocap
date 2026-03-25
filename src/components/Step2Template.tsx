@@ -25,7 +25,7 @@ function PosterScaled({ year, month, entries, mood, template }: { year: number; 
   }, []);
 
   return (
-    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5', overflow: 'hidden' }}>
+    <div ref={wrapperRef} className="w-full" style={{ aspectRatio: '4/5', overflow: 'hidden', maxWidth: 420 }}>
       <div style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
         <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
       </div>

@@ -109,7 +109,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
               boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',
             }}
           >
-            <div style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+            <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: 'inherit', overflow: 'hidden' }}>
               <PosterCanvas
                 ref={posterRef}
                 year={year}

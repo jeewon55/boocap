@@ -81,8 +81,8 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   };
 
   return (
-    <div className="flex-1 flex flex-col px-6 overflow-hidden">
-      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full min-h-0">
+    <div className="flex-1 flex flex-col px-6 overflow-auto">
+      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full py-4">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

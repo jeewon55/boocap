@@ -110,6 +110,19 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
 
       // Layout positions based on book count — generous spacing to prevent overlap
+      // NOTE: user wants only a subtle centering tweak for books inside this template.
+      const X_SHIFT_PERCENT = 6; // move books slightly to the right as a group
+      const posterH = 750;
+      const TITLE_TOP_PX = 104;
+      const TITLE_FONT_SIZE = 60;
+      const TITLE_FONT_FAMILY = "'Playfair Display', Georgia, serif";
+      const TITLE_GAP_PX = 28; // keep 28px gap between title and first book
+      const shiftLeft = (left: string) => {
+        const n = Number.parseFloat(left);
+        if (Number.isNaN(n)) return left;
+        return `${n + X_SHIFT_PERCENT}%`;
+      };
+
       const getPositions = (count: number) => {
         if (count === 1) return [
           { left: '20%', top: '28%', rotate: -3, w: 200, h: 286 },
@@ -150,6 +163,16 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const titleFontSize = books.length <= 3 ? 11 : books.length <= 5 ? 10 : 9;
 
       const positions = getPositions(books.length);
+      const titleBottomPx =
+        TITLE_TOP_PX +
+        TITLE_FONT_SIZE * 1.1 +
+        TITLE_FONT_SIZE * 1.05 +
+        -2; // matches marginTop: -2 on second line
+
+      const minBookTopPx = Math.min(
+        ...positions.map((p) => (Number.parseFloat(p.top) / 100) * posterH)
+      );
+      const yShiftPx = titleBottomPx + TITLE_GAP_PX - minBookTopPx;
 
       return (
         <div ref={ref} style={{ ...baseStyle, backgroundColor: '#F5F3EE' }}>
@@ -167,11 +190,11 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <Sparkle x={10} y={380} size={34} color="#D4A0D4" opacity={0.28} />
 
           {/* Title section */}
-          <div style={{ position: 'absolute', top: 36, left: 0, right: 0, textAlign: 'center', zIndex: 30 }}>
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontStyle: 'italic', fontSize: 57, fontWeight: 400, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+          <div style={{ position: 'absolute', top: TITLE_TOP_PX, left: 0, right: 0, textAlign: 'center', zIndex: 30 }}>
+            <p style={{ fontFamily: TITLE_FONT_FAMILY, fontStyle: 'italic', fontSize: TITLE_FONT_SIZE, fontWeight: 500, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
               what I read
             </p>
-            <p style={{ fontFamily: "'Noto Sans KR', 'Inter', sans-serif", fontSize: 63, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
+            <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_FONT_SIZE, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
               in {monthName}
             </p>
           </div>
@@ -187,8 +210,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               return (
                 <div key={book.key} style={{
                   position: 'absolute',
-                  left: pos.left,
-                  top: pos.top,
+                  left: shiftLeft(pos.left),
+                  top: `calc(${pos.top} + ${yShiftPx}px)`,
                   transform: `rotate(${pos.rotate}deg)`,
                   zIndex: 10 + i * 2,
                   display: 'flex',
@@ -208,12 +231,11 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     textAlign: 'center',
                     maxWidth: pos.w,
                     lineHeight: 1.3,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    whiteSpace: 'normal',
+                    overflow: 'visible',
+                    wordBreak: 'break-word',
                     position: 'relative',
                     zIndex: 10 + i * 2 + 1,
-                    backgroundColor: 'rgba(245,243,238,0.85)',
                     padding: '1px 4px',
                     borderRadius: 2,
                   }}>
@@ -223,6 +245,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               );
             })
           )}
+
           {/* Small decorative arrows between items */}
           <svg style={{ position: 'absolute', left: '48%', top: '48%', width: 16, height: 16, opacity: 0.2, zIndex: 5 }} viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" strokeWidth="2">
             <path d="M7 17L17 7M17 7H7M17 7V17" />
@@ -344,11 +367,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       fontWeight: 600,
                       color: '#fff',
                       letterSpacing: '0.05em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
                       maxHeight: '90%',
                       padding: '8px 0',
+                      whiteSpace: 'normal',
+                      overflow: 'visible',
                     }}>
                       {book.title}
                     </p>
@@ -486,7 +508,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           {/* Main typography area */}
           <div style={{
             position: 'absolute', left: 28, right: 28, top: 32, bottom: 70,
-            display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
           }}>
             {books.length === 0 ? (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -526,10 +548,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         color: '#1A1A1A',
                         textTransform: isKorean ? 'none' : 'none',
                         wordBreak: 'keep-all',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
+                        whiteSpace: 'normal',
+                        overflow: 'visible',
                         marginBottom: 2,
                       }}>
                         {book.title}

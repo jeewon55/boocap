@@ -38,7 +38,7 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
         </div>
         <button
           onClick={() => { setPickerYear(year); setOpen(true); }}
-          className="text-[11px] font-body tracking-[0.1em] text-muted-foreground underline underline-offset-4 decoration-muted-foreground/40 hover:text-primary hover:decoration-primary transition-colors whitespace-nowrap"
+          className="text-[11px] font-body tracking-[0.1em] text-muted-foreground underline underline-offset-4 decoration-muted-foreground/40 hover:text-primary hover:decoration-primary transition-colors whitespace-normal"
         >
           Change Month
         </button>

@@ -80,6 +80,9 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     setDownloading(false);
   };
 
+  const scaledW = 600 * scale;
+  const scaledH = 750 * scale;
+
   return (
     <div className="flex-1 flex flex-col px-6 overflow-auto">
       <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full py-4">
@@ -102,22 +105,24 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         >
           <div
             ref={wrapperRef}
-            className="w-full overflow-hidden rounded-xl"
+            className="w-full overflow-hidden rounded-[12px] flex justify-center"
             style={{
               aspectRatio: '4/5',
               maxWidth: 420,
               boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',
             }}
           >
-            <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: 'inherit', overflow: 'hidden' }}>
-              <PosterCanvas
-                ref={posterRef}
-                year={year}
-                month={month}
-                entries={entries}
-                mood={mood}
-                template={template}
-              />
+            <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0, borderRadius: 'inherit' }}>
+              <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+                <PosterCanvas
+                  ref={posterRef}
+                  year={year}
+                  month={month}
+                  entries={entries}
+                  mood={mood}
+                  template={template}
+                />
+              </div>
             </div>
           </div>
         </motion.div>

@@ -53,7 +53,11 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
+    <div
+      className={`min-h-[100dvh] bg-background text-foreground flex flex-col transition-colors duration-300 ${
+        step === 0 ? 'dark' : ''
+      }`}
+    >
       <StepIndicator current={step} />
 
       <WizardStep visible={step === 0}>

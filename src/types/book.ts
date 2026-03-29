@@ -12,7 +12,7 @@ export interface DayEntry {
 
 export type MoodType = 'minimal' | 'editorial' | 'bold' | 'dark';
 
-export type TemplateType = 'grid' | 'stack' | 'collage' | 'list' | 'spine' | 'calendar' | 'typography' | 'archive';
+export type TemplateType = 'grid' | 'stack' | 'list' | 'spine' | 'calendar' | 'typography' | 'mosaic';
 
 export interface MoodConfig {
   id: MoodType;
@@ -38,10 +38,9 @@ export const MOODS: MoodConfig[] = [
 export const TEMPLATES: TemplateConfig[] = [
   { id: 'grid', label: 'Grid', description: '균일한 그리드 레이아웃' },
   { id: 'stack', label: 'Stack', description: '뉴스레터 스타일' },
-  { id: 'collage', label: 'Collage', description: '자유로운 콜라주 배치' },
   { id: 'list', label: 'List', description: '리스트 타이포그래피' },
   { id: 'spine', label: 'Spine Stack', description: '책등을 쌓은 통계형' },
-  { id: 'calendar', label: 'Insight Calendar', description: '잔디형 독서 캘린더' },
+  { id: 'calendar', label: 'Insight Calendar', description: '손그림 격자·그리운 코코초이툰 타이포의 낙서 캘린더' },
   { id: 'typography', label: 'Bold Type', description: '텍스트가 화면을 압도하는 타이포 포스터' },
-  { id: 'archive', label: 'Minimal Archive', description: '미니멀 아카이브 리스트' },
+  { id: 'mosaic', label: 'Mosaic', description: '연도·월 없이 표지만, 책 개수에 맞는 컬러 그리드' },
 ];

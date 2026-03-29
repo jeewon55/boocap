@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 그리운 코코초이툰 — Insight Calendar poster (Noonnu CDN, OFL) */
+@font-face {
+  font-family: 'Griun Cocochoitoon';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Cocochoitoon-Rg.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 160 38% 17%;
@@ -51,6 +59,52 @@
     --hero-sub: 0 0% 75%;
     --hero-btn: 68 100% 50%;
     --hero-btn-fg: 160 38% 10%;
+  }
+
+  /* Deeper dark frame for Step 1 (activated via .dark on layout root) */
+  .dark {
+    --background: 160 42% 6%;
+    --foreground: 0 0% 96%;
+
+    --card: 160 36% 10%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 160 36% 10%;
+    --popover-foreground: 0 0% 96%;
+
+    --primary: 68 100% 50%;
+    --primary-foreground: 160 45% 6%;
+
+    --secondary: 160 32% 13%;
+    --secondary-foreground: 0 0% 96%;
+
+    --muted: 160 28% 16%;
+    --muted-foreground: 0 0% 58%;
+
+    --accent: 68 100% 50%;
+    --accent-foreground: 160 45% 6%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 160 22% 16%;
+    --input: 160 22% 16%;
+    --ring: 68 100% 50%;
+
+    --sidebar-background: 160 42% 6%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 68 100% 50%;
+    --sidebar-primary-foreground: 160 45% 6%;
+    --sidebar-accent: 160 32% 13%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 160 22% 16%;
+    --sidebar-ring: 68 100% 50%;
+
+    --hero-bg: 160 42% 6%;
+    --hero-fg: 68 100% 50%;
+    --hero-sub: 0 0% 62%;
+    --hero-btn: 68 100% 50%;
+    --hero-btn-fg: 160 45% 6%;
   }
 }
 

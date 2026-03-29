@@ -72,63 +72,41 @@ function doodleStrokeWidth(seed: number): number {
   return 1.02 + fract01(seed * 47.91823) * 0.95;
 }
 
-/** Open book outline with wobbly segments (Insight Calendar cells) */
-function CalendarOpenBookIcon({ color, seed }: { color: string; seed: number }) {
-  const s = seed * 19.413;
-  const amp = 0.62;
-  const stroke = (k: number) => doodleStrokeWidth(s + k * 13.1);
-  const p = {
-    fill: 'none' as const,
-    stroke: color,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
+/** Closed path: wobbly rectangle in local coords (e.g. viewBox 0 0 100 100) for filled sticker */
+function wobblyStickerRectPath(w: number, h: number, seed: number): string {
+  const amp = Math.min(w, h) * 0.042;
+  const inset = Math.min(w, h) * 0.035;
+  const x0 = inset;
+  const y0 = inset;
+  const x1 = w - inset;
+  const y1 = h - inset;
+  const seg = 5;
+  const samples = (
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    ox: number,
+    oy: number,
+    k: number,
+  ): [number, number][] => {
+    const pts: [number, number][] = [];
+    for (let s = 0; s <= seg; s++) {
+      const t = s / seg;
+      const px = ax + (bx - ax) * t;
+      const py = ay + (by - ay) * t;
+      const r = fract01(seed * 5.31 + k * 29 + s * 11.7);
+      const wob = (r - 0.5) * amp * 2.35;
+      pts.push([px + ox * wob, py + oy * wob]);
+    }
+    return pts;
   };
-  return (
-    <svg
-      width={44}
-      height={28}
-      viewBox="0 0 48 30"
-      aria-hidden
-      style={{ display: 'block', flexShrink: 0 }}
-    >
-      <path
-        d={wobbleSegmentLine(24, 4.1, 8.6, 7.4, s + 2, 4, amp)}
-        strokeWidth={stroke(1)}
-        {...p}
-      />
-      <path
-        d={wobbleSegmentLine(8.6, 7.4, 8.4, 24.1, s + 19, 7, amp)}
-        strokeWidth={stroke(2)}
-        {...p}
-      />
-      <path
-        d={wobbleSegmentLine(8.4, 24.1, 22.6, 22.7, s + 37, 5, amp)}
-        strokeWidth={stroke(3)}
-        {...p}
-      />
-      <path
-        d={wobbleSegmentLine(24, 4.1, 23.2, 22.9, s + 53, 9, amp * 0.85)}
-        strokeWidth={stroke(4) * 0.92}
-        {...p}
-        opacity={0.95}
-      />
-      <path
-        d={wobbleSegmentLine(24, 4.1, 39.4, 7.4, s + 71, 4, amp)}
-        strokeWidth={stroke(5)}
-        {...p}
-      />
-      <path
-        d={wobbleSegmentLine(39.4, 7.4, 39.6, 24.1, s + 88, 7, amp)}
-        strokeWidth={stroke(6)}
-        {...p}
-      />
-      <path
-        d={wobbleSegmentLine(39.6, 24.1, 25.4, 22.7, s + 104, 5, amp)}
-        strokeWidth={stroke(7)}
-        {...p}
-      />
-    </svg>
-  );
+  const e1 = samples(x0, y0, x1, y0, 0, -1, 1);
+  const e2 = samples(x1, y0, x1, y1, 1, 0, 2);
+  const e3 = samples(x1, y1, x0, y1, 0, 1, 3);
+  const e4 = samples(x0, y1, x0, y0, -1, 0, 4);
+  const all = [...e1, ...e2.slice(1), ...e3.slice(1), ...e4.slice(1)];
+  return `M ${all.map(([a, b]) => `${a.toFixed(2)} ${b.toFixed(2)}`).join(' L ')} Z`;
 }
 
 function wobbleOvalPath(
@@ -302,6 +280,16 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       });
       return Array.from(unique.values());
     }, [entries]);
+
+    /** Reading days sorted (capsule template). */
+    const readsSortedByDay = useMemo(
+      () =>
+        Object.entries(entries)
+          .filter(([, b]) => b)
+          .map(([d, b]) => ({ day: Number(d), book: b as Book }))
+          .sort((a, b) => a.day - b.day),
+      [entries],
+    );
 
     /** Stack template: 3 extra stars — sizes vary pseudo-randomly per poster (stable export) */
     const stackYellowSparkles = useMemo(() => {
@@ -679,6 +667,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         opacity: 0.65,
                         marginTop: 6,
                         textAlign: 'center',
+                        letterSpacing: '-0.02em',
                         maxWidth: pos.w,
                         lineHeight: 1.3,
                         whiteSpace: 'normal',
@@ -711,20 +700,32 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── LIST ───
     if (template === 'list') {
+      const listMonthTitle =
+        MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
       return (
         <div ref={ref} style={baseStyle}>
-          <div style={{ position: 'absolute', top: 0, right: 0, padding: 32, textAlign: 'right' }}>
-            <p style={{ fontSize: 56, fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.03em' }}>{MONTHS[month]}</p>
-            <p style={{ fontSize: 56, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em', color: moodConfig.accentColor }}>{year}</p>
-            <div style={{ width: 30, height: 2, backgroundColor: moodConfig.accentColor, marginLeft: 'auto', marginTop: 12 }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, padding: 32, textAlign: 'left' }}>
+            <p
+              style={{
+                fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
+                fontSize: 56,
+                fontWeight: 700,
+                lineHeight: 1,
+                letterSpacing: '-0.03em',
+                margin: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {year} {listMonthTitle}
+            </p>
           </div>
-          <div style={{ position: 'absolute', left: 32, right: 32, top: 200, bottom: 80 }}>
+          <div style={{ position: 'absolute', left: 32, right: 32, top: 160, bottom: 80 }}>
             {books.length === 0 ? emptyState : books.slice(0, 7).map((book, i) => (
               <div key={book.key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
                 <span style={{ fontSize: 32, fontWeight: 700, opacity: 0.1, minWidth: 50 }}>{String(i + 1).padStart(2, '0')}</span>
                 <BookImg src={book.coverUrl} alt={book.title} style={{ width: 52, height: 75, flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '0.02em', lineHeight: 1.3 }}>{book.title}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{book.title}</p>
                   <p style={{ fontSize: 10, opacity: 0.4, marginTop: 2 }}>{book.author}</p>
                 </div>
               </div>
@@ -738,65 +739,363 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── SPINE STACK: Vertical spines ───
-    if (template === 'spine') {
-      const spineColors = ['#E63946', '#457B9D', '#2A9D8F', '#E9C46A', '#F4A261', '#264653', '#6B705C', '#CB997E'];
+    // ─── TIME-LINE SCATTER: newsletter dividers + vertical timeline + zigzag labels ───
+    if (template === 'timeline') {
+      const listMonthTitle =
+        MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const pad = 32;
+      const ink = moodConfig.textColor;
+      const lineHeavy = 4;
+      /** Same vertical size as baseStyle 600×(4/5) canvas */
+      const posterHeight = 750;
+      const scatterFont = "'Pretendard', 'Noto Sans KR', sans-serif";
+      const reads = readsSortedByDay;
+
+      /** Vertical timeline — horizontal center of 600px canvas */
+      const lineX = 300;
+      /** Horizontal connectors start past on-spine date numerals */
+      const spineClearance = 13;
+      /** Keep dashed arms short of the title column (same formula as `gapFromLine` below). */
+      const dashTextGap = 4;
+      /** Track below two-line title (no divider under header) */
+      const trackTop = 132;
+      const trackBottom = posterHeight - 86;
+      const trackH = Math.max(120, trackBottom - trackTop);
+
+      const dayY = (d: number) => {
+        if (daysInMonth <= 1) return trackTop + trackH / 2;
+        return trackTop + ((d - 1) / (daysInMonth - 1)) * trackH;
+      };
+
+      /** One anchor per calendar day on the spine (same y if multiple books that day). */
+      const spineStops = [...new Map(reads.map((r) => [r.day, dayY(r.day)])).entries()]
+        .map(([day, y]) => ({ day, y }))
+        .sort((a, b) => a.y - b.y);
+
+      const desiredGapHalf = 9;
+      const verticalSpineSegments: { y1: number; y2: number }[] = (() => {
+        if (spineStops.length === 0) {
+          return [{ y1: trackTop, y2: trackBottom }];
+        }
+        const segs: { y1: number; y2: number }[] = [];
+        let cursor = trackTop;
+        for (let i = 0; i < spineStops.length; i++) {
+          const { y } = spineStops[i];
+          const prevY = i === 0 ? trackTop : spineStops[i - 1].y;
+          const nextY = i === spineStops.length - 1 ? trackBottom : spineStops[i + 1].y;
+          const spaceAbove = y - prevY;
+          const spaceBelow = nextY - y;
+          const halfUp = Math.min(desiredGapHalf, Math.max(2.5, spaceAbove / 2 - 0.5));
+          const halfDown = Math.min(desiredGapHalf, Math.max(2.5, spaceBelow / 2 - 0.5));
+          const segEnd = y - halfUp;
+          if (segEnd > cursor + 0.5) {
+            segs.push({ y1: cursor, y2: segEnd });
+          }
+          cursor = y + halfDown;
+        }
+        if (trackBottom > cursor + 0.5) {
+          segs.push({ y1: cursor, y2: trackBottom });
+        }
+        return segs;
+      })();
+
       return (
-        <div ref={ref} style={baseStyle}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '28px 32px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <div>
-              <p style={{ fontSize: 11, letterSpacing: '0.3em', opacity: 0.4 }}>MONTHLY RECAP</p>
-              <p style={{ fontSize: 10, opacity: 0.3, marginTop: 4 }}>{readDays} DAYS · {books.length} BOOKS</p>
-            </div>
+        <div ref={ref} style={{ ...baseStyle, textAlign: 'left' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              padding: pad,
+              paddingBottom: 10,
+              boxSizing: 'border-box',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: scatterFont,
+                fontSize: 56,
+                fontWeight: 700,
+                lineHeight: 1.02,
+                letterSpacing: '-0.03em',
+                margin: 0,
+                color: ink,
+              }}
+            >
+              {listMonthTitle}
+              <br />
+              {year}
+            </p>
           </div>
 
-          {/* Spine visualization */}
-          <div style={{ position: 'absolute', left: 32, right: 32, top: 80, bottom: 120, display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-            {books.length === 0 ? (
-              <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>{emptyState}</div>
-            ) : (
-              books.slice(0, 8).map((book, i) => {
-                const height = 60 + Math.random() * 30;
-                return (
+          <svg
+            width={600}
+            height={posterHeight}
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              pointerEvents: 'none',
+              overflow: 'visible',
+            }}
+            aria-hidden
+          >
+            {verticalSpineSegments.map((seg, si) => (
+              <line
+                key={`spine-${si}`}
+                x1={lineX}
+                y1={seg.y1}
+                x2={lineX}
+                y2={seg.y2}
+                stroke={ink}
+                strokeWidth={lineHeavy}
+                strokeLinecap="butt"
+              />
+            ))}
+            {spineStops.map(({ day, y }) => (
+              <text
+                key={`spine-day-${day}`}
+                x={lineX}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={ink}
+                style={{
+                  fontFamily: scatterFont,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {day}
+              </text>
+            ))}
+            {reads.map((r, i) => {
+              const y = dayY(r.day);
+              const isRight = i % 2 === 0;
+              const sameSideBefore = reads.slice(0, i).filter((_, j) => (j % 2 === 0) === isRight).length;
+              const stackShift = sameSideBefore * 36;
+              const dashLen = 44 + stackShift;
+              const gapFromLine = 12 + stackShift + spineClearance;
+              let x1: number;
+              let x2: number;
+              if (isRight) {
+                x1 = lineX + spineClearance;
+                x2 = Math.min(lineX + dashLen, lineX + gapFromLine - dashTextGap);
+                if (x2 <= x1 + 2) x2 = x1 + 2;
+              } else {
+                x1 = lineX - dashLen;
+                x2 = lineX - gapFromLine - dashTextGap;
+                if (x2 <= x1 + 2) x1 = x2 - 2;
+              }
+              return (
+                <g key={`${r.day}-${r.book.key}`}>
+                  <line
+                    x1={x1}
+                    y1={y}
+                    x2={x2}
+                    y2={y}
+                    stroke={ink}
+                    strokeWidth={1}
+                    strokeDasharray="3 5"
+                    opacity={0.45}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
+          {reads.map((r, i) => {
+            const y = dayY(r.day);
+            const isRight = i % 2 === 0;
+            const sameSideBefore = reads.slice(0, i).filter((_, j) => (j % 2 === 0) === isRight).length;
+            const stackShift = sameSideBefore * 36;
+            const gapFromLine = 12 + stackShift + spineClearance;
+            const blockStyle: React.CSSProperties = {
+              position: 'absolute',
+              top: y,
+              transform: 'translateY(-50%)',
+              textAlign: isRight ? 'left' : 'right',
+              boxSizing: 'border-box',
+            };
+            if (isRight) {
+              blockStyle.left = lineX + gapFromLine;
+              blockStyle.width = Math.min(268, 600 - pad - (lineX + gapFromLine));
+            } else {
+              const w = Math.min(248, lineX - gapFromLine - pad);
+              blockStyle.left = lineX - gapFromLine - w;
+              blockStyle.width = w;
+            }
+            return (
+              <div key={`txt-${r.day}-${r.book.key}`} style={blockStyle}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: scatterFont,
+                    fontSize: 17,
+                    fontWeight: 800,
+                    lineHeight: 1.12,
+                    letterSpacing: '0.03em',
+                    textTransform: 'uppercase',
+                    color: ink,
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {r.book.title}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    marginTop: 5,
+                    fontFamily: scatterFont,
+                    fontSize: 9,
+                    fontWeight: 500,
+                    lineHeight: 1.35,
+                    letterSpacing: '-0.01em',
+                    color: ink,
+                    opacity: 0.52,
+                  }}
+                >
+                  {r.book.author}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // ─── CAPSULE LIST: half-pill border, # | title (wrap) ───
+    if (template === 'capsule') {
+      const capsuleFont = "'Instrument Sans', 'Noto Sans KR', sans-serif";
+      const capsuleHeadNumFont = "'Pretendard', 'Noto Sans KR', sans-serif";
+      const padY = 30;
+      const n = readsSortedByDay.length;
+      const gap = n <= 5 ? 12 : n <= 9 ? 9 : n <= 14 ? 7 : 6;
+      const capsuleMinH = 60;
+      const capsuleDefaultH = 100;
+      const capsuleNumColW = 64;
+      const titleFontPx = 28;
+      const numFs = 38;
+
+      return (
+        <div
+          ref={ref}
+          style={{
+            ...baseStyle,
+            padding: `${padY}px 26px`,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxSizing: 'border-box',
+          }}
+        >
+          <p
+            style={{
+              flexShrink: 0,
+              margin: 0,
+              marginBottom: 14,
+              fontFamily: capsuleHeadNumFont,
+              fontSize: 48,
+              fontWeight: 600,
+              letterSpacing: '-0.5px',
+              color: moodConfig.textColor,
+              textAlign: 'left',
+              lineHeight: '64px',
+            }}
+          >
+            {n} BOOKS
+            <br />
+            READ IN {MONTHS_SHORT[month].toUpperCase()}
+          </p>
+          {n === 0 ? (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{emptyState}</div>
+          ) : (
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap,
+              }}
+            >
+              {readsSortedByDay.map(({ day, book }, i) => (
+                <div
+                  key={`${day}-${book.key}`}
+                  style={{
+                    boxSizing: 'border-box',
+                    minHeight: capsuleMinH,
+                    height: capsuleDefaultH,
+                    border: '4px solid #000',
+                    borderRadius: '9999px 0 0 9999px',
+                    backgroundColor: '#fff',
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    width: '100%',
+                    overflow: 'hidden',
+                  }}
+                >
                   <div
-                    key={book.key}
                     style={{
-                      flex: 1,
-                      height: `${height}%`,
-                      backgroundColor: spineColors[i % spineColors.length],
-                      borderRadius: '3px 3px 0 0',
+                      flexShrink: 0,
+                      boxSizing: 'border-box',
+                      width: capsuleNumColW,
+                      minWidth: capsuleNumColW,
+                      maxWidth: capsuleNumColW,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      position: 'relative',
-                      minWidth: 0,
+                      padding: '8px 4px',
+                      fontFamily: capsuleHeadNumFont,
+                      fontSize: numFs,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      color: '#000',
                     }}
                   >
-                    <p style={{
-                      writingMode: 'vertical-rl',
-                      textOrientation: 'mixed',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: '#fff',
-                      letterSpacing: '0.05em',
-                      maxHeight: '90%',
-                      padding: '8px 0',
-                      whiteSpace: 'normal',
-                      overflow: 'visible',
-                    }}>
-                      {book.title}
-                    </p>
+                    {i + 1}
                   </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Bottom type */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 32px 28px' }}>
-            <p style={{ fontSize: 48, fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.03em' }}>{MONTHS[month]}</p>
-            <p style={{ fontSize: 48, fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.03em', color: moodConfig.accentColor }}>{year}</p>
-          </div>
+                  <div
+                    style={{
+                      width: 0,
+                      borderLeft: '2px solid #000',
+                      alignSelf: 'stretch',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      padding: '12px 16px 12px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: capsuleFont,
+                        fontSize: titleFontPx,
+                        fontWeight: 800,
+                        letterSpacing: '-0.02em',
+                        color: '#000',
+                        lineHeight: 1.25,
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        display: 'block',
+                        width: '100%',
+                      }}
+                    >
+                      {book.title}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -1009,38 +1308,64 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     />
                   </div>
                   {book ? (
-                    <>
+                    <div
+                      style={{
+                        flex: 1,
+                        minHeight: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '100%',
+                        padding: '6px 0 2px',
+                      }}
+                    >
                       <div
                         style={{
-                          flex: 1,
-                          minHeight: 0,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '4px 0 2px',
+                          position: 'relative',
+                          width: '100%',
+                          maxWidth: '100%',
                         }}
                       >
-                        <CalendarOpenBookIcon color={doodleInk} seed={gridSeed + day * 97} />
+                        <svg
+                          viewBox="0 0 100 100"
+                          preserveAspectRatio="none"
+                          aria-hidden
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            width: '100%',
+                            height: '100%',
+                          }}
+                        >
+                          <path
+                            d={wobblyStickerRectPath(100, 100, gridSeed + day * 131)}
+                            fill="#141414"
+                          />
+                        </svg>
+                        <p
+                          style={{
+                            margin: 0,
+                            position: 'relative',
+                            zIndex: 1,
+                            fontSize: 9,
+                            lineHeight: 1.25,
+                            letterSpacing: '-0.02em',
+                            color: '#fff',
+                            fontWeight: 400,
+                            textAlign: 'center',
+                            wordBreak: 'break-word',
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 4,
+                            WebkitBoxOrient: 'vertical' as const,
+                            padding: '8px 7px',
+                          }}
+                        >
+                          {book.title}
+                        </p>
                       </div>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: 9,
-                          lineHeight: 1.25,
-                          color: doodleInk,
-                          fontWeight: 400,
-                          textAlign: 'center',
-                          wordBreak: 'break-word',
-                          overflow: 'hidden',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical' as const,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {book.title}
-                      </p>
-                    </>
+                    </div>
                   ) : (
                     <div style={{ flex: 1, minHeight: 0 }} />
                   )}
@@ -1069,160 +1394,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             <span>
               {readDays} / {daysInMonth} read days
             </span>
-          </div>
-        </div>
-      );
-    }
-
-    // ─── BOLD TYPOGRAPHY: Text-as-design poster ───
-    if (template === 'typography') {
-      const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      const connectors = ['read', 'and', 'with', 'also', 'then'];
-
-      // Sticker-like book cover positions scattered among text
-      const stickerPositions = [
-        { right: 20, top: '18%', rotate: 6, size: 62 },
-        { right: 60, top: '42%', rotate: -8, size: 56 },
-        { left: 10, top: '58%', rotate: 10, size: 50 },
-        { right: 30, top: '68%', rotate: -5, size: 58 },
-        { left: 40, top: '36%', rotate: 7, size: 48 },
-        { right: 10, top: '82%', rotate: -4, size: 52 },
-      ];
-
-      // Decorative SVG elements
-      const Barcode = ({ x, y }: { x: number; y: number }) => (
-        <div style={{ position: 'absolute', left: x, top: y, zIndex: 5, opacity: 0.7 }}>
-          <div style={{ display: 'flex', gap: 1, height: 22 }}>
-            {[3,2,1,3,1,2,3,1,2,1,3,2,1,2,3,1].map((w, i) => (
-              <div key={i} style={{ width: w, height: '100%', backgroundColor: '#C8FF00' }} />
-            ))}
-          </div>
-          <p style={{ fontSize: 6, letterSpacing: '0.1em', color: '#999', marginTop: 1, fontFamily: "'Space Mono', monospace" }}>4 902137 891023</p>
-        </div>
-      );
-
-      const Ticket = ({ x, y, rotate = 0 }: { x: number; y: number; rotate?: number }) => (
-        <div style={{
-          position: 'absolute', left: x, top: y, zIndex: 6,
-          width: 42, height: 22,
-          backgroundColor: '#C8FF00',
-          borderRadius: 3,
-          transform: `rotate(${rotate}deg)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <p style={{ fontSize: 5, fontWeight: 700, letterSpacing: '0.08em', color: '#1A1A1A', fontFamily: "'Space Mono', monospace" }}>ADMIT ONE</p>
-        </div>
-      );
-
-      const Seal = ({ x, y, size = 36 }: { x: number; y: number; size?: number }) => (
-        <svg style={{ position: 'absolute', left: x, top: y, width: size, height: size, zIndex: 6 }} viewBox="0 0 40 40">
-          <circle cx="20" cy="20" r="18" fill="none" stroke="#C8FF00" strokeWidth="2" />
-          <circle cx="20" cy="20" r="13" fill="none" stroke="#C8FF00" strokeWidth="1" />
-          <text x="20" y="22" textAnchor="middle" fontSize="6" fontWeight="700" fill="#C8FF00" fontFamily="'Space Mono', monospace">READ</text>
-        </svg>
-      );
-
-      // Calculate font sizes based on book count
-      const baseFontSize = books.length <= 2 ? 72 : books.length <= 4 ? 58 : 48;
-
-      return (
-        <div ref={ref} style={{ ...baseStyle, backgroundColor: '#FFFFFF', color: '#1A1A1A' }}>
-          {/* Main typography area */}
-          <div style={{
-            position: 'absolute', left: 28, right: 28, top: 32, bottom: 70,
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          }}>
-            {books.length === 0 ? (
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <p style={{ fontSize: 14, opacity: 0.2, letterSpacing: '0.15em' }}>ADD BOOKS TO PREVIEW</p>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {books.slice(0, 6).map((book, i) => {
-                  const fontSize = Math.max(baseFontSize - i * 4, 36);
-                  const connector = connectors[i % connectors.length];
-                  const isKorean = /[가-힣]/.test(book.title);
-                  return (
-                    <div key={book.key} style={{ position: 'relative' }}>
-                      {/* Connector word between titles */}
-                      {i > 0 && (
-                        <p style={{
-                          fontFamily: "'Playfair Display', Georgia, serif",
-                          fontStyle: 'italic',
-                          fontSize: 14,
-                          color: '#999',
-                          marginBottom: -4,
-                          marginTop: -2,
-                          letterSpacing: '0.05em',
-                        }}>
-                          {connector}
-                        </p>
-                      )}
-                      {/* Book title — huge and bold */}
-                      <p style={{
-                        fontFamily: isKorean
-                          ? "'Pretendard', 'Noto Sans KR', sans-serif"
-                          : "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                        fontSize,
-                        fontWeight: 900,
-                        lineHeight: 0.92,
-                        letterSpacing: '-0.03em',
-                        color: '#1A1A1A',
-                        textTransform: isKorean ? 'none' : 'none',
-                        wordBreak: 'keep-all',
-                        whiteSpace: 'normal',
-                        overflow: 'visible',
-                        marginBottom: 2,
-                      }}>
-                        {book.title}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Book covers as stickers scattered over text */}
-          {books.slice(0, 6).map((book, i) => {
-            const pos = stickerPositions[i];
-            if (!pos) return null;
-            return (
-              <div key={`sticker-${book.key}`} style={{
-                position: 'absolute',
-                ...(pos.left !== undefined ? { left: pos.left } : {}),
-                ...(pos.right !== undefined ? { right: pos.right } : {}),
-                top: pos.top,
-                transform: `rotate(${pos.rotate}deg)`,
-                zIndex: 8,
-                border: '3px solid #fff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                borderRadius: 2,
-                overflow: 'hidden',
-              }}>
-                <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.size, height: pos.size * 1.4 }} />
-              </div>
-            );
-          })}
-
-          {/* Decorative accents */}
-          <Barcode x={380} y={28} />
-          <Ticket x={28} y={20} rotate={-3} />
-          <Seal x={480} y={520} size={44} />
-          <Seal x={20} y={440} size={30} />
-          <Ticket x={420} y={380} rotate={8} />
-
-          {/* Bottom info */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            padding: '0 28px 24px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-          }}>
-            <div>
-              <p style={{ fontSize: 8, letterSpacing: '0.2em', opacity: 0.35, fontFamily: "'Space Mono', monospace" }}>RECAP BY VISCAP</p>
-              <p style={{ fontSize: 8, letterSpacing: '0.15em', opacity: 0.35, fontFamily: "'Space Mono', monospace", marginTop: 2 }}>{MONTHS[month]} {year}</p>
-            </div>
-            <p style={{ fontSize: 8, opacity: 0.25, fontFamily: "'Space Mono', monospace" }}>{books.length} BOOKS · {readDays} DAYS</p>
           </div>
         </div>
       );

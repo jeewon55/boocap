@@ -48,7 +48,7 @@ export default function Landing() {
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 px-6 md:px-12 lg:px-20 py-12 lg:py-0 max-w-7xl mx-auto w-full">
         {/* Left Column */}
         <div className="flex-1 max-w-xl space-y-8">
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-hero-foreground">
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-[rgba(221,255,0,1)]">
             Visualize your{' '}
             <span className="text-hero-btn">intellectual growth.</span>
             <br />

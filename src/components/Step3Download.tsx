@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import domtoimage from 'dom-to-image-more';
+import { toPng } from 'html-to-image';
 import { Download, ArrowLeft } from 'lucide-react';
 import { Book, MoodType, TemplateType } from '@/types/book';
 import { PosterCanvas } from './PosterCanvas';
@@ -42,33 +42,36 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     setDownloading(true);
     try {
       const TARGET_W = 1080;
-      const TARGET_H = 1350;
-
-      // Wait for all images to be fully loaded
       const images = posterRef.current.querySelectorAll('img');
       await Promise.all(
-        Array.from(images).map(
-          (img) =>
-            img.complete
-              ? Promise.resolve()
-              : new Promise((resolve) => {
-                  img.onload = resolve;
-                  img.onerror = resolve;
-                })
-        )
+        Array.from(images).map(async (img) => {
+          if (!img.complete) {
+            await new Promise<void>((resolve) => {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            });
+          }
+          try {
+            await img.decode();
+          } catch {
+            // Ignore decode failures; export can continue.
+          }
+        })
       );
       // Small extra delay for rendering stability
       await new Promise((r) => setTimeout(r, 300));
 
-      const dataUrl = await domtoimage.toPng(posterRef.current, {
-        width: TARGET_W,
-        height: TARGET_H,
-        style: {
-          transform: `scale(${TARGET_W / posterRef.current.scrollWidth})`,
-          transformOrigin: 'top left',
-        },
+      const exportOptions = {
         cacheBust: true,
-      });
+        includeQueryParams: true,
+        pixelRatio: 1,
+        canvasWidth: TARGET_W,
+        canvasHeight: 1350,
+        skipFonts: false,
+        backgroundColor: null,
+      } as const;
+
+      const dataUrl = await toPng(posterRef.current, exportOptions);
 
       const link = document.createElement('a');
       link.download = `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`;
@@ -76,8 +79,9 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       link.click();
     } catch (e) {
       console.error('Export failed', e);
+    } finally {
+      setDownloading(false);
     }
-    setDownloading(false);
   };
 
   const scaledW = 600 * scale;

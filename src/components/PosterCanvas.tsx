@@ -5,6 +5,13 @@ import paperTexture from '@/assets/paper-texture.jpg';
 
 const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
+function makeCoverUrl(src: string): string {
+  if (!src || !/^https?:\/\//i.test(src)) return src;
+  const noProto = src.replace(/^https?:\/\//i, '');
+  // wsrv.nl: image proxy with proper CORS headers so canvas exports keep covers.
+  return `https://wsrv.nl/?url=${encodeURIComponent(noProto)}&default=maxage:7d`;
+}
+
 /** Mosaic poster: 1–3 books = one row; 4 = 2×2; then wider tiles up to 9 = 3×3; scales beyond. */
 function mosaicGridDims(bookCount: number): { cols: number; rows: number } {
   const n = bookCount;
@@ -190,7 +197,7 @@ interface PosterCanvasProps {
 
 const BookImg = ({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) => (
   <img
-    src={src}
+    src={makeCoverUrl(src)}
     alt={alt}
     referrerPolicy="no-referrer"
     style={{ objectFit: 'cover', ...style }}
@@ -328,7 +335,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       <p style={{ fontSize: 14, opacity: 0.3, letterSpacing: '0.2em', textAlign: 'center' }}>ADD BOOKS TO PREVIEW</p>
     );
 
-    // ─── GRID ───
+    // ─── GRID (bordered calendar, cover fills cell) ───
     if (template === 'grid') {
       const GRID_FONT = "'DM Sans', system-ui, sans-serif";
       const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
@@ -374,7 +381,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               bottom: 32,
               zIndex: 1,
               minHeight: 0,
-              overflow: 'auto',
+              overflow: 'hidden',
               boxSizing: 'border-box',
             }}
           >
@@ -443,6 +450,184 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         {day}
                       </span>
                     )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── GRID 2: borderless editorial calendar (date → title → cover per cell) ───
+    if (template === 'grid2') {
+      const GRID2_FONT = "'DM Sans', system-ui, sans-serif";
+      const GRID2_TEXT = '#313131';
+      const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const firstDay = new Date(year, month, 1).getDay();
+      const blanks = Array.from({ length: firstDay });
+      const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+      /** Taller rows when that calendar week has no books (grid flows : blanks + days). */
+      const GRID2_EMPTY_WEEK_MIN_H = 40;
+      const totalCells = firstDay + daysInMonth;
+      const gridRowCount = Math.max(1, Math.ceil(totalCells / 7));
+      const gridRowHasBook = Array.from({ length: gridRowCount }, () => false);
+      for (let i = 0; i < totalCells; i++) {
+        const r = Math.floor(i / 7);
+        if (i >= firstDay) {
+          const d = i - firstDay + 1;
+          if (d >= 1 && d <= daysInMonth && entries[d]) gridRowHasBook[r] = true;
+        }
+      }
+
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: baseStyle.width,
+            aspectRatio: baseStyle.aspectRatio,
+            position: baseStyle.position,
+            overflow: baseStyle.overflow,
+            borderRadius: baseStyle.borderRadius,
+            fontFamily: GRID2_FONT,
+            backgroundColor: '#EDEDED',
+            color: GRID2_TEXT,
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 32,
+              left: 28,
+              right: 28,
+              zIndex: 1,
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: 16,
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: 44,
+                fontWeight: 700,
+                lineHeight: 1.08,
+                letterSpacing: '-0.04em',
+                color: GRID2_TEXT,
+                maxWidth: '78%',
+              }}
+            >
+              {gridMonthTitle} reads
+            </p>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: '0.06em',
+                color: GRID2_TEXT,
+                flexShrink: 0,
+                paddingTop: 10,
+              }}
+            >
+              {year}
+            </span>
+          </div>
+
+          <div
+            style={{
+              position: 'absolute',
+              top: 112,
+              left: 28,
+              right: 28,
+              bottom: 28,
+              zIndex: 1,
+              minHeight: 0,
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                columnGap: 12,
+                rowGap: 16,
+                alignContent: 'start',
+                width: '100%',
+              }}
+            >
+              {blanks.map((_, i) => {
+                const row = Math.floor(i / 7);
+                const stretchRow = !gridRowHasBook[row];
+                return (
+                  <div
+                    key={`g2-b${i}`}
+                    aria-hidden
+                    style={{ minHeight: stretchRow ? GRID2_EMPTY_WEEK_MIN_H : 1 }}
+                  />
+                );
+              })}
+              {days.map((day) => {
+                const book = entries[day];
+                const cellIdx = firstDay + day - 1;
+                const row = Math.floor(cellIdx / 7);
+                const stretchRow = !gridRowHasBook[row];
+                return (
+                  <div
+                    key={day}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: 5,
+                      minWidth: 0,
+                      minHeight: stretchRow ? GRID2_EMPTY_WEEK_MIN_H : 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 500,
+                        color: GRID2_TEXT,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {day}
+                    </span>
+                    {book ? (
+                      <>
+                        <p
+                          style={{
+                            margin: 0,
+                            width: '100%',
+                            fontSize: 9,
+                            fontWeight: 700,
+                            lineHeight: 1.28,
+                            letterSpacing: '-0.01em',
+                            color: GRID2_TEXT,
+                            wordBreak: 'break-word',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical' as const,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {book.title}
+                        </p>
+                        <BookImg
+                          src={book.coverUrl}
+                          alt={book.title}
+                          style={{
+                            width: '100%',
+                            aspectRatio: '2 / 3',
+                            objectFit: 'cover',
+                            display: 'block',
+                            borderRadius: 3,
+                          }}
+                        />
+                      </>
+                    ) : null}
                   </div>
                 );
               })}
@@ -989,6 +1174,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             display: 'flex',
             flexDirection: 'column',
             boxSizing: 'border-box',
+            backgroundColor: '#FFFFFF',
           }}
         >
           <p
@@ -1029,9 +1215,12 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     boxSizing: 'border-box',
                     minHeight: capsuleMinH,
                     height: capsuleDefaultH,
-                    border: '4px solid #000',
+                    borderTop: '4px solid #000',
+                    borderBottom: '4px solid #000',
+                    borderLeft: '4px solid #000',
+                    borderRight: 'none',
                     borderRadius: '9999px 0 0 9999px',
-                    backgroundColor: '#fff',
+                    backgroundColor: '#FFFFFF',
                     display: 'flex',
                     alignItems: 'stretch',
                     width: '100%',
@@ -1061,7 +1250,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   <div
                     style={{
                       width: 0,
-                      borderLeft: '2px solid #000',
+                      borderLeft: '4px solid #000',
                       alignSelf: 'stretch',
                       flexShrink: 0,
                     }}

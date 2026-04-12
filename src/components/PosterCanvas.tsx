@@ -466,14 +466,18 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const GRID2_OUT_MONTH_DATE = '#C8C8C8';
       /** Two-line title (month + “Reading Journey”, 64px × 2, line-height 1) + year row */
       const GRID2_HEADER_TOP = 16;
-      const GRID2_GRID_TOP = 168;
+      /** Lower = more vertical space for calendar (title minHeight still ties to this). */
+      const GRID2_GRID_TOP = 152;
       /** Match top inset; used for grid area height + cover sizing math. */
       const GRID2_BOTTOM_PAD = 16;
+      const GRID2_SIDE_PAD = 24;
       const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
       const firstDay = new Date(year, month, 1).getDay();
       const prevMonthLastDay = new Date(year, month, 0).getDate();
       /** Taller rows when that calendar week has no books (grid flows : blanks + days). */
       const GRID2_EMPTY_WEEK_MIN_H = 40;
+      /** Cap per-day cover slot so a sparse month (few “book weeks”) does not stretch covers vertically. */
+      const GRID2_COVER_SLOT_MAX = 96;
       const totalCells = firstDay + daysInMonth;
       const gridRowCount = Math.max(1, Math.ceil(totalCells / 7));
       const totalGridCells = gridRowCount * 7;
@@ -489,20 +493,58 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       /** Poster height matches 600×(5/4); keep grid math in sync with `aspectRatio: '4/5'`. */
       const GRID2_POSTER_H = 750;
       const gridInnerH = GRID2_POSTER_H - GRID2_GRID_TOP - GRID2_BOTTOM_PAD;
-      const grid2DateBlockH = 12;
-      /** Only 5 calendar rows *and* every row has ≥1 book: pack covers to fit; else full 2:3 covers. */
-      const grid2UseDenseCovers = gridRowCount === 5 && gridRowHasBook.every(Boolean);
-      const colGap = grid2UseDenseCovers ? 8 : 12;
-      const rowGap = grid2UseDenseCovers ? 8 : 16;
-      const grid2DateImgGap = grid2UseDenseCovers ? 3 : 5;
-      let coverMaxHeight = 0;
-      if (grid2UseDenseCovers) {
-        const rowGapsTotal = Math.max(0, gridRowCount - 1) * rowGap;
-        const perRowBudget =
-          gridRowCount > 0 ? (gridInnerH - rowGapsTotal) / gridRowCount : gridInnerH;
-        const rowCoverCap = Math.floor(perRowBudget - grid2DateBlockH - grid2DateImgGap);
-        coverMaxHeight = Math.max(40, rowCoverCap);
+      const grid2DateBlockH = 10;
+      /** 5- or 6-row months where every row has ≥1 book: tighter gaps (covers still sized to fit below). */
+      const grid2UseDenseCovers =
+        (gridRowCount === 5 || gridRowCount === 6) && gridRowHasBook.every(Boolean);
+      const colGap = grid2UseDenseCovers ? 8 : 10;
+      const rowGap = grid2UseDenseCovers
+        ? gridRowCount >= 6
+          ? 6
+          : 8
+        : gridRowCount >= 6
+          ? 8
+          : gridRowCount >= 5
+            ? 12
+            : 16;
+      const grid2DateImgGap = grid2UseDenseCovers ? 2 : gridRowCount >= 6 ? 3 : 4;
+      /** Always cap cover height to row budget so 6-week months are not clipped by overflow:hidden. */
+      const rowGapsTotal = Math.max(0, gridRowCount - 1) * rowGap;
+      const contentW = Number(baseStyle.width) - GRID2_SIDE_PAD * 2;
+      const cellW = (contentW - 6 * colGap) / 7;
+      /** 2:3 at cell width — used only to pick contain vs cover. */
+      const naturalCoverH = Math.floor((cellW * 3) / 2);
+      const rowBase = grid2DateBlockH + grid2DateImgGap;
+      /** Rows with no books stay short; vertical budget is shared only across book rows → larger covers when many empty weeks. */
+      const bookRowCount = gridRowHasBook.reduce((n, has) => n + (has ? 1 : 0), 0);
+      const nonBookRows = gridRowCount - bookRowCount;
+      const emptyRowApproxH = GRID2_EMPTY_WEEK_MIN_H + grid2DateBlockH + grid2DateImgGap;
+      let grid2CoverSlotH = 40;
+      if (bookRowCount > 0) {
+        const bookBlockBudget =
+          gridInnerH - rowGapsTotal - nonBookRows * emptyRowApproxH;
+        grid2CoverSlotH = Math.max(
+          40,
+          Math.min(GRID2_COVER_SLOT_MAX, Math.floor(bookBlockBudget / bookRowCount - rowBase)),
+        );
       }
+      let usedGridH =
+        bookRowCount * (rowBase + grid2CoverSlotH) +
+        nonBookRows * emptyRowApproxH +
+        rowGapsTotal;
+      while (
+        usedGridH + bookRowCount <= gridInnerH &&
+        bookRowCount > 0 &&
+        grid2CoverSlotH < GRID2_COVER_SLOT_MAX
+      ) {
+        grid2CoverSlotH += 1;
+        usedGridH =
+          bookRowCount * (rowBase + grid2CoverSlotH) +
+          nonBookRows * emptyRowApproxH +
+          rowGapsTotal;
+      }
+      const grid2CoverObjectFit: 'contain' | 'cover' =
+        grid2CoverSlotH <= naturalCoverH ? 'contain' : 'cover';
 
       return (
         <div
@@ -522,8 +564,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             style={{
               position: 'absolute',
               top: GRID2_HEADER_TOP,
-              left: 28,
-              right: 28,
+              left: GRID2_SIDE_PAD,
+              right: GRID2_SIDE_PAD,
               zIndex: 1,
               display: 'flex',
               alignItems: 'flex-start',
@@ -568,8 +610,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             style={{
               position: 'absolute',
               top: GRID2_GRID_TOP,
-              left: 28,
-              right: 28,
+              left: GRID2_SIDE_PAD,
+              right: GRID2_SIDE_PAD,
               bottom: GRID2_BOTTOM_PAD,
               zIndex: 1,
               minHeight: 0,
@@ -628,40 +670,30 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       {displayDay}
                     </span>
                     {book ? (
-                      grid2UseDenseCovers ? (
-                        <div
-                          style={{
-                            width: '100%',
-                            height: coverMaxHeight,
-                            borderRadius: 0,
-                            overflow: 'hidden',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <BookImg
-                            src={book.coverUrl}
-                            alt={book.title}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              display: 'block',
-                            }}
-                          />
-                        </div>
-                      ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: grid2CoverSlotH,
+                          borderRadius: 0,
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#EDEDED',
+                        }}
+                      >
                         <BookImg
                           src={book.coverUrl}
                           alt={book.title}
                           style={{
                             width: '100%',
-                            aspectRatio: '2 / 3',
-                            objectFit: 'cover',
+                            height: '100%',
+                            objectFit: grid2CoverObjectFit,
                             display: 'block',
-                            borderRadius: 0,
                           }}
                         />
-                      )
+                      </div>
                     ) : null}
                   </div>
                 );
@@ -920,40 +952,236 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── LIST ───
     if (template === 'list') {
+      const listFont = "'Pretendard', system-ui, sans-serif";
       const listMonthTitle =
         MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const listBg = '#f0f0f0';
+      const listInk = '#1a1a1a';
+      const listPad = 24;
+      const listCoverStrokeGap = 8;
+      const listRowGapDateToCover = 32;
+      /** Poster inner height matches 600×4/5 canvas */
+      const LIST_POSTER_H = 750;
+      const listTitleTopMin = 40;
+      const listMonthBlockH = 48;
+      const listBelowTitleGap = 14;
+      /** Default list row book title size (px); used for layout estimate + title `<p>` */
+      const listBookTitleDefaultPx = 20;
+      const listTitleLineH = 1.3;
+      const listAuthorFontPx = 16;
+      const listAuthorGap = 2;
+      const listRows = readsSortedByDay.slice(0, 7);
+      const listRowCount = listRows.length;
+      /** Tighter row padding when many items */
+      const listDenseRows = listRowCount >= 5;
+      const listVeryDenseRows = listRowCount >= 7;
+      const listRowPadY = listVeryDenseRows ? 5 : listDenseRows ? 7 : 12;
+      /** Padding above day number + title block in each list row */
+      const listRowPadYTop = 12;
+      const listRowPadYBottom = listRowPadY;
+      const listDateFontPx = 28;
+      const listDateColH = listDateFontPx;
+      const listDateColW = 48;
+      const listRowMaxH = 120;
+      /** Cover image height = list row height minus this (px) */
+      const listCoverShyOfRowPx = 16;
+
+      const listInnerMain =
+        LIST_POSTER_H - Math.max(listTitleTopMin, listPad) - listPad;
+      const listMaxListBlockH =
+        listInnerMain - listMonthBlockH - listBelowTitleGap;
+      const listBorderTopH = 1;
+
+      /** Row height from date/title; cover is row − listCoverShyOfRowPx (see JSX). */
+      const listEstimateListH = (withAuthor: boolean) => {
+        if (listRowCount === 0) return listBorderTopH;
+        const titleBlock =
+          listBookTitleDefaultPx * listTitleLineH +
+          (withAuthor ? listAuthorGap + listAuthorFontPx : 0);
+        const contentH = Math.max(listDateColH, Math.ceil(titleBlock));
+        const rowH = Math.min(
+          listRowPadYTop + listRowPadYBottom + contentH + 1,
+          listRowMaxH,
+        );
+        return listBorderTopH + listRowCount * rowH;
+      };
+
+      let listShowAuthor = true;
+      if (listRowCount > 0 && listEstimateListH(true) > listMaxListBlockH) {
+        listShowAuthor = false;
+      }
+
       return (
-        <div ref={ref} style={baseStyle}>
-          <div style={{ position: 'absolute', top: 0, left: 0, padding: 32, textAlign: 'left' }}>
-            <p
+        <div ref={ref} style={{ ...baseStyle, backgroundColor: listBg, color: listInk, fontFamily: listFont }}>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              alignItems: 'stretch',
+              paddingTop: Math.max(listTitleTopMin, listPad),
+              paddingBottom: listPad,
+              paddingLeft: listPad,
+              paddingRight: listPad,
+              boxSizing: 'border-box',
+              minHeight: 0,
+              height: '100%',
+            }}
+          >
+            <div style={{ textAlign: 'right', width: '100%', flexShrink: 0 }}>
+              <p
+                style={{
+                  fontSize: 48,
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  textAlign: 'right',
+                  color: listInk,
+                }}
+              >
+                {listMonthTitle}{' '}
+                <span style={{ letterSpacing: '-2px' }}>{year}</span>
+              </p>
+            </div>
+            <div
               style={{
-                fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
-                fontSize: 56,
-                fontWeight: 700,
-                lineHeight: 1,
-                letterSpacing: '-0.03em',
-                margin: 0,
-                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                marginTop: listBelowTitleGap,
+                marginLeft: -listPad,
+                marginRight: -listPad,
+                width: `calc(100% + ${listPad * 2}px)`,
+                display: 'flex',
+                flexDirection: 'column',
+                borderTop: '1px solid #000',
               }}
             >
-              {year} {listMonthTitle}
-            </p>
-          </div>
-          <div style={{ position: 'absolute', left: 32, right: 32, top: 160, bottom: 80 }}>
-            {books.length === 0 ? emptyState : books.slice(0, 7).map((book, i) => (
-              <div key={book.key} style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-                <span style={{ fontSize: 32, fontWeight: 700, opacity: 0.1, minWidth: 50 }}>{String(i + 1).padStart(2, '0')}</span>
-                <BookImg src={book.coverUrl} alt={book.title} style={{ width: 52, height: 75, flexShrink: 0, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.3 }}>{book.title}</p>
-                  <p style={{ fontSize: 10, opacity: 0.4, marginTop: 2 }}>{book.author}</p>
+              {readsSortedByDay.length === 0 ? (
+                <div
+                  style={{
+                    color: listInk,
+                    padding: `${listRowPadYTop}px ${listPad}px ${listRowPadYBottom}px`,
+                    borderBottom: '1px solid #000',
+                  }}
+                >
+                  {emptyState}
                 </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 32px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p style={{ fontSize: 11, letterSpacing: '0.2em', opacity: 0.3 }}>MONTHLY RECAP</p>
-            <p style={{ fontSize: 10, opacity: 0.3 }}>{readDays} DAYS · {books.length} BOOKS</p>
+              ) : (
+                listRows.map(({ day, book }) => (
+                  <div
+                    key={`${day}-${book.key}`}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'stretch',
+                      paddingLeft: listPad,
+                      paddingRight: listPad,
+                      borderBottom: '1px solid #000',
+                      boxSizing: 'border-box',
+                      maxHeight: listRowMaxH,
+                      overflow: 'hidden',
+                      minWidth: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flexShrink: 0,
+                        width: listDateColW,
+                        paddingTop: listRowPadYTop,
+                        paddingBottom: listRowPadYBottom,
+                        boxSizing: 'border-box',
+                        marginRight: listRowGapDateToCover,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: listDateFontPx,
+                          fontWeight: 500,
+                          lineHeight: 1,
+                          color: listInk,
+                          textAlign: 'left',
+                          display: 'block',
+                        }}
+                      >
+                        {String(day).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: '0 0 auto',
+                        height: '100%',
+                        minHeight: 0,
+                        minWidth: 0,
+                        gap: listCoverStrokeGap,
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: `calc(100% - ${listCoverShyOfRowPx}px)`,
+                          maxHeight: `calc(100% - ${listCoverShyOfRowPx}px)`,
+                          aspectRatio: '5 / 7',
+                          overflow: 'hidden',
+                          minWidth: 0,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <BookImg
+                          src={book.coverUrl}
+                          alt={book.title}
+                          style={{ width: '100%', height: '100%', display: 'block' }}
+                        />
+                      </div>
+                      <div
+                        aria-hidden
+                        style={{
+                          width: 0,
+                          flexShrink: 0,
+                          borderLeft: '1px solid #000',
+                          alignSelf: 'stretch',
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        flex: '1 1 0%',
+                        minWidth: 0,
+                        color: listInk,
+                        paddingLeft: 16,
+                        paddingTop: listRowPadYTop,
+                        paddingBottom: listRowPadYBottom,
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: listBookTitleDefaultPx,
+                          fontWeight: 500,
+                          letterSpacing: '-0.02em',
+                          lineHeight: listTitleLineH,
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {book.title}
+                      </p>
+                      {listShowAuthor ? (
+                        <p style={{ fontSize: listAuthorFontPx, opacity: 0.4, marginTop: listAuthorGap, marginBottom: 0 }}>
+                          {book.author}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       );

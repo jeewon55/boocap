@@ -11,100 +11,100 @@
 }
 
 @layer base {
+  /* Swiss / International — #ffffff field, black type, red accent */
   :root {
-    --background: 160 38% 17%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
 
-    --card: 160 30% 20%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
 
-    --popover: 160 30% 20%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 68 100% 50%;
-    --primary-foreground: 160 38% 12%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 25% 22%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 86%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 160 20% 25%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 88%;
+    --muted-foreground: 0 0% 38%;
 
-    --accent: 68 100% 50%;
-    --accent-foreground: 160 38% 12%;
+    --accent: 356 86% 48%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 160 15% 28%;
-    --input: 160 15% 28%;
-    --ring: 68 100% 50%;
+    --border: 0 0% 78%;
+    --input: 0 0% 78%;
+    --ring: 0 0% 9%;
 
-    --radius: 8px;
+    --radius: 2px;
 
-    --sidebar-background: 160 38% 17%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 68 100% 50%;
-    --sidebar-primary-foreground: 160 38% 12%;
-    --sidebar-accent: 160 25% 22%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 160 15% 28%;
-    --sidebar-ring: 68 100% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 86%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 78%;
+    --sidebar-ring: 0 0% 9%;
 
-    --font-display: 'Instrument Sans', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-display: 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-    --hero-bg: 160 38% 17%;
-    --hero-fg: 68 100% 50%;
-    --hero-sub: 0 0% 75%;
-    --hero-btn: 68 100% 50%;
-    --hero-btn-fg: 160 38% 10%;
+    --hero-bg: 0 0% 100%;
+    --hero-fg: 0 0% 7%;
+    --hero-sub: 0 0% 38%;
+    --hero-btn: 0 0% 9%;
+    --hero-btn-fg: 0 0% 100%;
   }
 
-  /* Deeper dark frame for Step 1 (activated via .dark on layout root) */
   .dark {
-    --background: 160 42% 6%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 96%;
 
-    --card: 160 36% 10%;
+    --card: 0 0% 14%;
     --card-foreground: 0 0% 96%;
 
-    --popover: 160 36% 10%;
+    --popover: 0 0% 14%;
     --popover-foreground: 0 0% 96%;
 
-    --primary: 68 100% 50%;
-    --primary-foreground: 160 45% 6%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 9%;
 
-    --secondary: 160 32% 13%;
+    --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 96%;
 
-    --muted: 160 28% 16%;
+    --muted: 0 0% 18%;
     --muted-foreground: 0 0% 58%;
 
-    --accent: 68 100% 50%;
-    --accent-foreground: 160 45% 6%;
+    --accent: 356 86% 52%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 160 22% 16%;
-    --input: 160 22% 16%;
-    --ring: 68 100% 50%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
+    --ring: 0 0% 96%;
 
-    --sidebar-background: 160 42% 6%;
+    --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 68 100% 50%;
-    --sidebar-primary-foreground: 160 45% 6%;
-    --sidebar-accent: 160 32% 13%;
+    --sidebar-primary: 0 0% 96%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 0 0% 96%;
-    --sidebar-border: 160 22% 16%;
-    --sidebar-ring: 68 100% 50%;
+    --sidebar-border: 0 0% 22%;
+    --sidebar-ring: 0 0% 96%;
 
-    --hero-bg: 160 42% 6%;
-    --hero-fg: 68 100% 50%;
-    --hero-sub: 0 0% 62%;
-    --hero-btn: 68 100% 50%;
-    --hero-btn-fg: 160 45% 6%;
+    --hero-bg: 0 0% 10%;
+    --hero-fg: 0 0% 96%;
+    --hero-sub: 0 0% 58%;
+    --hero-btn: 0 0% 96%;
+    --hero-btn-fg: 0 0% 9%;
   }
 }
 
@@ -114,7 +114,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
   }
 

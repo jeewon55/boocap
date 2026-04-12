@@ -26,19 +26,16 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
     <>
       <div className="flex items-center gap-3 py-4 border-b border-border">
         <div className="flex-1">
-          <h3
-            className="font-display text-3xl md:text-4xl font-black tracking-tight"
-            style={{ color: '#DFFF00' }}
-          >
+          <h3 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground">
             {MONTHS[month]}
           </h3>
-          <p className="font-display text-sm tracking-[0.3em] text-muted-foreground mt-0.5">
+          <p className="font-display text-sm tracking-[0.28em] text-muted-foreground mt-0.5 tabular-nums">
             {year}
           </p>
         </div>
         <button
           onClick={() => { setPickerYear(year); setOpen(true); }}
-          className="text-[11px] font-body tracking-[0.1em] text-muted-foreground underline underline-offset-4 decoration-muted-foreground/40 hover:text-primary hover:decoration-primary transition-colors whitespace-normal"
+          className="text-[11px] font-body tracking-[0.1em] text-muted-foreground underline underline-offset-4 decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors whitespace-normal"
         >
           Change Month
         </button>
@@ -48,7 +45,7 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
       <AnimatePresence>
         {open && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20"
             onClick={() => setOpen(false)}
           >
             <motion.div
@@ -56,23 +53,23 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="bg-card border border-border rounded-xl w-[90vw] max-w-sm mx-4 overflow-hidden"
+              className="bg-card border border-foreground w-[90vw] max-w-sm mx-4 overflow-hidden shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with year navigation */}
               <div className="flex items-center justify-between p-4 border-b border-border">
                 <button
                   onClick={() => setPickerYear((y) => y - 1)}
-                  className="text-xs font-body text-muted-foreground hover:text-primary transition-colors px-2 py-1"
+                  className="text-xs font-body text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                 >
                   {pickerYear - 1}
                 </button>
-                <span className="font-display text-lg font-bold tracking-tight text-primary">
+                <span className="font-display text-lg font-bold tracking-tight text-foreground tabular-nums">
                   {pickerYear}
                 </span>
                 <button
                   onClick={() => setPickerYear((y) => y + 1)}
-                  className="text-xs font-body text-muted-foreground hover:text-primary transition-colors px-2 py-1"
+                  className="text-xs font-body text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                 >
                   {pickerYear + 1}
                 </button>
@@ -86,12 +83,11 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
                     <button
                       key={name}
                       onClick={() => handleSelect(i)}
-                      className={`py-3 rounded-lg text-xs font-body font-medium tracking-[0.1em] transition-all ${
+                      className={`py-3 text-xs font-body font-medium tracking-[0.12em] uppercase transition-colors ${
                         isActive
-                          ? 'font-bold'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                          ? 'bg-foreground text-background font-bold'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
-                      style={isActive ? { backgroundColor: '#DFFF00', color: '#000' } : undefined}
                     >
                       {name.slice(0, 3)}
                     </button>
@@ -103,7 +99,7 @@ export function MonthSelector({ year, month, onChange }: MonthSelectorProps) {
               <div className="px-4 pb-4">
                 <button
                   onClick={() => setOpen(false)}
-                  className="w-full py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
+                  className="w-full py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-muted transition-colors"
                 >
                   Cancel
                 </button>

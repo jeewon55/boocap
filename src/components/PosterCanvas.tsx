@@ -459,18 +459,24 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── GRID 2: borderless editorial calendar (date → title → cover per cell) ───
+    // ─── GRID 2: borderless editorial calendar (date → cover per cell) ───
     if (template === 'grid2') {
       const GRID2_FONT = "'DM Sans', system-ui, sans-serif";
       const GRID2_TEXT = '#313131';
+      const GRID2_OUT_MONTH_DATE = '#C8C8C8';
+      /** Two-line title (month + “Reading Journey”, 64px × 2, line-height 1) + year row */
+      const GRID2_HEADER_TOP = 16;
+      const GRID2_GRID_TOP = 168;
+      /** Match top inset; used for grid area height + cover sizing math. */
+      const GRID2_BOTTOM_PAD = 16;
       const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
       const firstDay = new Date(year, month, 1).getDay();
-      const blanks = Array.from({ length: firstDay });
-      const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
       /** Taller rows when that calendar week has no books (grid flows : blanks + days). */
       const GRID2_EMPTY_WEEK_MIN_H = 40;
       const totalCells = firstDay + daysInMonth;
       const gridRowCount = Math.max(1, Math.ceil(totalCells / 7));
+      const totalGridCells = gridRowCount * 7;
       const gridRowHasBook = Array.from({ length: gridRowCount }, () => false);
       for (let i = 0; i < totalCells; i++) {
         const r = Math.floor(i / 7);
@@ -478,6 +484,24 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           const d = i - firstDay + 1;
           if (d >= 1 && d <= daysInMonth && entries[d]) gridRowHasBook[r] = true;
         }
+      }
+
+      /** Poster height matches 600×(5/4); keep grid math in sync with `aspectRatio: '4/5'`. */
+      const GRID2_POSTER_H = 750;
+      const gridInnerH = GRID2_POSTER_H - GRID2_GRID_TOP - GRID2_BOTTOM_PAD;
+      const grid2DateBlockH = 12;
+      /** Only 5 calendar rows *and* every row has ≥1 book: pack covers to fit; else full 2:3 covers. */
+      const grid2UseDenseCovers = gridRowCount === 5 && gridRowHasBook.every(Boolean);
+      const colGap = grid2UseDenseCovers ? 8 : 12;
+      const rowGap = grid2UseDenseCovers ? 8 : 16;
+      const grid2DateImgGap = grid2UseDenseCovers ? 3 : 5;
+      let coverMaxHeight = 0;
+      if (grid2UseDenseCovers) {
+        const rowGapsTotal = Math.max(0, gridRowCount - 1) * rowGap;
+        const perRowBudget =
+          gridRowCount > 0 ? (gridInnerH - rowGapsTotal) / gridRowCount : gridInnerH;
+        const rowCoverCap = Math.floor(perRowBudget - grid2DateBlockH - grid2DateImgGap);
+        coverMaxHeight = Math.max(40, rowCoverCap);
       }
 
       return (
@@ -497,7 +521,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <div
             style={{
               position: 'absolute',
-              top: 32,
+              top: GRID2_HEADER_TOP,
               left: 28,
               right: 28,
               zIndex: 1,
@@ -505,23 +529,29 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               alignItems: 'flex-start',
               justifyContent: 'space-between',
               gap: 16,
+              minHeight: GRID2_GRID_TOP - GRID2_HEADER_TOP,
+              boxSizing: 'border-box',
             }}
           >
             <p
               style={{
                 margin: 0,
-                fontSize: 44,
+                width: '100%',
+                fontFamily: 'Pretendard, system-ui, sans-serif',
+                fontSize: 64,
                 fontWeight: 700,
-                lineHeight: 1.08,
+                lineHeight: 1,
                 letterSpacing: '-0.04em',
                 color: GRID2_TEXT,
-                maxWidth: '78%',
               }}
             >
-              {gridMonthTitle} reads
+              {gridMonthTitle}
+              <br />
+              Reading Journey
             </p>
             <span
               style={{
+                fontFamily: 'Pretendard, system-ui, sans-serif',
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: '0.06em',
@@ -537,10 +567,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <div
             style={{
               position: 'absolute',
-              top: 112,
+              top: GRID2_GRID_TOP,
               left: 28,
               right: 28,
-              bottom: 28,
+              bottom: GRID2_BOTTOM_PAD,
               zIndex: 1,
               minHeight: 0,
               overflow: 'hidden',
@@ -551,70 +581,75 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, 1fr)',
-                columnGap: 12,
-                rowGap: 16,
+                columnGap: colGap,
+                rowGap,
                 alignContent: 'start',
                 width: '100%',
               }}
             >
-              {blanks.map((_, i) => {
+              {Array.from({ length: totalGridCells }, (_, i) => {
                 const row = Math.floor(i / 7);
                 const stretchRow = !gridRowHasBook[row];
+                let displayDay: number;
+                let dateColor = GRID2_TEXT;
+                let currMonthDay: number | null = null;
+                if (i < firstDay) {
+                  displayDay = prevMonthLastDay - firstDay + 1 + i;
+                  dateColor = GRID2_OUT_MONTH_DATE;
+                } else if (i < firstDay + daysInMonth) {
+                  currMonthDay = i - firstDay + 1;
+                  displayDay = currMonthDay;
+                } else {
+                  displayDay = i - firstDay - daysInMonth + 1;
+                  dateColor = GRID2_OUT_MONTH_DATE;
+                }
+                const book = currMonthDay != null ? entries[currMonthDay] : undefined;
                 return (
                   <div
-                    key={`g2-b${i}`}
-                    aria-hidden
-                    style={{ minHeight: stretchRow ? GRID2_EMPTY_WEEK_MIN_H : 1 }}
-                  />
-                );
-              })}
-              {days.map((day) => {
-                const book = entries[day];
-                const cellIdx = firstDay + day - 1;
-                const row = Math.floor(cellIdx / 7);
-                const stretchRow = !gridRowHasBook[row];
-                return (
-                  <div
-                    key={day}
+                    key={`g2-cell-${i}`}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'flex-start',
-                      gap: 5,
+                      gap: grid2DateImgGap,
                       minWidth: 0,
                       minHeight: stretchRow ? GRID2_EMPTY_WEEK_MIN_H : 0,
                     }}
                   >
                     <span
                       style={{
+                        fontFamily: 'Pretendard, system-ui, sans-serif',
                         fontSize: 10,
-                        fontWeight: 500,
-                        color: GRID2_TEXT,
+                        fontWeight: 700,
+                        color: dateColor,
                         lineHeight: 1,
                       }}
                     >
-                      {day}
+                      {displayDay}
                     </span>
                     {book ? (
-                      <>
-                        <p
+                      grid2UseDenseCovers ? (
+                        <div
                           style={{
-                            margin: 0,
                             width: '100%',
-                            fontSize: 9,
-                            fontWeight: 700,
-                            lineHeight: 1.28,
-                            letterSpacing: '-0.01em',
-                            color: GRID2_TEXT,
-                            wordBreak: 'break-word',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical' as const,
+                            height: coverMaxHeight,
+                            borderRadius: 0,
                             overflow: 'hidden',
+                            flexShrink: 0,
                           }}
                         >
-                          {book.title}
-                        </p>
+                          <BookImg
+                            src={book.coverUrl}
+                            alt={book.title}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block',
+                            }}
+                          />
+                        </div>
+                      ) : (
                         <BookImg
                           src={book.coverUrl}
                           alt={book.title}
@@ -623,10 +658,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                             aspectRatio: '2 / 3',
                             objectFit: 'cover',
                             display: 'block',
-                            borderRadius: 3,
+                            borderRadius: 0,
                           }}
                         />
-                      </>
+                      )
                     ) : null}
                   </div>
                 );

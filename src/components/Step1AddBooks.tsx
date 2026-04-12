@@ -18,8 +18,8 @@ function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.Mou
           onError={() => setImgOk(false)}
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center" style={{ backgroundColor: '#1a1a1a' }}>
-          <BookOpen className="w-3.5 h-3.5" style={{ color: '#DFFF00' }} />
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
+          <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
       )}
       <div
@@ -60,14 +60,14 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
   const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
 
   return (
-    <div className="flex-1 flex flex-col px-6 overflow-hidden">
-      <div className="flex-1 max-w-md mx-auto w-full pt-2 flex flex-col min-h-0">
+    <div className="flex flex-col px-6">
+      <div className="max-w-md mx-auto w-full pt-2 flex flex-col">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
         >
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
+          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground mt-2">
             Which days defined your {monthName}?
           </h2>
           <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
@@ -78,7 +78,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
         <MonthSelector year={year} month={month} onChange={onMonthChange} />
 
         {/* Calendar grid */}
-        <div className="flex-1 min-h-0 flex flex-col mt-2">
+        <div className="flex flex-col mt-2">
           <div className="grid grid-cols-7 gap-px mb-1">
             {WEEKDAYS.map((d) => (
               <div key={d} className="text-center text-[9px] tracking-[0.15em] text-muted-foreground font-body py-1">
@@ -110,7 +110,8 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
         </div>
       </div>
 
-      <div className="py-4 max-w-md mx-auto w-full">
+      {/* 하단 고정 버튼 - 화면이 짧아도 항상 보임 */}
+      <div className="sticky bottom-0 py-4 max-w-md mx-auto w-full bg-background">
         <button
           onClick={onNext}
           className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
@@ -122,11 +123,11 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
 
       {/* View existing book detail */}
       {selectedDay !== null && entries[selectedDay] && !isReplacing && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/15" onClick={() => setSelectedDay(null)}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-xl"
+            className="bg-card border border-foreground/20 w-full sm:max-w-md sm:mx-4 sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-border">

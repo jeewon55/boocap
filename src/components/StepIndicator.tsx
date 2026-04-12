@@ -6,18 +6,18 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ current }: StepIndicatorProps) {
   return (
-    <div className="flex items-center gap-1.5 px-6 py-4">
+    <div className="flex items-center gap-1.5 px-6 py-4 border-b border-border bg-background">
       {STEPS.map((label, i) => (
         <div key={label} className="flex items-center gap-1.5 flex-1">
           <div className="flex flex-col items-center flex-1">
             <div
-              className={`h-1 w-full rounded-full transition-colors duration-300 ${
-                i <= current ? 'bg-primary' : 'bg-border'
+              className={`h-0.5 w-full transition-colors duration-300 ${
+                i <= current ? 'bg-foreground' : 'bg-border'
               }`}
             />
             <span
-              className={`text-[9px] tracking-[0.1em] font-body mt-1.5 transition-colors ${
-                i <= current ? 'text-primary' : 'text-muted-foreground'
+              className={`text-[9px] tracking-[0.18em] font-body uppercase mt-2 transition-colors ${
+                i <= current ? 'text-foreground font-semibold' : 'text-muted-foreground'
               }`}
             >
               {label}

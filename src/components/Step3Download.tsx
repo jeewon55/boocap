@@ -96,7 +96,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           transition={{ delay: 0.1, duration: 0.4 }}
           className="self-start mb-4"
         >
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-primary mt-2">
+          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground mt-2">
             Your {monthName}, beautifully visualized.
           </h2>
         </motion.div>
@@ -109,11 +109,11 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         >
           <div
             ref={wrapperRef}
-            className="w-full overflow-hidden rounded-[12px] flex justify-center"
+            className="w-full overflow-hidden border border-foreground/15 bg-card flex justify-center"
             style={{
               aspectRatio: '4/5',
               maxWidth: 420,
-              boxShadow: '0 0 60px rgba(223, 255, 0, 0.15), 0 20px 60px rgba(0,0,0,0.4)',
+              boxShadow: '12px 12px 0 0 rgba(0,0,0,0.07)',
             }}
           >
             <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0, borderRadius: 'inherit' }}>

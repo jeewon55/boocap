@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { StepIndicator } from '@/components/StepIndicator';
 import { WizardStep } from '@/components/WizardStep';
 import { Step1AddBooks } from '@/components/Step1AddBooks';
@@ -53,11 +52,7 @@ export default function Index() {
   };
 
   return (
-    <div
-      className={`min-h-[100dvh] bg-background text-foreground flex flex-col transition-colors duration-300 ${
-        step === 0 ? 'dark' : ''
-      }`}
-    >
+    <div className="min-h-[100dvh] bg-background text-foreground flex flex-col">
       <StepIndicator current={step} />
 
       <WizardStep visible={step === 0}>

@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, BarChart3, Download } from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 
 const MONTHS = [
-'January', 'February', 'March', 'April', 'May', 'June',
-'July', 'August', 'September', 'October', 'November', 'December'];
-
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 function getDefaultMonth() {
   const now = new Date();
   let m = now.getMonth() - 1;
   let y = now.getFullYear();
-  if (m < 0) {m = 11;y -= 1;}
+  if (m < 0) {
+    m = 11;
+    y -= 1;
+  }
   return { year: y, month: m };
 }
 
@@ -21,7 +24,18 @@ export default function Landing() {
   const [year, setYear] = useState(defYear);
   const [month, setMonth] = useState(defMonth);
   const [showPicker, setShowPicker] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showPicker) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [showPicker]);
 
   const handleCreate = () => {
     navigate(`/create?year=${year}&month=${month}`);
@@ -30,186 +44,136 @@ export default function Landing() {
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   return (
-    <div className="min-h-[100dvh] bg-hero flex flex-col">
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-5">
-        <span className="font-display text-xl font-bold text-hero-foreground tracking-tight">
+    <div className="min-h-[100dvh] bg-background text-foreground flex flex-col">
+      <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-border">
+        <span className="font-display text-sm font-bold tracking-[0.28em] uppercase">
           Boocap
         </span>
         <button
+          type="button"
           onClick={handleCreate}
-          className="text-xs font-body text-hero-sub hover:text-hero-foreground transition-colors tracking-wider uppercase">
-          
-          Get Started
+          className="text-[10px] font-body text-muted-foreground hover:text-foreground tracking-[0.22em] uppercase transition-colors"
+        >
+          Get started
         </button>
       </nav>
 
-      {/* Hero */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20 px-6 md:px-12 lg:px-20 py-12 lg:py-0 max-w-7xl mx-auto w-full">
-        {/* Left Column */}
-        <div className="flex-1 max-w-xl space-y-8">
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-[rgba(221,255,0,1)]">
+      <div className="flex-1 flex flex-col lg:flex-row max-w-6xl mx-auto w-full">
+        <section className="flex-1 flex flex-col justify-center px-6 md:px-10 py-14 lg:py-24">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.12] tracking-[-0.03em] text-foreground max-w-xl">
             Visualize your{' '}
-            <span className="text-hero-btn">intellectual growth.</span>
+            <span className="text-accent">intellectual growth</span>
             <br />
-            In one striking poster.
+            in one precise poster.
           </h1>
-
-          <p className="text-base md:text-lg font-body text-hero-sub leading-relaxed max-w-md">
-            Turn your monthly readings into a stunning data-driven trophy. Track, visualize, and share your reading journey.
+          <p className="mt-0 h-fit w-fit max-w-md text-left text-sm md:text-base font-body text-muted-foreground leading-relaxed">
+            Turn monthly readings into a clean, grid-based summary. Track, lay out, and export in a single composition.
           </p>
 
-          {/* Input Group */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Date Selector */}
-            <div className="relative">
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 sm:items-stretch">
+            <div ref={pickerRef} className="relative">
               <button
+                type="button"
                 onClick={() => setShowPicker(!showPicker)}
-                className="h-14 px-5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl text-hero-foreground font-body text-sm flex items-center gap-3 hover:bg-white/15 transition-colors min-w-[200px]">
-                
-                <BookOpen className="w-4 h-4 text-hero-btn flex-shrink-0" />
-                <span>{MONTHS[month]} {year}</span>
+                className="h-12 w-full sm:w-auto min-w-[200px] px-4 bg-card border border-border text-foreground font-body text-xs tracking-wide flex items-center gap-3 hover:bg-muted/60 transition-colors text-left uppercase"
+              >
+                <BookOpen className="w-4 h-4 text-foreground shrink-0" strokeWidth={1.5} />
+                <span className="normal-case tracking-normal">{MONTHS[month]} {year}</span>
               </button>
 
-              {showPicker &&
-              <div className="absolute top-full mt-2 left-0 bg-hero border border-white/20 rounded-2xl p-4 z-50 shadow-2xl min-w-[280px] animate-fade-in">
-                  {/* Year selector */}
-                  <div className="flex gap-2 mb-3 flex-wrap">
-                    {years.map((y) =>
-                  <button
-                    key={y}
-                    onClick={() => setYear(y)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-body transition-colors ${
-                    y === year ?
-                    'bg-hero-btn text-hero-btn-foreground font-semibold' :
-                    'text-hero-sub hover:text-hero-foreground hover:bg-white/10'}`
-                    }>
-                    
+              {showPicker && (
+                <div className="absolute top-full left-0 mt-2 bg-card border border-border p-4 min-w-[280px] shadow-[8px_8px_0_0_rgba(0,0,0,0.06)]">
+                  <div className="flex gap-1 mb-3 flex-wrap">
+                    {years.map((y) => (
+                      <button
+                        key={y}
+                        type="button"
+                        onClick={() => setYear(y)}
+                        className={`px-2.5 py-1.5 text-[10px] font-body tracking-wider uppercase border transition-colors ${
+                          y === year
+                            ? 'bg-foreground text-background border-foreground'
+                            : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
+                        }`}
+                      >
                         {y}
                       </button>
-                  )}
+                    ))}
                   </div>
-                  {/* Month grid */}
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {MONTHS.map((m, i) =>
-                  <button
-                    key={m}
-                    onClick={() => {setMonth(i);setShowPicker(false);}}
-                    className={`px-2 py-2 rounded-xl text-xs font-body transition-colors ${
-                    i === month && year === year ?
-                    'bg-hero-btn text-hero-btn-foreground font-semibold' :
-                    'text-hero-sub hover:text-hero-foreground hover:bg-white/10'}`
-                    }>
-                    
+                  <div className="grid grid-cols-3 gap-px bg-border">
+                    {MONTHS.map((m, i) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => {
+                          setMonth(i);
+                          setShowPicker(false);
+                        }}
+                        className={`py-2.5 text-[10px] font-body tracking-[0.12em] uppercase bg-card transition-colors ${
+                          i === month
+                            ? 'bg-foreground text-background'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        }`}
+                      >
                         {m.slice(0, 3)}
                       </button>
-                  )}
+                    ))}
                   </div>
                 </div>
-              }
+              )}
             </div>
 
-            {/* CTA Button */}
             <button
+              type="button"
               onClick={handleCreate}
-              className="h-14 px-8 bg-hero-btn text-hero-btn-foreground rounded-2xl font-display font-bold text-sm tracking-wide flex items-center justify-center gap-2 hover:brightness-110 transition-all active:scale-[0.98]">
-              
-              Create My Recap
-              <ArrowRight className="w-4 h-4" />
+              className="h-12 px-8 bg-foreground text-background font-display text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              Create recap
+              <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
+        </section>
 
-          {/* Stats */}
-          
+        <aside className="flex-1 flex items-center justify-center px-6 md:px-10 py-12 lg:py-24 bg-background border-t lg:border-t-0 border-border">
+          <div className="w-full max-w-[300px] md:max-w-[320px]">
+            <div className="border border-foreground bg-card aspect-[4/5] flex flex-col p-6 shadow-[12px_12px_0_0_rgba(0,0,0,0.08)]">
+              <div>
+                <p className="text-accent text-[9px] font-body tracking-[0.35em] uppercase font-semibold">
+                  Monthly recap
+                </p>
+                <p className="font-display text-2xl font-bold tracking-tight mt-2 text-foreground">
+                  {MONTHS[month]}
+                </p>
+                <p className="text-muted-foreground text-[11px] font-body tabular-nums mt-0.5">{year}</p>
+              </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-          
-        </div>
-
-        {/* Right Column — Poster Preview */}
-        <div className="flex-shrink-0">
-          <div
-            className="relative transition-transform duration-700 ease-out"
-            style={{
-              transform: hovered ?
-              'perspective(1000px) rotateY(-5deg) rotateX(3deg) translateY(-8px)' :
-              'perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(0px)'
-            }}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}>
-            
-            {/* Glow */}
-            <div className="absolute -inset-6 bg-hero-btn/10 rounded-3xl blur-3xl transition-opacity duration-700"
-            style={{ opacity: hovered ? 0.6 : 0.2 }} />
-
-            {/* Card */}
-            <div className="relative w-[280px] md:w-[320px] aspect-[4/5] bg-gradient-to-br from-white/10 to-white/5 border border-white/15 rounded-3xl overflow-hidden backdrop-blur-sm shadow-2xl">
-              {/* Mock poster content */}
-              <div className="absolute inset-0 p-6 flex flex-col justify-between">
-                {/* Header */}
-                <div>
-                  <p className="text-hero-btn text-[10px] font-body tracking-[0.3em] uppercase">Monthly Recap</p>
-                  <p className="text-hero-foreground font-display text-2xl font-black mt-1">
-                    {MONTHS[month]}
-                  </p>
-                  <p className="text-hero-sub text-xs font-body">{year}</p>
-                </div>
-
-                {/* Book grid mock */}
-                <div className="grid grid-cols-3 gap-2 my-4">
-                  {Array.from({ length: 6 }).map((_, i) =>
+              <div className="grid grid-cols-3 gap-2 my-6 flex-1 content-center">
+                {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
-                    className="aspect-[2/3] rounded-lg transition-all duration-500"
+                    className="aspect-[2/3] border border-border bg-muted"
                     style={{
-                      background: `hsl(${80 + i * 30}, ${40 + i * 8}%, ${25 + i * 5}%)`,
-                      transform: hovered ? `translateY(${Math.sin(i * 1.2) * 4}px)` : 'translateY(0)',
-                      transitionDelay: `${i * 60}ms`
-                    }} />
+                      backgroundImage: `linear-gradient(135deg, hsl(0 0% ${88 - i * 3}%) 0%, hsl(0 0% ${78 - i * 4}%) 100%)`,
+                    }}
+                  />
+                ))}
+              </div>
 
-                  )}
+              <div className="flex justify-between items-end pt-2 border-t border-border">
+                <div>
+                  <p className="font-display text-3xl font-bold tabular-nums leading-none">6</p>
+                  <p className="text-muted-foreground text-[9px] font-body tracking-[0.2em] uppercase mt-1">Books</p>
                 </div>
-
-                {/* Footer stats */}
-                <div className="flex justify-between items-end">
-                  <div>
-                    <p className="text-hero-foreground font-display text-3xl font-black">6</p>
-                    <p className="text-hero-sub text-[9px] font-body tracking-wider uppercase">books read</p>
-                  </div>
-                  <div className="flex gap-1">
-                    {[20, 45, 30, 60, 50, 35].map((h, i) =>
-                    <div
-                      key={i}
-                      className="w-2 bg-hero-btn/60 rounded-full transition-all duration-500"
-                      style={{
-                        height: hovered ? `${h}px` : `${h * 0.6}px`,
-                        transitionDelay: `${i * 80}ms`
-                      }} />
-
-                    )}
-                  </div>
+                <div className="flex gap-0.5 items-end h-12">
+                  {[20, 45, 30, 60, 50, 35].map((h, i) => (
+                    <div key={i} className="w-1.5 bg-foreground/25" style={{ height: `${h * 0.45}px` }} />
+                  ))}
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
 
-      {/* Close picker on outside click */}
-      {showPicker &&
-      <div className="fixed inset-0 z-40" onClick={() => setShowPicker(false)} />
-      }
-    </div>);
-
+    </div>
+  );
 }

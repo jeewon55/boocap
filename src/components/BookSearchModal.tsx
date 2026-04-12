@@ -13,8 +13,8 @@ function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
         <div className="absolute inset-0 animate-pulse bg-secondary" />
       )}
       {status === 'error' ? (
-        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#1a1a1a' }}>
-          <BookOpen className="w-4 h-4" style={{ color: '#DFFF00' }} />
+        <div className="w-full h-full flex items-center justify-center bg-muted">
+          <BookOpen className="w-4 h-4 text-muted-foreground" />
         </div>
       ) : (
         <img
@@ -93,11 +93,11 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/15" onClick={onClose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col rounded-t-2xl sm:rounded-xl"
+        className="bg-card border border-foreground/20 w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -115,7 +115,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           <button
             onClick={() => setMode('search')}
             className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'search' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              mode === 'search' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
             }`}
           >
             검색
@@ -123,7 +123,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           <button
             onClick={() => setMode('manual')}
             className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'manual' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
+              mode === 'manual' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
             }`}
           >
             직접 입력
@@ -164,7 +164,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   <p className="text-sm text-muted-foreground">검색 결과가 없습니다</p>
                   <button
                     onClick={() => { setMode('manual'); setManualTitle(query); }}
-                    className="inline-flex items-center gap-1.5 text-xs font-body text-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
+                    className="inline-flex items-center gap-1.5 text-xs font-body text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity"
                   >
                     <PenLine className="w-3 h-3" />
                     직접 입력하기
@@ -197,7 +197,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   <button
                     type="button"
                     onClick={() => { setManualCoverUrl(''); setPreviewError(false); }}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-foreground text-background flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[10px]"
                   >
                     <X className="w-3 h-3" />
                   </button>

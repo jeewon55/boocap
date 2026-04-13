@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { Book, MOODS, MoodType, TemplateType } from '@/types/book';
-import { getPaleDominantCoverBackground } from '@/lib/mosaicCoverColor';
+import { getPaleDominantCoverBackground, mosaicBackdropIfNearlyWhite } from '@/lib/mosaicCoverColor';
 import paperTexture from '@/assets/paper-texture.jpg';
 
 const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -217,6 +217,9 @@ const MOSAIC_FALLBACK_COLORS = [
   '#E8F6E4',
 ];
 
+/** `maxWidth` alone doesn’t grow covers once it exceeds the grid cell — use scale for a real size bump. */
+const MOSAIC_COVER_DISPLAY_SCALE = 1.2;
+
 function MosaicBookCell({
   book,
   cols,
@@ -234,7 +237,7 @@ function MosaicBookCell({
     setBg(fallbackBg);
     let cancelled = false;
     getPaleDominantCoverBackground(book.coverUrl).then((c) => {
-      if (!cancelled && c) setBg(c);
+      if (!cancelled && c) setBg(mosaicBackdropIfNearlyWhite(c));
     });
     return () => {
       cancelled = true;
@@ -251,6 +254,7 @@ function MosaicBookCell({
         padding: cols <= 2 ? 1 : 0,
         minHeight: 0,
         minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       <div
@@ -258,6 +262,9 @@ function MosaicBookCell({
           maxWidth: '100%',
           maxHeight: '100%',
           filter: 'drop-shadow(5px 7px 3px rgba(0,0,0,0.42))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <BookImg
@@ -267,9 +274,12 @@ function MosaicBookCell({
             width: '100%',
             height: '100%',
             maxWidth: coverMaxW,
+            maxHeight: '100%',
             aspectRatio: '5 / 7',
             borderRadius: 2,
             display: 'block',
+            transform: `scale(${MOSAIC_COVER_DISPLAY_SCALE})`,
+            transformOrigin: 'center center',
           }}
         />
       </div>
@@ -297,26 +307,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           .sort((a, b) => a.day - b.day),
       [entries],
     );
-
-    /** Stack template: 3 extra stars — sizes vary pseudo-randomly per poster (stable export) */
-    const stackYellowSparkles = useMemo(() => {
-      if (template !== 'stack') return [] as { x: number; y: number; size: number; opacity: number }[];
-      let seed = year * 10007 + month * 1009 + books.length * 503;
-      const rnd = () => {
-        seed = (seed * 48271) % 2147483647;
-        return seed / 2147483647;
-      };
-      const fixed = [
-        { x: 158, y: 198 },
-        { x: 418, y: 312 },
-        { x: 72, y: 528 },
-      ];
-      return fixed.map((pos) => ({
-        ...pos,
-        size: Math.round(20 + rnd() * 36),
-        opacity: 0.32 + rnd() * 0.2,
-      }));
-    }, [template, year, month, books.length]);
 
     const readDays = Object.keys(entries).length;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -362,12 +352,12 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               right: 0,
               zIndex: 0,
               textAlign: 'center',
-              fontSize: 48,
+              fontSize: 64,
               fontWeight: 700,
               lineHeight: 1.2,
-              letterSpacing: '-2px',
+              letterSpacing: '-3px',
               color: moodConfig.textColor,
-              fontFamily: GRID_FONT,
+              fontFamily: 'Pretendard',
             }}
           >
             Read in {gridMonthTitle}
@@ -375,7 +365,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <div
             style={{
               position: 'absolute',
-              top: 154,
+              top: 174,
               left: 32,
               right: 32,
               bottom: 32,
@@ -711,100 +701,101 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       /** Safe zone: Tailwind p-6 (24px) — keeps type & covers off the poster edge */
       const STACK_SAFE_PAD = 24;
 
-      // Sparkle SVG — `x`/`y` are always in full poster coordinates (600×750), not the padded safe zone
-      const Sparkle = ({ x, y, size = 28, color = '#C8A2C8', opacity = 0.6 }: { x: number; y: number; size?: number; color?: string; opacity?: number }) => (
-        <svg style={{ position: 'absolute', left: x, top: y, width: size, height: size, opacity }} viewBox="0 0 24 24" fill={color}>
-          <path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41L12 0Z" />
-        </svg>
-      );
-
       // Layout positions — relative layout inside safe zone; whole group is shifted so its bbox is horizontally centered
       const posterH = 750;
       const innerH = posterH - 2 * STACK_SAFE_PAD;
       const INNER_W = 600 - 2 * STACK_SAFE_PAD;
-      const TITLE_TOP_PX = 88;
-      const TITLE_FONT_SIZE = 60;
-      const TITLE_FONT_FAMILY = "'Playfair Display', Georgia, serif";
-      const TITLE_GAP_PX = 28; // keep 28px gap between title and first book
+      const TITLE_TOP_PX = 36;
+      const TITLE_FONT_SIZE = 80;
+      const TITLE_SUBLINE_FONT_SIZE = TITLE_FONT_SIZE / 2;
+      const TITLE_FONT_FAMILY = "'Instrument Sans', sans-serif";
+      const STACK_TITLE_COLOR = '#000000';
+      const TITLE_GAP_PX = 60;
+      /** Nudge cover stack slightly above true vertical center of the band below the title */
+      const STACK_COLLAGE_NUDGE_UP_PX = 20;
 
+      /** Neat grid: no rotation, aligned rows/columns inside the safe zone */
       const getPositions = (count: number) => {
+        const R = 0;
         if (count === 1) {
-          return [{ left: '50%', top: '28%', rotate: -3, w: 200, h: 286, centerX: true as const }];
+          return [{ left: '50%', top: '32%', rotate: R, w: 200, h: 286, centerX: true as const }];
         }
         if (count === 2) {
           return [
-            { left: '8%', top: '28%', rotate: -4, w: 170, h: 243 },
-            { left: '54%', top: '30%', rotate: 3, w: 170, h: 243 },
+            { left: '11%', top: '30%', rotate: R, w: 162, h: 232 },
+            { left: '57%', top: '30%', rotate: R, w: 162, h: 232 },
           ];
         }
         if (count === 3) {
           return [
-            { left: '4%', top: '27%', rotate: -5, w: 150, h: 215 },
-            { left: '36%', top: '30%', rotate: 2, w: 150, h: 215 },
-            { left: '67%', top: '26%', rotate: -3, w: 150, h: 215 },
+            { left: '7%', top: '30%', rotate: R, w: 142, h: 203 },
+            { left: '36%', top: '30%', rotate: R, w: 142, h: 203 },
+            { left: '65%', top: '30%', rotate: R, w: 142, h: 203 },
           ];
         }
         if (count === 4) {
           return [
-            { left: '4%', top: '26%', rotate: -4, w: 130, h: 186 },
-            { left: '30%', top: '24%', rotate: 3, w: 130, h: 186 },
-            { left: '18%', top: '56%', rotate: 2, w: 130, h: 186 },
-            { left: '56%', top: '28%', rotate: -2, w: 130, h: 186 },
+            { left: '17%', top: '26%', rotate: R, w: 124, h: 177 },
+            { left: '54%', top: '26%', rotate: R, w: 124, h: 177 },
+            { left: '17%', top: '56%', rotate: R, w: 124, h: 177 },
+            { left: '54%', top: '56%', rotate: R, w: 124, h: 177 },
           ];
         }
         if (count === 5) {
           return [
-            { left: '3%', top: '25%', rotate: -4, w: 120, h: 172 },
-            { left: '28%', top: '23%', rotate: 3, w: 120, h: 172 },
-            { left: '55%', top: '26%', rotate: -2, w: 120, h: 172 },
-            { left: '10%', top: '54%', rotate: 5, w: 120, h: 172 },
-            { left: '42%', top: '56%', rotate: -3, w: 120, h: 172 },
+            { left: '6%', top: '25%', rotate: R, w: 114, h: 163 },
+            { left: '34%', top: '25%', rotate: R, w: 114, h: 163 },
+            { left: '62%', top: '25%', rotate: R, w: 114, h: 163 },
+            { left: '24%', top: '55%', rotate: R, w: 114, h: 163 },
+            { left: '52%', top: '55%', rotate: R, w: 114, h: 163 },
           ];
         }
         if (count === 6) {
           return [
-            { left: '3%', top: '24%', rotate: -4, w: 110, h: 158 },
-            { left: '27%', top: '22%', rotate: 3, w: 110, h: 158 },
-            { left: '53%', top: '25%', rotate: -2, w: 110, h: 158 },
-            { left: '8%', top: '52%', rotate: 5, w: 110, h: 158 },
-            { left: '36%', top: '54%', rotate: -3, w: 110, h: 158 },
-            { left: '62%', top: '51%', rotate: 4, w: 110, h: 158 },
+            { left: '8%', top: '25%', rotate: R, w: 104, h: 149 },
+            { left: '34%', top: '25%', rotate: R, w: 104, h: 149 },
+            { left: '60%', top: '25%', rotate: R, w: 104, h: 149 },
+            { left: '8%', top: '54%', rotate: R, w: 104, h: 149 },
+            { left: '34%', top: '54%', rotate: R, w: 104, h: 149 },
+            { left: '60%', top: '54%', rotate: R, w: 104, h: 149 },
           ];
         }
 
-        // count is always ≥ 7 here: 4 covers per row
         const cols = 4;
         const rows = Math.ceil(count / cols);
-        let seed = count * 9973 + 17;
-        const rnd = () => {
-          seed = (seed * 16807) % 2147483647;
-          return seed / 2147483647;
-        };
-        const coverW = Math.max(56, Math.min(102, Math.floor((INNER_W * 0.92) / cols - 8)));
-        const coverH = Math.round(coverW * 1.43);
-        const rotCycle = [-4, 3, -2, 4, -3, 5, 2, -5, 3, -4];
-        const v0 = 19;
-        const v1 = 76;
-        const band = v1 - v0;
-        /** Share of vertical band used from first row center to last — lower = tighter row gaps */
-        const rowPack = 0.48;
-        const rowSpan = band * rowPack;
-        const rowGap = rows <= 1 ? 0 : rowSpan / (rows - 1);
-        const rowBlockStart = v0 + (band - rowSpan) / 2;
+        const gapPx = 16;
+        /** Reserve vertical space under each cover for title lines (px in poster inner coords) */
+        const stackTitleBelowCoverPx = count > 12 ? 40 : count > 8 ? 44 : 50;
+        const bandTop = 22;
+        const bandBottom = 76;
+        const bandPx = ((bandBottom - bandTop) / 100) * innerH;
+        const rowHpx = rows > 0 ? bandPx / rows : bandPx;
+        let coverW = Math.max(
+          52,
+          Math.min(96, Math.floor((INNER_W * 0.9 - gapPx * (cols - 1)) / cols)),
+        );
+        let coverH = Math.round(coverW * 1.43);
+        if (coverH + stackTitleBelowCoverPx > rowHpx) {
+          coverH = Math.max(48, Math.floor(rowHpx - stackTitleBelowCoverPx));
+          coverW = Math.max(48, Math.floor(coverH / 1.43));
+        }
+        const cwPct = (coverW / INNER_W) * 100;
+        const blockH = coverH + stackTitleBelowCoverPx;
+        const blockPct = (blockH / innerH) * 100;
+        const sidePct = 4;
+        const cellWPct = (100 - 2 * sidePct) / cols;
+        const bandH = bandBottom - bandTop;
+        const cellHPct = rows > 0 ? bandH / rows : bandH;
         const out: Array<{ left: string; top: string; rotate: number; w: number; h: number }> = [];
-        const slotW = 88 / cols;
         for (let i = 0; i < count; i++) {
           const row = Math.floor(i / cols);
           const col = i % cols;
-          const topPct =
-            rows <= 1
-              ? v0 + band * 0.32 + (rnd() - 0.5) * 2
-              : rowBlockStart + row * rowGap + (rnd() - 0.5) * 2;
-          const leftPct = 6 + col * slotW + slotW * 0.32 + (rnd() - 0.5) * (slotW * 0.22);
+          const leftPct = sidePct + col * cellWPct + (cellWPct - cwPct) / 2;
+          const topPct = bandTop + row * cellHPct + (cellHPct - blockPct) / 2;
           out.push({
-            left: `${Math.max(1, Math.min(82, leftPct))}%`,
-            top: `${Math.max(15, Math.min(78, topPct))}%`,
-            rotate: rotCycle[i % rotCycle.length] + Math.round((rnd() - 0.5) * 3),
+            left: `${Math.max(0, Math.min(100 - cwPct, leftPct))}%`,
+            top: `${Math.max(bandTop, Math.min(bandBottom - blockPct, topPct))}%`,
+            rotate: R,
             w: coverW,
             h: coverH,
           });
@@ -819,15 +810,34 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const positions = getPositions(books.length);
       const titleBottomPx =
         TITLE_TOP_PX +
-        TITLE_FONT_SIZE * 1.1 +
         TITLE_FONT_SIZE * 1.05 +
-        -2; // matches marginTop: -2 on second line
+        TITLE_SUBLINE_FONT_SIZE * 1.05 -
+        2; // main line + smaller subline; marginTop -2 between
 
-      const minBookTopPx =
-        positions.length === 0
-          ? 0
-          : Math.min(...positions.map((p) => (Number.parseFloat(p.top) / 100) * innerH));
-      const yShiftPx = titleBottomPx + TITLE_GAP_PX - minBookTopPx;
+      /** Vertical band for covers (below title); center cover stack in this band */
+      const collageBandTop = titleBottomPx + TITLE_GAP_PX;
+      const collageBandBottom = innerH - STACK_SAFE_PAD;
+      const collageBandH = Math.max(0, collageBandBottom - collageBandTop);
+      let yShiftPx = 0;
+      if (positions.length > 0) {
+        const minBaseTop = Math.min(
+          ...positions.map((p) => (Number.parseFloat(p.top) / 100) * innerH),
+        );
+        const maxBaseBottom = Math.max(
+          ...positions.map((p) => (Number.parseFloat(p.top) / 100) * innerH + p.h),
+        );
+        const coverStackH = Math.max(1, maxBaseBottom - minBaseTop);
+        const yIdeal =
+          collageBandTop +
+          (collageBandH - coverStackH) / 2 -
+          STACK_COLLAGE_NUDGE_UP_PX -
+          minBaseTop;
+        const yMin = collageBandTop - minBaseTop;
+        const yMax = collageBandBottom - maxBaseBottom;
+        yShiftPx = yIdeal;
+        yShiftPx = Math.max(yShiftPx, yMin);
+        if (yMax >= yMin) yShiftPx = Math.min(yShiftPx, yMax);
+      }
 
       const displayed = books;
       const stackCollageOffsetPx = (() => {
@@ -852,35 +862,34 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         return INNER_W / 2 - (minL + maxR) / 2;
       })();
 
+      const stackBg = '#ffffff';
+      const stackFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
+      const stackBookWord = books.length === 1 ? 'book' : 'books';
+      const stackPageTotal = books.reduce((sum, b) => sum + (typeof b.pageCount === 'number' ? Math.max(0, b.pageCount) : 0), 0);
+      const stackPageWord = stackPageTotal === 1 ? 'page' : 'pages';
+
       return (
-        <div ref={ref} style={{ ...baseStyle, backgroundColor: '#F5F3EE' }}>
+        <div
+          ref={ref}
+          style={{
+            ...baseStyle,
+            backgroundColor: stackBg,
+            border: stackFrameBorder,
+            boxSizing: 'border-box',
+          }}
+        >
           {/* Paper texture overlay — full bleed */}
           <img src={paperTexture} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5, mixBlendMode: 'multiply' }} />
 
-          {/* Sparkles: full-poster layer — independent of safe-zone padding (600×750 px space) */}
-          <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
-            <Sparkle x={50} y={15} size={56} color="#D4A0D4" opacity={0.5} />
-            <Sparkle x={340} y={5} size={42} color="#A8D8A8" opacity={0.45} />
-            <Sparkle x={500} y={40} size={36} color="#A8D8A8" opacity={0.35} />
-            <Sparkle x={530} y={600} size={48} color="#D4A0D4" opacity={0.35} />
-            <Sparkle x={20} y={670} size={38} color="#A8D8A8" opacity={0.4} />
-            <Sparkle x={280} y={680} size={32} color="#D4A0D4" opacity={0.3} />
-            <Sparkle x={440} y={350} size={28} color="#A8D8A8" opacity={0.25} />
-            <Sparkle x={10} y={380} size={34} color="#D4A0D4" opacity={0.28} />
-            {stackYellowSparkles.map((s, i) => (
-              <Sparkle key={`y${i}`} x={s.x} y={s.y} size={s.size} color="#F9E79F" opacity={s.opacity} />
-            ))}
-          </div>
-
-          {/* Safe zone: type & covers; sparkles sit under this layer but use full poster coordinates */}
+          {/* Safe zone: type & covers */}
           <div className="absolute inset-6 z-[5] overflow-visible">
             {/* Title section */}
-            <div style={{ position: 'absolute', top: TITLE_TOP_PX, left: 0, right: 0, textAlign: 'center', zIndex: 30 }}>
-              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontStyle: 'italic', fontSize: TITLE_FONT_SIZE, fontWeight: 500, color: '#2B3A67', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
-                what I read
+            <div style={{ position: 'absolute', top: TITLE_TOP_PX, left: 0, right: 0, zIndex: 30 }}>
+              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', textAlign: 'left' }}>
+                {monthName}
               </p>
-              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_FONT_SIZE, fontWeight: 700, color: '#2B3A67', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2 }}>
-                in {monthName}
+              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_SUBLINE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2, textAlign: 'left' }}>
+                with {books.length} {stackBookWord}, {stackPageTotal} {stackPageWord}
               </p>
             </div>
 
@@ -907,7 +916,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      padding: 4,
+                      padding: '4px 10px',
                     }}>
                       <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden' }}>
                         <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
@@ -917,11 +926,11 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         fontSize: titleFontSize,
                         color: '#2C2C2C',
                         opacity: 0.65,
-                        marginTop: 6,
+                        marginTop: 8,
                         textAlign: 'center',
                         letterSpacing: '-0.02em',
                         maxWidth: pos.w,
-                        lineHeight: 1.3,
+                        lineHeight: 1.35,
                         whiteSpace: 'normal',
                         overflow: 'visible',
                         wordBreak: 'break-word',
@@ -937,14 +946,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 })}
               </div>
             )}
-
-            {/* Small decorative arrows between items */}
-            <svg className="absolute left-1/2 top-1/2 z-[5] h-4 w-4 -translate-x-1/2 -translate-y-1/2 opacity-20" viewBox="0 0 24 24" fill="none" stroke="#2C2C2C" strokeWidth="2">
-              <path d="M7 17L17 7M17 7H7M17 7V17" />
-            </svg>
-
-            {/* Year small text */}
-            <p className="absolute bottom-3 right-4 z-[30] text-xs tracking-widest text-[#2C2C2C]/25" style={{ fontFamily: "'Inter', sans-serif" }}>{year}</p>
           </div>
         </div>
       );
@@ -955,7 +956,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const listFont = "'Pretendard', system-ui, sans-serif";
       const listMonthTitle =
         MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      const listBg = '#f0f0f0';
+      const listBg = '#ffffff';
+      const listFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
       const listInk = '#1a1a1a';
       const listPad = 24;
       const listCoverStrokeGap = 8;
@@ -965,26 +967,24 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const listTitleTopMin = 40;
       const listMonthBlockH = 48;
       const listBelowTitleGap = 14;
-      /** Default list row book title size (px); used for layout estimate + title `<p>` */
-      const listBookTitleDefaultPx = 20;
-      const listTitleLineH = 1.3;
-      const listAuthorFontPx = 16;
+      /** List row title / author; shrink when many books so rows fit the poster */
+      let listBookTitleDefaultPx = 20;
+      let listTitleLineH = 1.3;
+      let listAuthorFontPx = 16;
       const listAuthorGap = 2;
-      const listRows = readsSortedByDay.slice(0, 7);
+      const listRows = readsSortedByDay;
       const listRowCount = listRows.length;
+      if (listRowCount >= 10) {
+        listBookTitleDefaultPx = 17;
+        listAuthorFontPx = 13;
+        listTitleLineH = 1.25;
+      }
       /** Tighter row padding when many items */
       const listDenseRows = listRowCount >= 5;
-      const listVeryDenseRows = listRowCount >= 7;
-      const listRowPadY = listVeryDenseRows ? 5 : listDenseRows ? 7 : 12;
-      /** Padding above day number + title block in each list row */
-      const listRowPadYTop = 12;
-      const listRowPadYBottom = listRowPadY;
-      const listDateFontPx = 28;
-      const listDateColH = listDateFontPx;
-      const listDateColW = 48;
-      const listRowMaxH = 120;
-      /** Cover image height = list row height minus this (px) */
-      const listCoverShyOfRowPx = 16;
+      const listVeryDenseRows = listRowCount >= 8;
+      const listExtraDenseRows = listRowCount >= 12;
+      let listRowPadYBottom =
+        listExtraDenseRows ? 4 : listVeryDenseRows ? 5 : listDenseRows ? 7 : 12;
 
       const listInnerMain =
         LIST_POSTER_H - Math.max(listTitleTopMin, listPad) - listPad;
@@ -992,27 +992,92 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         listInnerMain - listMonthBlockH - listBelowTitleGap;
       const listBorderTopH = 1;
 
+      /** Padding above day number + title block in each list row (may tighten to fit all rows). */
+      let listRowPadYTop = listExtraDenseRows ? 6 : listVeryDenseRows ? 8 : 12;
+      let listDateFontPx = listExtraDenseRows ? 22 : listVeryDenseRows ? 24 : 28;
+      const listDateColW = 48;
+      /** Row cap: min(120, poster budget/n); then reduced in loop if content still overflows. */
+      let listRowMaxH = 120;
+      /** Cover image height = list row height minus this (px) */
+      let listCoverShyOfRowPx = 16;
+
       /** Row height from date/title; cover is row − listCoverShyOfRowPx (see JSX). */
-      const listEstimateListH = (withAuthor: boolean) => {
+      const listMeasureListTotalH = (
+        withAuthor: boolean,
+        rowMaxH: number,
+        padTop: number,
+        padBottom: number,
+        datePx: number,
+      ) => {
         if (listRowCount === 0) return listBorderTopH;
         const titleBlock =
           listBookTitleDefaultPx * listTitleLineH +
           (withAuthor ? listAuthorGap + listAuthorFontPx : 0);
-        const contentH = Math.max(listDateColH, Math.ceil(titleBlock));
-        const rowH = Math.min(
-          listRowPadYTop + listRowPadYBottom + contentH + 1,
-          listRowMaxH,
-        );
+        const contentH = Math.max(datePx, Math.ceil(titleBlock));
+        const rowH = Math.min(padTop + padBottom + contentH + 1, rowMaxH);
         return listBorderTopH + listRowCount * rowH;
       };
 
       let listShowAuthor = true;
-      if (listRowCount > 0 && listEstimateListH(true) > listMaxListBlockH) {
-        listShowAuthor = false;
+      const listFits = (author: boolean, rowMax: number) =>
+        listMeasureListTotalH(
+          author,
+          rowMax,
+          listRowPadYTop,
+          listRowPadYBottom,
+          listDateFontPx,
+        ) <= listMaxListBlockH;
+
+      if (listRowCount > 0) {
+        const listListBodyBudget = listMaxListBlockH - listBorderTopH;
+        /** Per-row cap so n rows (+ list top border) stay within poster; allow <12px when n is large */
+        listRowMaxH = Math.min(
+          120,
+          Math.max(3, Math.floor(listListBodyBudget / listRowCount)),
+        );
+        const listMinRowH = 3;
+        for (let step = 0; step < 200; step++) {
+          if (listFits(listShowAuthor, listRowMaxH)) break;
+          if (listShowAuthor) {
+            listShowAuthor = false;
+            continue;
+          }
+          if (listRowPadYTop > 4) {
+            listRowPadYTop -= 2;
+            continue;
+          }
+          if (listRowPadYBottom > 2) {
+            listRowPadYBottom -= 1;
+            continue;
+          }
+          if (listDateFontPx > 11) {
+            listDateFontPx -= 1;
+            continue;
+          }
+          if (listCoverShyOfRowPx > 2) {
+            listCoverShyOfRowPx -= 2;
+            continue;
+          }
+          if (listRowMaxH > listMinRowH) {
+            listRowMaxH -= 1;
+            continue;
+          }
+          break;
+        }
       }
 
       return (
-        <div ref={ref} style={{ ...baseStyle, backgroundColor: listBg, color: listInk, fontFamily: listFont }}>
+        <div
+          ref={ref}
+          style={{
+            ...baseStyle,
+            backgroundColor: listBg,
+            border: listFrameBorder,
+            boxSizing: 'border-box',
+            color: listInk,
+            fontFamily: listFont,
+          }}
+        >
           <div
             style={{
               position: 'absolute',
@@ -1183,6 +1248,198 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               )}
             </div>
           </div>
+        </div>
+      );
+    }
+
+    // ─── ESSAY: prose block — “In {month}, I have read …” + titled list + closing line ───
+    if (template === 'essay') {
+      const essayFont = "'Pretendard', 'Noto Sans KR', sans-serif";
+      const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const essayRows = readsSortedByDay;
+      const essayN = essayRows.length;
+      const essayIntroHeadingPx = 64;
+      const essayHeadlineBase: React.CSSProperties = {
+        margin: 0,
+        fontWeight: 700,
+        letterSpacing: '-0.02em',
+        color: moodConfig.textColor,
+      };
+      const essayHeadlineIntro: React.CSSProperties = {
+        ...essayHeadlineBase,
+        fontSize: essayIntroHeadingPx,
+        lineHeight: 1.1,
+      };
+      const essayHeadlineOutro: React.CSSProperties = {
+        ...essayHeadlineBase,
+        fontSize: 48,
+        lineHeight: 1.2,
+      };
+      let essayTitlePx = 28;
+      let essayTitleGap = 20;
+      let essaySectionGap = 28;
+      if (essayN > 12) {
+        essayTitlePx = 18;
+        essayTitleGap = 9;
+        essaySectionGap = 18;
+      } else if (essayN > 8) {
+        essayTitlePx = 20;
+        essayTitleGap = 11;
+        essaySectionGap = 20;
+      } else if (essayN > 5) {
+        essayTitlePx = 23;
+        essayTitleGap = 16;
+        essaySectionGap = 24;
+      }
+
+      /** Poster inner height (600×4/5) minus vertical padding. */
+      const ESSAY_POSTER_H = 750;
+      const essayVertPad = 96;
+      const essayContentW = Number(baseStyle.width) - 64;
+      const essayLineHeight = 1.38;
+      const essayThumbTextGap = 10;
+      /** Cover thumbnail height = title font size × this (width stays 5∶7 of height). */
+      const essayCoverHeightToFont = 1.25;
+      /** Reserve space for two-line outro at 48px / 1.2. */
+      const essayOutroReserve = Math.ceil(48 * 1.2 * 2.5);
+
+      const estimateEssayListHeight = (titlePx: number, gap: number): number => {
+        if (essayN === 0) return 0;
+        const thumbH = titlePx * essayCoverHeightToFont;
+        const thumbW = Math.round((thumbH * 5) / 7);
+        const textMaxW = Math.max(100, essayContentW - essayThumbTextGap - thumbW);
+        const charPx = titlePx * 0.56;
+        let total = 0;
+        for (let ri = 0; ri < essayRows.length; ri++) {
+          const units = Math.max(1, [...essayRows[ri].book.title].length);
+          const lines = Math.max(1, Math.ceil((units * charPx) / textMaxW));
+          const textBlockH = lines * titlePx * essayLineHeight;
+          total += Math.max(textBlockH, thumbH);
+          if (ri < essayRows.length - 1) total += gap;
+        }
+        return total;
+      };
+
+      const essayMiddleBudget = (sectionGap: number) =>
+        ESSAY_POSTER_H -
+        essayVertPad -
+        (essayIntroHeadingPx * 1.1 * 2 + sectionGap) -
+        essayOutroReserve;
+
+      if (essayN >= 9) {
+        for (let step = 0; step < 240; step++) {
+          const budget = essayMiddleBudget(essaySectionGap);
+          const listH = estimateEssayListHeight(essayTitlePx, essayTitleGap);
+          if (listH <= budget) break;
+          if (essayTitleGap > 4) {
+            essayTitleGap -= 1;
+            continue;
+          }
+          if (essaySectionGap > 12) {
+            essaySectionGap -= 1;
+            continue;
+          }
+          if (essayTitlePx > 12) {
+            essayTitlePx -= 1;
+            continue;
+          }
+          break;
+        }
+      }
+
+      const essayCoverThumbH = essayTitlePx * essayCoverHeightToFont;
+      const essayCoverThumbW = Math.round((essayCoverThumbH * 5) / 7);
+
+      return (
+        <div
+          ref={ref}
+          style={{
+            ...baseStyle,
+            fontFamily: essayFont,
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            padding: '48px 32px 48px',
+            minHeight: 0,
+          }}
+        >
+          <div style={{ flexShrink: 0, width: '100%', boxSizing: 'border-box' }}>
+            <p style={essayHeadlineIntro}>
+              In {monthName},
+              <br />
+              I have read:
+            </p>
+            <div style={{ height: essaySectionGap }} aria-hidden />
+          </div>
+          <div
+            style={{
+              flex: '1 1 0%',
+              minHeight: 0,
+              minWidth: 0,
+              width: '100%',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+            }}
+          >
+            {essayN === 0 ? (
+              emptyState
+            ) : (
+              essayRows.map(({ book }, i) => (
+                <div
+                  key={`${book.key}-${i}`}
+                  style={{
+                    marginBottom: i < essayN - 1 ? essayTitleGap : 0,
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    fontSize: essayTitlePx,
+                    lineHeight: 1.38,
+                    color: moodConfig.textColor,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      letterSpacing: '-0.02em',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                    }}
+                  >
+                    {book.title}
+                  </span>
+                  <BookImg
+                    src={book.coverUrl}
+                    alt=""
+                    style={{
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                      height: essayCoverThumbH,
+                      width: essayCoverThumbW,
+                      borderRadius: 2,
+                      marginLeft: 10,
+                    }}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+          <p style={{ ...essayHeadlineOutro, flexShrink: 0, width: '100%', boxSizing: 'border-box' }}>
+            and these pages have{' '}
+            <span
+              style={{
+                display: 'inline-block',
+                transform: 'skewX(-10deg)',
+                transformOrigin: '50% 55%',
+              }}
+            >
+              reshaped
+            </span>{' '}
+            my thoughts.
+          </p>
         </div>
       );
     }
@@ -1427,6 +1684,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const titleFontPx = 28;
       const numFs = 38;
 
+      const capsuleFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
+
       return (
         <div
           ref={ref}
@@ -1438,20 +1697,21 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             flexDirection: 'column',
             boxSizing: 'border-box',
             backgroundColor: '#FFFFFF',
+            border: capsuleFrameBorder,
           }}
         >
           <p
             style={{
               flexShrink: 0,
               margin: 0,
-              marginBottom: 14,
-              fontFamily: capsuleHeadNumFont,
+              marginBottom: 42,
+              fontFamily: 'Arial',
               fontSize: 48,
               fontWeight: 600,
               letterSpacing: '-0.5px',
               color: moodConfig.textColor,
               textAlign: 'left',
-              lineHeight: '64px',
+              lineHeight: '56px',
             }}
           >
             {n} BOOKS
@@ -1857,7 +2117,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const cellCount = cols * rows;
       const slots = Array.from({ length: cellCount }, (_, i) => books[i] ?? null);
       const coverBase = Math.min(300, Math.max(88, Math.floor(598 / cols)));
-      const coverMaxW = Math.round(coverBase * 2.72 * 1.5);
+      const coverMaxW = Math.round(coverBase * 2.72);
 
       return (
         <div ref={ref} style={{ ...baseStyle, padding: 0, overflow: 'hidden' }}>

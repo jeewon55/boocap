@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
-import { searchBooks } from '@/lib/bookApi';
+import { enrichBookWithPageCount, searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
 
@@ -46,6 +46,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
+  const [enrichingKey, setEnrichingKey] = useState<string | null>(null);
   const [mode, setMode] = useState<'search' | 'manual'>('search');
 
   const [manualTitle, setManualTitle] = useState('');
@@ -148,14 +149,26 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               {results.map((book) => (
                 <button
                   key={book.key}
-                  onClick={() => onSelect(book)}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0"
+                  type="button"
+                  disabled={enrichingKey != null}
+                  onClick={async () => {
+                    setEnrichingKey(book.key);
+                    try {
+                      onSelect(await enrichBookWithPageCount(book));
+                    } finally {
+                      setEnrichingKey(null);
+                    }
+                  }}
+                  className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0 disabled:opacity-50"
                 >
                   <BookCoverThumb src={book.coverUrl} alt={book.title} />
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate text-foreground">{book.title}</p>
                     <p className="text-xs text-muted-foreground truncate">{book.author}</p>
                   </div>
+                  {enrichingKey === book.key ? (
+                    <Loader2 className="w-4 h-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />
+                  ) : null}
                 </button>
               ))}
 

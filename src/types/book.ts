@@ -3,6 +3,8 @@ export interface Book {
   author: string;
   coverUrl: string;
   key: string;
+  /** Total pages when known (API or ISBN lookup); stack poster sums pageCount for each distinct book */
+  pageCount?: number;
 }
 
 export interface DayEntry {
@@ -12,7 +14,16 @@ export interface DayEntry {
 
 export type MoodType = 'minimal' | 'editorial' | 'bold' | 'dark';
 
-export type TemplateType = 'grid' | 'grid2' | 'stack' | 'list' | 'capsule' | 'calendar' | 'mosaic' | 'timeline';
+export type TemplateType =
+  | 'grid'
+  | 'grid2'
+  | 'stack'
+  | 'list'
+  | 'essay'
+  | 'capsule'
+  | 'calendar'
+  | 'mosaic'
+  | 'timeline';
 
 export interface MoodConfig {
   id: MoodType;
@@ -44,6 +55,11 @@ export const TEMPLATES: TemplateConfig[] = [
   },
   { id: 'stack', label: 'Stack', description: '뉴스레터 스타일' },
   { id: 'list', label: 'List', description: '리스트 타이포그래피' },
+  {
+    id: 'essay',
+    label: 'Essay',
+    description: '영문 산문형 — In (월), I have read … / 제목+번호 / 마무리 문장',
+  },
   { id: 'capsule', label: 'Capsule List', description: '상단 월·권수 제목, 캡슐 안에는 번호와 제목만' },
   { id: 'calendar', label: 'Insight Calendar', description: '손그림 격자·그리운 코코초이툰 타이포의 낙서 캘린더' },
   { id: 'mosaic', label: 'Mosaic', description: '연도·월 없이 표지만, 책 개수에 맞는 컬러 그리드' },

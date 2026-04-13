@@ -145,3 +145,44 @@ export async function getPaleDominantCoverBackground(imageUrl: string): Promise<
 
   return color;
 }
+
+const MOSAIC_NEAR_WHITE_LUM = 241;
+/** Max R/G/B spread for treating a color as neutral (white / light gray), not a pale tint. */
+const MOSAIC_NEAR_WHITE_CHROMA = 18;
+const MOSAIC_CELL_LIGHT_GRAY = '#F2F2F2';
+
+function parseRgbCss(s: string): { r: number; g: number; b: number } | null {
+  const t = s.trim();
+  const m = t.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (m) return { r: +m[1], g: +m[2], b: +m[3] };
+  const hex = t.match(/^#([\da-f]{3}|[\da-f]{6})$/i);
+  if (!hex) return null;
+  const h = hex[1];
+  if (h.length === 3) {
+    return {
+      r: parseInt(h[0] + h[0], 16),
+      g: parseInt(h[1] + h[1], 16),
+      b: parseInt(h[2] + h[2], 16),
+    };
+  }
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+}
+
+/**
+ * Mosaic tile backdrop: pure / near-white reads as “no fill” on white posters — use a light gray.
+ */
+export function mosaicBackdropIfNearlyWhite(cssColor: string): string {
+  const p = parseRgbCss(cssColor);
+  if (!p) return cssColor;
+  const { r, g, b } = p;
+  const lum = luminance(r, g, b);
+  const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+  if (lum >= MOSAIC_NEAR_WHITE_LUM && chroma <= MOSAIC_NEAR_WHITE_CHROMA) {
+    return MOSAIC_CELL_LIGHT_GRAY;
+  }
+  return cssColor;
+}

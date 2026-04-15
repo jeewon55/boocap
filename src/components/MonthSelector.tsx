@@ -96,7 +96,7 @@ export function MonthSelector({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="mx-4 w-[90vw] max-w-sm overflow-hidden border border-foreground bg-card font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+              className="mx-4 w-[90vw] max-w-sm overflow-hidden rounded-[4px] border border-foreground/20 bg-card font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with year navigation */}

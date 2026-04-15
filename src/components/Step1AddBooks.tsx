@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookSearchModal } from '@/components/BookSearchModal';
+import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { MonthSelector } from '@/components/MonthSelector';
 import { X, ArrowRight, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -234,12 +235,13 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
       {/* View existing book detail */}
       {selectedDay !== null && entries[selectedDay] && !isReplacing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/15" onClick={() => setSelectedDay(null)}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full border border-foreground/20 bg-card font-body sm:mx-4 sm:max-w-md sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <BottomSheetKeyboardLift>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex w-full max-h-[85vh] flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center justify-between p-5 border-b border-border">
               <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
                 {MONTHS[month]} {String(selectedDay).padStart(2, '0')}
@@ -277,7 +279,8 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
                 Replace
               </button>
             </div>
-          </motion.div>
+            </motion.div>
+          </BottomSheetKeyboardLift>
         </div>
       )}
 

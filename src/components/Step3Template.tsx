@@ -60,7 +60,7 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
 
         {/* Preview */}
         <div ref={containerRef} className="w-full flex justify-center">
-          <div className="origin-top shadow-xl" style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top center' }}>
+          <div className="origin-top" style={{ width: 600, transform: `scale(${scale})`, transformOrigin: 'top center' }}>
             <PosterCanvas
               year={year}
               month={month}

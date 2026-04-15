@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 그리운 코코초이툰 — Insight Calendar poster (Noonnu CDN, OFL) */
-@font-face {
-  font-family: 'Griun Cocochoitoon';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Cocochoitoon-Rg.woff2') format('woff2');
-  font-weight: normal;
-  font-display: swap;
-}
-
 @layer base {
   /* Swiss / International — #ffffff field, black type, neutral accent (no red UI text) */
   :root {

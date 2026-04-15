@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, ImageIcon } from 'lucide-react';
 import { Book } from '@/types/book';
+import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -32,10 +33,11 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-full animate-fade-in rounded-t-2xl border border-border bg-background font-body sm:mx-4 sm:max-w-md sm:rounded-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <BottomSheetKeyboardLift>
+        <div
+          className="flex w-full max-h-[85vh] animate-fade-in flex-col overflow-hidden rounded-t-[4px] border border-border bg-background font-body sm:rounded-[4px]"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="flex items-center justify-between border-b border-border p-5">
           <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
             {MONTH_NAMES[month]} {day}
@@ -109,7 +111,8 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
             Save
           </button>
         </div>
-      </div>
+        </div>
+      </BottomSheetKeyboardLift>
     </div>
   );
 }

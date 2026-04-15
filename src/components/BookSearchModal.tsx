@@ -3,6 +3,7 @@ import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
 import { enrichBookWithPageCount, searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
+import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 
 function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
@@ -95,12 +96,13 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/15" onClick={onClose}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:mx-4 sm:max-w-md sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <BottomSheetKeyboardLift>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
@@ -273,7 +275,8 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
             </button>
           </div>
         )}
-      </motion.div>
+        </motion.div>
+      </BottomSheetKeyboardLift>
     </div>
   );
 }

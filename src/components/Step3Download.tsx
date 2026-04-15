@@ -101,20 +101,19 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         </motion.div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[26rem] flex-1 min-h-0 flex-col py-4">
+      <div className="mx-auto flex w-full max-w-[26rem] shrink-0 flex-col py-1">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="flex min-h-0 w-full flex-1 justify-center"
+          className="flex w-full shrink-0 flex-col items-center overflow-hidden px-1 pt-6 pb-1 md:px-2"
         >
           <div
             ref={wrapperRef}
-            className="w-full overflow-hidden border border-foreground/15 bg-card flex justify-center"
+            className="flex w-full justify-center overflow-hidden"
             style={{
               aspectRatio: '4/5',
               maxWidth: 420,
-              boxShadow: '12px 12px 0 0 rgba(0,0,0,0.07)',
             }}
           >
             <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0, borderRadius: 'inherit' }}>
@@ -133,7 +132,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         </motion.div>
       </div>
 
-      <div className="mx-auto w-full max-w-[26rem] space-y-3 py-4">
+      <div className="mx-auto w-full max-w-[26rem] space-y-3 pt-2 pb-4">
         <button
           onClick={handleDownload}
           disabled={downloading}
@@ -154,7 +153,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
             onClick={onReset}
             className="flex-1 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
-            처음부터 다시
+            Start over
           </button>
         </div>
       </div>

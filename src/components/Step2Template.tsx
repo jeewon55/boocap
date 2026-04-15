@@ -131,7 +131,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         {/* Height from 480px track + padding; overflow-x hidden for Embla */}
         <div
           ref={emblaRef}
-          className="flex h-fit w-full shrink-0 items-start overflow-hidden px-1 pt-6 pb-6 md:px-2"
+          className="flex h-fit w-full shrink-0 items-start overflow-hidden px-1 pt-6 pb-1 md:px-2"
         >
           <div className="flex h-[480px] max-h-[480px] min-h-0 w-full touch-pan-y items-center will-change-transform">
             {TEMPLATES.map((t, index) => {
@@ -173,7 +173,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </div>
 
         {/* Template name + dots combined below carousel */}
-        <div className="mt-2 flex shrink-0 flex-col items-center gap-2">
+        <div className="mt-1 flex shrink-0 flex-col items-center gap-4">
           <div className="text-center">
             <p className="font-display text-sm font-bold tracking-[0] text-foreground">{activeTemplate.label}</p>
           </div>

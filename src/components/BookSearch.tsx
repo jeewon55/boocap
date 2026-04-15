@@ -34,7 +34,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="mx-4 flex max-h-[80vh] w-full max-w-md flex-col border border-border bg-background font-body"
+        className="mx-4 flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-[4px] border border-border bg-background font-body"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">

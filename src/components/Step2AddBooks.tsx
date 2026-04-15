@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Book } from '@/types/book';
 import { BookEntryModal } from '@/components/BookEntryModal';
 import { BookSearchModal } from '@/components/BookSearchModal';
+import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
@@ -104,10 +105,11 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
       {/* View existing book detail */}
       {selectedDay !== null && entries[selectedDay] && !isReplacing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
-          <div
-            className="w-full animate-fade-in rounded-t-2xl border border-border bg-background font-body sm:mx-4 sm:max-w-md sm:rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <BottomSheetKeyboardLift>
+            <div
+              className="flex w-full max-h-[85vh] animate-fade-in flex-col overflow-hidden rounded-t-[4px] border border-border bg-background font-body sm:rounded-[4px]"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex items-center justify-between p-5 border-b border-border">
               <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
                 {MONTHS[month]} {selectedDay}
@@ -145,7 +147,8 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
                 Replace
               </button>
             </div>
-          </div>
+            </div>
+          </BottomSheetKeyboardLift>
         </div>
       )}
 

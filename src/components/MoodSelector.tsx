@@ -8,13 +8,13 @@ interface MoodSelectorProps {
 export function MoodSelector({ selected, onChange }: MoodSelectorProps) {
   return (
     <div className="py-4 border-t border-border">
-      <p className="text-[10px] tracking-[0.3em] text-muted-foreground mb-3 font-body uppercase">Mood</p>
+      <p className="text-[10px] tracking-[0] text-muted-foreground mb-3 font-display uppercase">Mood</p>
       <div className="flex gap-2">
         {MOODS.map((mood) => (
           <button
             key={mood.id}
             onClick={() => onChange(mood.id)}
-            className={`flex-1 py-2 text-xs font-body tracking-wide border transition-colors ${
+            className={`flex-1 rounded-[4px] border py-2 text-xs font-body font-medium tracking-normal transition-colors ${
               selected === mood.id
                 ? 'border-foreground bg-foreground text-background'
                 : 'border-border hover:border-foreground/30'

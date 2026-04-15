@@ -25,7 +25,6 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
   const [downloading, setDownloading] = useState(false);
-  const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -88,24 +87,26 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const scaledH = 750 * scale;
 
   return (
-    <div className="flex-1 flex flex-col px-6 overflow-auto">
-      <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full py-4">
+    <div className="flex flex-1 flex-col overflow-auto px-6">
+      <div className="mx-auto w-full max-w-[26rem] shrink-0 pt-2">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="self-start mb-4"
+          className="text-center"
         >
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground mt-2">
-            Your {monthName}, beautifully visualized.
+          <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
+            Archive Visualized.
           </h2>
         </motion.div>
+      </div>
 
+      <div className="mx-auto flex w-full max-w-[26rem] flex-1 min-h-0 flex-col py-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="w-full flex justify-center flex-1 min-h-0"
+          className="flex min-h-0 w-full flex-1 justify-center"
         >
           <div
             ref={wrapperRef}
@@ -132,26 +133,26 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         </motion.div>
       </div>
 
-      <div className="py-4 max-w-md mx-auto w-full space-y-3">
+      <div className="mx-auto w-full max-w-[26rem] space-y-3 py-4">
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity disabled:opacity-50 rounded-lg"
+          className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Download className="w-3.5 h-3.5" />
-          {downloading ? 'EXPORTING...' : 'DOWNLOAD IMAGE'}
+          {downloading ? 'Exporting…' : 'Download Image'}
         </button>
         <div className="flex gap-3">
           <button
             onClick={onBack}
-            className="flex-1 flex items-center justify-center gap-2 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back
           </button>
           <button
             onClick={onReset}
-            className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
+            className="flex-1 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
             처음부터 다시
           </button>

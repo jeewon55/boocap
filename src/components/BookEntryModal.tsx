@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { X, ImageIcon } from 'lucide-react';
 import { Book } from '@/types/book';
 
-const MONTHS = [
-  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
 interface BookEntryModalProps {
@@ -33,14 +33,14 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-background border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-lg animate-fade-in"
+        className="w-full animate-fade-in rounded-t-2xl border border-border bg-background font-body sm:mx-4 sm:max-w-md sm:rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-5 border-b border-border">
-          <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
-            {MONTHS[month]} {day}
+        <div className="flex items-center justify-between border-b border-border p-5">
+          <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
+            {MONTH_NAMES[month]} {day}
           </span>
-          <button onClick={onClose} className="p-1 hover:bg-secondary transition-colors rounded">
+          <button onClick={onClose} className="rounded-[4px] p-1 transition-colors hover:bg-secondary">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -64,38 +64,38 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
 
           {/* Title */}
           <div>
-            <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-              책 제목
+            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+              Title
             </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="예: 데미안"
-              className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+              placeholder="e.g. Demian"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
           </div>
 
           {/* Author */}
           <div>
-            <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-              저자
+            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+              Author
             </label>
             <input
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
-              placeholder="예: 헤르만 헤세"
-              className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+              placeholder="e.g. Hermann Hesse"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
           </div>
           <div>
-            <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">
-              표지 이미지 URL
+            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+              Cover image URL
             </label>
             <input
               value={coverUrl}
               onChange={(e) => { setCoverUrl(e.target.value); setPreviewError(false); }}
               placeholder="https://example.com/cover.jpg"
-              className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
             />
           </div>
         </div>
@@ -104,9 +104,9 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
           <button
             onClick={handleConfirm}
             disabled={!title.trim() || !coverUrl.trim()}
-            className="w-full py-3 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity disabled:opacity-30"
+            className="w-full rounded-[4px] bg-foreground py-3 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90 disabled:opacity-30"
           >
-            확인
+            Save
           </button>
         </div>
       </div>

@@ -32,12 +32,14 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col px-6">
-      <div className="flex-1 max-w-md mx-auto w-full pt-2">
-        <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-2">Step 3</p>
-        <h2 className="font-display text-2xl font-bold tracking-tight mb-6">
-          템플릿을 선택하세요
-        </h2>
+    <div className="flex flex-1 flex-col px-6">
+      <div className="mx-auto w-full max-w-[26rem] flex-1 pt-2">
+        <div className="text-center">
+          <p className="mb-2 font-display text-[10px] uppercase tracking-[0] text-muted-foreground">Step 3</p>
+          <h2 className="mt-2 mb-6 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
+            템플릿을 선택하세요
+          </h2>
+        </div>
 
         {/* Template options */}
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -45,16 +47,13 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
             <button
               key={t.id}
               onClick={() => onTemplateChange(t.id)}
-              className={`p-4 border text-left transition-all ${
+              className={`rounded-[4px] border p-4 text-left transition-all ${
                 template === t.id
                   ? 'border-foreground bg-foreground text-background'
                   : 'border-border hover:border-foreground/30'
               }`}
             >
-              <p className="text-sm font-display font-semibold">{t.label}</p>
-              <p className={`text-[10px] mt-0.5 ${template === t.id ? 'opacity-70' : 'text-muted-foreground'}`}>
-                {t.description}
-              </p>
+              <p className="text-sm font-display font-semibold tracking-[0]">{t.label}</p>
             </button>
           ))}
         </div>
@@ -73,17 +72,17 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
         </div>
       </div>
 
-      <div className="py-6 max-w-md mx-auto w-full flex gap-3">
+      <div className="mx-auto flex w-full max-w-[26rem] gap-3 py-6">
         <button
           onClick={onBack}
-          className="flex-1 flex items-center justify-center gap-2 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+          className="flex flex-1 items-center justify-center gap-2 rounded-[4px] border border-border py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back
         </button>
         <button
           onClick={onGenerate}
-          className="flex-[2] flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+          className="flex flex-[2] items-center justify-center gap-2 rounded-[4px] bg-foreground py-4 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90"
         >
           Generate Poster
         </button>

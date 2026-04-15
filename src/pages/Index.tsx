@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { StepIndicator } from '@/components/StepIndicator';
 import { WizardStep } from '@/components/WizardStep';
 import { Step1AddBooks } from '@/components/Step1AddBooks';
 import { Step2Template } from '@/components/Step2Template';
@@ -52,9 +51,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground flex flex-col">
-      <StepIndicator current={step} />
-
+    <div className="flex min-h-[100dvh] flex-col bg-background text-foreground">
       <WizardStep visible={step === 0}>
         <Step1AddBooks
           year={year}

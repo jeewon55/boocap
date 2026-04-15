@@ -30,9 +30,9 @@ function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-const MONTHS = [
-  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
 interface BookSearchModalProps {
@@ -98,15 +98,15 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-foreground/20 w-full sm:max-w-md sm:mx-4 max-h-[85vh] flex flex-col sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+        className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:mx-4 sm:max-w-md sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
-            {MONTHS[month]} {day}
+        <div className="flex items-center justify-between border-b border-border p-4">
+          <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
+            {MONTH_NAMES[month]} {day}
           </span>
-          <button onClick={onClose} className="p-1 hover:bg-secondary transition-colors rounded">
+          <button onClick={onClose} className="rounded-[4px] p-1 transition-colors hover:bg-secondary">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -115,19 +115,19 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
         <div className="flex border-b border-border">
           <button
             onClick={() => setMode('search')}
-            className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'search' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
+            className={`flex-1 rounded-none py-2.5 text-xs font-body font-medium tracking-normal transition-colors ${
+              mode === 'search' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
             }`}
           >
-            검색
+            Search
           </button>
           <button
             onClick={() => setMode('manual')}
-            className={`flex-1 py-2.5 text-xs font-body tracking-[0.1em] uppercase transition-colors ${
-              mode === 'manual' ? 'text-foreground border-b-2 border-foreground' : 'text-muted-foreground'
+            className={`flex-1 rounded-none py-2.5 text-xs font-body font-medium tracking-normal transition-colors ${
+              mode === 'manual' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
             }`}
           >
-            직접 입력
+            Manual entry
           </button>
         </div>
 
@@ -139,7 +139,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="책 제목을 검색하세요..."
+                placeholder="Search by title or author…"
                 className="w-full bg-transparent text-sm font-body outline-none placeholder:text-muted-foreground"
               />
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
@@ -163,8 +163,8 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 >
                   <BookCoverThumb src={book.coverUrl} alt={book.title} />
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate text-foreground">{book.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                    <p className="truncate text-sm font-medium font-body text-foreground">{book.title}</p>
+                    <p className="truncate text-xs font-body text-muted-foreground">{book.author}</p>
                   </div>
                   {enrichingKey === book.key ? (
                     <Loader2 className="w-4 h-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />
@@ -174,13 +174,13 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
               {query && !loading && results.length === 0 && (
                 <div className="p-4 text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">검색 결과가 없습니다</p>
+                  <p className="text-sm text-muted-foreground">No results found.</p>
                   <button
                     onClick={() => { setMode('manual'); setManualTitle(query); }}
-                    className="inline-flex items-center gap-1.5 text-xs font-body text-foreground underline underline-offset-2 hover:opacity-70 transition-opacity"
+                    className="inline-flex items-center gap-1.5 text-xs font-body text-foreground underline underline-offset-2 transition-opacity hover:opacity-70"
                   >
                     <PenLine className="w-3 h-3" />
-                    직접 입력하기
+                    Enter manually
                   </button>
                 </div>
               )}
@@ -191,7 +191,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   className="w-full flex items-center gap-2 p-3 text-muted-foreground hover:bg-secondary transition-colors text-left"
                 >
                   <PenLine className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-xs font-body">찾는 책이 없나요? 직접 입력하기</span>
+                  <span className="text-xs font-body">Can&apos;t find your book? Enter manually</span>
                 </button>
               )}
             </div>
@@ -219,47 +219,47 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-24 h-36 bg-secondary flex flex-col items-center justify-center border border-dashed border-border hover:border-primary transition-colors cursor-pointer gap-1.5 rounded"
+                  className="flex h-36 w-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[4px] border border-dashed border-border bg-secondary transition-colors hover:border-primary"
                 >
                   <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[9px] text-muted-foreground font-body">업로드</span>
+                  <span className="text-[9px] font-body text-muted-foreground">Upload</span>
                 </button>
               )}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
               {!manualCoverUrl && (
-                <p className="text-[10px] text-muted-foreground font-body">이미지를 업로드하거나 아래에 URL을 입력하세요</p>
+                <p className="text-[10px] font-body text-muted-foreground">Upload a cover image or paste a URL below.</p>
               )}
             </div>
 
             <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">책 제목 *</label>
+              <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Title *</label>
               <input
                 autoFocus={mode === 'manual'}
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
-                placeholder="예: 데미안"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
+                placeholder="e.g. Demian"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">저자</label>
+              <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Author</label>
               <input
                 value={manualAuthor}
                 onChange={(e) => setManualAuthor(e.target.value)}
-                placeholder="예: 헤르만 헤세"
-                className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
+                placeholder="e.g. Hermann Hesse"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
 
             {!manualCoverUrl && (
               <div>
-                <label className="text-[10px] tracking-[0.2em] text-muted-foreground font-body uppercase block mb-2">또는 이미지 URL</label>
+                <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Or cover image URL</label>
                 <input
                   value={manualCoverUrl}
                   onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
                   placeholder="https://example.com/cover.jpg"
-                  className="w-full bg-transparent border border-border px-3 py-2.5 text-sm font-body outline-none focus:border-primary transition-colors placeholder:text-muted-foreground rounded"
+                  className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
             )}
@@ -267,9 +267,9 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
             <button
               onClick={handleManualConfirm}
               disabled={!manualTitle.trim()}
-              className="w-full py-3 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity disabled:opacity-30 rounded-lg"
+              className="w-full rounded-[4px] bg-primary py-3 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-30"
             >
-              확인
+              Save
             </button>
           </div>
         )}

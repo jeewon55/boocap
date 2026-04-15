@@ -31,15 +31,17 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
   const bookCount = Object.keys(entries).length;
 
   return (
-    <div className="flex-1 flex flex-col px-6">
-      <div className="flex-1 max-w-md mx-auto w-full pt-2">
-        <p className="text-[10px] tracking-[0.3em] text-muted-foreground font-body uppercase mb-2">Step 2</p>
-        <h2 className="font-display text-2xl font-bold tracking-tight mb-1">
-          책을 추가하세요
-        </h2>
-        <p className="text-xs text-muted-foreground font-body mb-4">
-          {MONTHS[month]} {year} · {bookCount}권 추가됨
-        </p>
+    <div className="flex flex-1 flex-col px-6">
+      <div className="mx-auto w-full max-w-[26rem] flex-1 pt-2">
+        <div className="text-center">
+          <p className="mb-2 font-display text-[10px] uppercase tracking-[0] text-muted-foreground">Step 2</p>
+          <h2 className="mt-2 mb-1 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
+            책을 추가하세요
+          </h2>
+          <p className="text-xs text-muted-foreground font-body mb-4">
+            {MONTHS[month]} {year} · {bookCount}권 추가됨
+          </p>
+        </div>
 
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-px mb-1">
@@ -57,7 +59,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
               <button
                 key={day}
                 onClick={() => setSelectedDay(day)}
-                className="relative aspect-square flex items-center justify-center border border-border hover:bg-secondary/50 transition-colors group rounded-sm overflow-hidden"
+                className="group relative flex aspect-square items-center justify-center overflow-hidden rounded-none border border-border transition-colors hover:bg-secondary/50"
               >
                 {book ? (
                   <>
@@ -82,17 +84,17 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
         </div>
       </div>
 
-      <div className="py-6 max-w-md mx-auto w-full flex gap-3">
+      <div className="mx-auto flex w-full max-w-[26rem] gap-3 py-6">
         <button
           onClick={onBack}
-          className="flex-1 flex items-center justify-center gap-2 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+          className="flex flex-1 items-center justify-center gap-2 rounded-[4px] border border-border py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back
         </button>
         <button
           onClick={onNext}
-          className="flex-[2] flex items-center justify-center gap-2 py-4 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+          className="flex flex-[2] items-center justify-center gap-2 rounded-[4px] bg-foreground py-4 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90"
         >
           Choose Template
           <ArrowRight className="w-3.5 h-3.5" />
@@ -103,14 +105,14 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
       {selectedDay !== null && entries[selectedDay] && !isReplacing && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={() => setSelectedDay(null)}>
           <div
-            className="bg-background border border-border w-full sm:max-w-md sm:mx-4 rounded-t-2xl sm:rounded-lg animate-fade-in"
+            className="w-full animate-fade-in rounded-t-2xl border border-border bg-background font-body sm:mx-4 sm:max-w-md sm:rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
+              <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
                 {MONTHS[month]} {selectedDay}
               </span>
-              <button onClick={() => setSelectedDay(null)} className="p-1 hover:bg-secondary transition-colors rounded">
+              <button onClick={() => setSelectedDay(null)} className="rounded-[4px] p-1 transition-colors hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -132,15 +134,15 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
             <div className="p-5 pt-0 flex gap-3">
               <button
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
-                className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors"
+                className="flex-1 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
               >
-                삭제
+                Delete
               </button>
               <button
                 onClick={() => setIsReplacing(true)}
-                className="flex-1 py-3 bg-foreground text-background text-xs font-body tracking-[0.15em] uppercase hover:opacity-90 transition-opacity"
+                className="flex-1 rounded-[4px] bg-foreground py-3 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90"
               >
-                변경
+                Replace
               </button>
             </div>
           </div>

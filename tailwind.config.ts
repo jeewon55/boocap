@@ -1,5 +1,15 @@
 import type { Config } from "tailwindcss";
 
+/** App shell only — poster templates use their own stacks in `PosterCanvas.tsx`. */
+const fontSans = [
+  "-apple-system",
+  "BlinkMacSystemFont",
+  '"SF Pro Text"',
+  '"SF Pro Display"',
+  "system-ui",
+  "sans-serif",
+] as const;
+
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
@@ -14,8 +24,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Helvetica Neue', 'Helvetica', 'Arial', 'ui-sans-serif', 'sans-serif'],
-        body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: [...fontSans],
+        display: [...fontSans],
+        body: [...fontSans],
+        pretendard: [...fontSans],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -34,11 +34,11 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-background border border-border w-full max-w-md mx-4 max-h-[80vh] flex flex-col"
+        className="mx-4 flex max-h-[80vh] w-full max-w-md flex-col border border-border bg-background font-body"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
+          <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
             {month} {day}
           </span>
           <button onClick={onClose} className="p-1 hover:bg-secondary transition-colors">
@@ -80,8 +80,8 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
                 className="w-10 h-14 object-cover flex-shrink-0"
               />
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{book.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{book.author}</p>
+                <p className="truncate text-sm font-medium font-body">{book.title}</p>
+                <p className="truncate text-xs font-body text-muted-foreground">{book.author}</p>
               </div>
               {enrichingKey === book.key ? (
                 <Loader2 className="w-4 h-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />

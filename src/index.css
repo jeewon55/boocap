@@ -11,7 +11,7 @@
 }
 
 @layer base {
-  /* Swiss / International — #ffffff field, black type, red accent */
+  /* Swiss / International — #ffffff field, black type, neutral accent (no red UI text) */
   :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 7%;
@@ -31,7 +31,7 @@
     --muted: 0 0% 88%;
     --muted-foreground: 0 0% 38%;
 
-    --accent: 356 86% 48%;
+    --accent: 0 0% 7%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 46%;
@@ -52,8 +52,9 @@
     --sidebar-border: 0 0% 78%;
     --sidebar-ring: 0 0% 9%;
 
-    --font-display: 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, sans-serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    /* App UI: SF Pro on Apple via system stack (same as Tailwind `font-body` / `font-display`). */
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
 
     --hero-bg: 0 0% 100%;
     --hero-fg: 0 0% 7%;
@@ -81,8 +82,8 @@
     --muted: 0 0% 18%;
     --muted-foreground: 0 0% 58%;
 
-    --accent: 356 86% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 62% 48%;
     --destructive-foreground: 0 0% 100%;

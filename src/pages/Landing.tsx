@@ -45,28 +45,21 @@ export default function Landing() {
 
   return (
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col">
-      <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-border">
-        <span className="font-display text-sm font-bold tracking-[0.28em] uppercase">
+      <nav className="flex items-center justify-center px-6 pt-2 pb-4">
+        <span className="font-display text-[20px] font-bold tracking-[0] uppercase">
           Boocap
         </span>
-        <button
-          type="button"
-          onClick={handleCreate}
-          className="text-[10px] font-body text-muted-foreground hover:text-foreground tracking-[0.22em] uppercase transition-colors"
-        >
-          Get started
-        </button>
       </nav>
 
-      <div className="flex-1 flex flex-col lg:flex-row max-w-6xl mx-auto w-full">
-        <section className="flex-1 flex flex-col justify-center px-6 md:px-10 py-14 lg:py-24">
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.12] tracking-[-0.03em] text-foreground max-w-xl">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col lg:flex-row">
+        <section className="flex flex-1 flex-col justify-center px-6 py-14 lg:py-24">
+          <h1 className="max-w-xl font-display text-3xl font-black leading-[1.12] tracking-[0] text-foreground sm:text-4xl md:text-5xl">
             Visualize your{' '}
-            <span className="text-accent">intellectual growth</span>
+            <span className="text-foreground">intellectual growth</span>
             <br />
             in one precise poster.
           </h1>
-          <p className="mt-0 h-fit w-fit max-w-md text-left text-sm md:text-base font-body text-muted-foreground leading-relaxed">
+          <p className="mt-[16px] h-fit w-fit max-w-md text-left text-sm font-body leading-relaxed text-muted-foreground md:text-base">
             Turn monthly readings into a clean, grid-based summary. Track, lay out, and export in a single composition.
           </p>
 
@@ -75,10 +68,12 @@ export default function Landing() {
               <button
                 type="button"
                 onClick={() => setShowPicker(!showPicker)}
-                className="h-12 w-full sm:w-auto min-w-[200px] px-4 bg-card border border-border text-foreground font-body text-xs tracking-wide flex items-center gap-3 hover:bg-muted/60 transition-colors text-left uppercase"
+                className="flex h-12 w-full min-w-[200px] items-center gap-3 rounded-[4px] border border-border bg-card px-4 text-left text-xs font-body font-medium tracking-normal text-foreground transition-colors hover:bg-muted/60 sm:w-auto"
               >
                 <BookOpen className="w-4 h-4 text-foreground shrink-0" strokeWidth={1.5} />
-                <span className="normal-case tracking-normal">{MONTHS[month]} {year}</span>
+                <span>
+                  {MONTHS[month]} {year}
+                </span>
               </button>
 
               {showPicker && (
@@ -89,7 +84,7 @@ export default function Landing() {
                         key={y}
                         type="button"
                         onClick={() => setYear(y)}
-                        className={`px-2.5 py-1.5 text-[10px] font-body tracking-wider uppercase border transition-colors ${
+                        className={`rounded-[4px] border px-2.5 py-1.5 text-[10px] font-body font-medium tracking-normal transition-colors ${
                           y === year
                             ? 'bg-foreground text-background border-foreground'
                             : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
@@ -108,7 +103,7 @@ export default function Landing() {
                           setMonth(i);
                           setShowPicker(false);
                         }}
-                        className={`py-2.5 text-[10px] font-body tracking-[0.12em] uppercase bg-card transition-colors ${
+                        className={`rounded-[4px] bg-card py-2.5 text-[10px] font-body font-medium tracking-normal transition-colors ${
                           i === month
                             ? 'bg-foreground text-background'
                             : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -125,22 +120,22 @@ export default function Landing() {
             <button
               type="button"
               onClick={handleCreate}
-              className="h-12 px-8 bg-foreground text-background font-display text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+              className="flex h-12 items-center justify-center gap-2 rounded-[4px] bg-foreground px-8 font-display text-[11px] font-semibold tracking-normal text-background transition-opacity hover:opacity-90"
             >
-              Create recap
+              Create Recap
               <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
         </section>
 
-        <aside className="flex-1 flex items-center justify-center px-6 md:px-10 py-12 lg:py-24 bg-background border-t lg:border-t-0 border-border">
+        <aside className="flex flex-1 items-center justify-center border-t border-border bg-background px-6 py-12 lg:border-t-0 lg:py-24">
           <div className="w-full max-w-[300px] md:max-w-[320px]">
             <div className="border border-foreground bg-card aspect-[4/5] flex flex-col p-6 shadow-[12px_12px_0_0_rgba(0,0,0,0.08)]">
               <div>
-                <p className="text-accent text-[9px] font-body tracking-[0.35em] uppercase font-semibold">
+                <p className="text-[9px] font-body font-semibold uppercase tracking-[0.35em] text-foreground">
                   Monthly recap
                 </p>
-                <p className="font-display text-2xl font-bold tracking-tight mt-2 text-foreground">
+                <p className="font-display text-2xl font-bold tracking-[0] mt-2 text-foreground">
                   {MONTHS[month]}
                 </p>
                 <p className="text-muted-foreground text-[11px] font-body tabular-nums mt-0.5">{year}</p>
@@ -160,7 +155,7 @@ export default function Landing() {
 
               <div className="flex justify-between items-end pt-2 border-t border-border">
                 <div>
-                  <p className="font-display text-3xl font-bold tabular-nums leading-none">6</p>
+                  <p className="font-display text-3xl font-bold tabular-nums leading-none tracking-[0]">6</p>
                   <p className="text-muted-foreground text-[9px] font-body tracking-[0.2em] uppercase mt-1">Books</p>
                 </div>
                 <div className="flex gap-0.5 items-end h-12">

@@ -13,30 +13,92 @@ function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.Mou
         <img
           src={book.coverUrl}
           alt={book.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
           referrerPolicy="no-referrer"
           onError={() => setImgOk(false)}
         />
       ) : (
-        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-muted">
-          <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+        <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-muted">
+          <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
         </div>
       )}
       <div
-        className="absolute top-0 right-0 p-0.5 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
+        className="absolute right-0 top-0 cursor-pointer rounded-bl-sm bg-primary/80 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
         onClick={onRemove}
       >
-        <X className="w-2.5 h-2.5 text-primary-foreground" />
+        <X className="h-2.5 w-2.5 text-primary-foreground" />
       </div>
     </>
   );
 }
 
-const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+/** Monday-first single-letter row (Sat / Sun both “S”; titles disambiguate). */
+const WEEK_LETTERS_MON: { letter: string; title: string }[] = [
+  { letter: 'M', title: 'Monday' },
+  { letter: 'T', title: 'Tuesday' },
+  { letter: 'W', title: 'Wednesday' },
+  { letter: 'T', title: 'Thursday' },
+  { letter: 'F', title: 'Friday' },
+  { letter: 'S', title: 'Saturday' },
+  { letter: 'S', title: 'Sunday' },
+];
+
+const MONTHS_SHORT = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
 ];
+
+type CalendarGridCell =
+  | { scope: 'current'; day: number }
+  | { scope: 'adjacent'; day: number; which: 'prev' | 'next' };
+
+function twoDigitDay(n: number): string {
+  if (!Number.isFinite(n) || n < 1 || n > 31) return '  ';
+  return String(Math.trunc(n)).padStart(2, '0');
+}
+
+/** Monday-first ISO-style weeks; leading/trailing days are adjacent months. */
+function buildCalendarWeekRows(year: number, month: number): CalendarGridCell[][] {
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isFinite(y) || !Number.isFinite(m)) return [];
+
+  const firstDaySun0 = new Date(y, m, 1).getDay();
+  const leadBlanks = (firstDaySun0 + 6) % 7;
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const prevMonthLast = new Date(y, m, 0).getDate();
+
+  const leading: CalendarGridCell[] = [];
+  for (let i = 0; i < leadBlanks; i++) {
+    leading.push({
+      scope: 'adjacent',
+      which: 'prev',
+      day: prevMonthLast - leadBlanks + 1 + i,
+    });
+  }
+
+  const current: CalendarGridCell[] = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    current.push({ scope: 'current', day: d });
+  }
+
+  const gridDays: CalendarGridCell[] = [...leading, ...current];
+  let nextTrail = 1;
+  while (gridDays.length % 7 !== 0) {
+    gridDays.push({ scope: 'adjacent', which: 'next', day: nextTrail++ });
+  }
+
+  const weekRows: CalendarGridCell[][] = [];
+  for (let i = 0; i < gridDays.length; i += 7) {
+    weekRows.push(gridDays.slice(i, i + 7));
+  }
+  return weekRows;
+}
 
 interface Step1Props {
   year: number;
@@ -52,69 +114,117 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isReplacing, setIsReplacing] = useState(false);
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const blanks = Array.from({ length: firstDay });
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const bookCount = Object.keys(entries).length;
-  const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+  const weekRows = buildCalendarWeekRows(year, month);
 
   return (
     <div className="flex flex-col px-6">
-      <div className="max-w-md mx-auto w-full pt-2 flex flex-col">
+      <div className="mx-auto w-full max-w-[26rem] pt-2 flex flex-col">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
+          className="text-center"
         >
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground mt-2">
-            Which days defined your {monthName}?
+          <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
+            Mark Your Days.
           </h2>
-          <p className="text-xs text-muted-foreground font-body mt-1 mb-2">
-            Tap dates to add books you read · {bookCount} added
-          </p>
         </motion.div>
 
-        <MonthSelector year={year} month={month} onChange={onMonthChange} />
+        <MonthSelector
+          year={year}
+          month={month}
+          onChange={onMonthChange}
+          compactHeader
+          compactLeading={
+            <span
+              className="select-none font-display font-black tracking-[0] text-foreground"
+              style={{ fontSize: 'clamp(3rem, 14vw, 3.75rem)', lineHeight: 0.82 }}
+            >
+              {MONTHS_SHORT[month]}
+            </span>
+          }
+        />
 
-        {/* Calendar grid */}
-        <div className="flex flex-col mt-2">
-          <div className="grid grid-cols-7 gap-px mb-1">
-            {WEEKDAYS.map((d) => (
-              <div key={d} className="text-center text-[9px] tracking-[0.15em] text-muted-foreground font-body py-1">
-                {d}
+        {/* Editorial calendar — horizontal rules only, Monday-first, two-digit dates */}
+        <div className="relative mt-0.5 overflow-hidden rounded-sm px-1 pb-0.5 pt-1">
+          <div className="relative z-[1] grid grid-cols-7 border-b border-border/35 px-0.5 pb-2 pt-0">
+            {WEEK_LETTERS_MON.map(({ letter, title }) => (
+              <div
+                key={title}
+                title={title}
+                className="text-center font-body text-[11px] font-semibold text-muted-foreground"
+              >
+                {letter}
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-x-1 gap-y-[6px]">
-            {blanks.map((_, i) => <div key={`b${i}`} />)}
-            {days.map((day) => {
-              const book = entries[day];
-              return (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`relative aspect-[3/4] flex items-center justify-center border transition-colors group rounded-sm overflow-hidden ${
-                    book ? 'border-primary/40' : 'border-border hover:border-primary/30'
-                  }`}
-                >
-                  {book ? (
-                    <CalendarCover book={book} onRemove={(e) => { e.stopPropagation(); onRemoveBook(day); }} />
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground font-body">{day}</span>
-                  )}
-                </button>
-              );
-            })}
+
+          <div className="relative z-[1] font-body">
+            {weekRows.map((row, ri) => (
+              <div
+                key={`w-${ri}`}
+                className="grid grid-cols-7 border-b border-border/35 last:border-b-0"
+              >
+                {row.map((cell, ci) => {
+                  const cellKey = `cell-${ri}-${ci}`;
+                  switch (cell.scope) {
+                    case 'adjacent':
+                      return (
+                        <div
+                          key={cellKey}
+                          className="pointer-events-none flex aspect-[3/4] w-full min-w-0 items-start justify-start p-1.5"
+                        >
+                          <span className="font-display text-[22px] font-bold tabular-nums leading-none tracking-tighter text-[#d6d6d6]">
+                            {twoDigitDay(cell.day)}
+                          </span>
+                        </div>
+                      );
+                    case 'current': {
+                      const day = cell.day;
+                      const book = entries[day];
+                      return (
+                        <button
+                          key={cellKey}
+                          type="button"
+                          onClick={() => setSelectedDay(day)}
+                          aria-label={`${MONTHS_SHORT[month]} ${twoDigitDay(day)}${book ? `, ${book.title}` : ''}`}
+                          className={`group relative flex aspect-[3/4] w-full min-w-0 flex-col rounded-none text-left transition-colors hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground/25 ${
+                            book ? 'overflow-hidden p-0' : 'items-start justify-start p-1.5'
+                          }`}
+                        >
+                          {book ? (
+                            <div className="absolute inset-0 overflow-hidden shadow-sm ring-1 ring-inset ring-border">
+                              <CalendarCover
+                                book={book}
+                                onRemove={(e) => {
+                                  e.stopPropagation();
+                                  onRemoveBook(day);
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <span className="font-display text-[22px] font-bold tabular-nums leading-none tracking-tighter text-foreground">
+                              {twoDigitDay(day)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    }
+                    default:
+                      return null;
+                  }
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* 하단 고정 버튼 - 화면이 짧아도 항상 보임 */}
-      <div className="sticky bottom-0 py-4 max-w-md mx-auto w-full bg-background">
+      <div className="sticky bottom-0 mx-auto w-full max-w-[26rem] bg-background py-4">
         <button
           onClick={onNext}
-          className="w-full flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
+          className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
         >
           Choose Template
           <ArrowRight className="w-3.5 h-3.5" />
@@ -127,14 +237,14 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-foreground/20 w-full sm:max-w-md sm:mx-4 sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+            className="w-full border border-foreground/20 bg-card font-body sm:mx-4 sm:max-w-md sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 border-b border-border">
-              <span className="font-display text-sm tracking-[0.2em] text-muted-foreground">
-                {MONTHS[month]} {selectedDay}
+              <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
+                {MONTHS[month]} {String(selectedDay).padStart(2, '0')}
               </span>
-              <button onClick={() => setSelectedDay(null)} className="p-1 hover:bg-secondary transition-colors rounded">
+              <button onClick={() => setSelectedDay(null)} className="rounded-[4px] p-1 transition-colors hover:bg-secondary">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -146,9 +256,9 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
                 className="w-28 h-40 object-cover shadow-lg rounded"
               />
               <div className="text-center">
-                <p className="text-sm font-medium font-body">{entries[selectedDay].title}</p>
+                <p className="font-body text-sm font-medium">{entries[selectedDay].title}</p>
                 {entries[selectedDay].author && (
-                  <p className="text-xs text-muted-foreground font-body mt-1">{entries[selectedDay].author}</p>
+                  <p className="mt-1 font-body text-xs text-muted-foreground">{entries[selectedDay].author}</p>
                 )}
               </div>
             </div>
@@ -156,15 +266,15 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
             <div className="p-5 pt-0 flex gap-3">
               <button
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
-                className="flex-1 py-3 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
+                className="flex-1 rounded-[4px] border border-border py-3 font-body text-xs font-medium tracking-normal transition-colors hover:bg-secondary"
               >
-                삭제
+                Delete
               </button>
               <button
                 onClick={() => setIsReplacing(true)}
-                className="flex-1 py-3 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
+                className="flex-1 rounded-[4px] bg-primary py-3 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
               >
-                변경
+                Replace
               </button>
             </div>
           </motion.div>

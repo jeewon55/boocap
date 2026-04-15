@@ -34,7 +34,7 @@ export function BookCalendar({ year, month, entries, onDayClick, onRemove }: Boo
             <button
               key={day}
               onClick={() => onDayClick(day)}
-              className="relative aspect-square flex items-center justify-center border border-border hover:bg-secondary transition-colors group"
+              className="group relative flex aspect-square items-center justify-center rounded-none border border-border transition-colors hover:bg-secondary"
             >
               {book ? (
                 <>

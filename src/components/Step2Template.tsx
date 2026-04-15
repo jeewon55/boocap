@@ -97,34 +97,33 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
   }, [emblaApi]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header - consistent position with Step1 */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="px-6 pt-1 max-w-md mx-auto w-full"
-      >
-        <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground mt-1">
-          Which days defined your month?
-        </h2>
-        <p className="text-xs text-muted-foreground font-body mt-0.5 mb-1">
-          좌우로 스와이프하여 템플릿을 선택하세요
-        </p>
-      </motion.div>
+    <div className="flex flex-1 flex-col overflow-hidden px-6">
+      {/* Header — same shell as Step1 “Mark Your Days.” */}
+      <div className="mx-auto w-full max-w-[26rem] shrink-0 pt-2">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="text-center"
+        >
+          <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
+            Frame Your Month.
+          </h2>
+        </motion.div>
+      </div>
 
       {/* Carousel — no flex-1 so content doesn’t stretch; gap to buttons via mt-6 on action bar */}
       <div className="relative flex shrink-0 flex-col justify-start py-1">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}
-          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center border border-border bg-card text-foreground hover:bg-muted transition-colors"
+          className="absolute left-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[4px] border border-border bg-card text-foreground transition-colors hover:bg-muted md:flex"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <button
           onClick={scrollNext}
-          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center border border-border bg-card text-foreground hover:bg-muted transition-colors"
+          className="absolute right-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[4px] border border-border bg-card text-foreground transition-colors hover:bg-muted md:flex"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -175,17 +174,19 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
 
         {/* Template name + dots combined below carousel */}
         <div className="mt-2 flex shrink-0 flex-col items-center gap-2">
-          <div className="text-center h-10">
-            <p className="font-display font-bold text-sm text-foreground tracking-wide">{activeTemplate.label}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{activeTemplate.description}</p>
+          <div className="text-center">
+            <p className="font-display text-sm font-bold tracking-[0] text-foreground">{activeTemplate.label}</p>
           </div>
-          <div className="flex justify-center gap-1.5">
+          <div className="flex h-2 items-center justify-center gap-2">
             {TEMPLATES.map((_, i) => (
               <button
                 key={i}
+                type="button"
+                aria-label={`Go to template ${i + 1}`}
+                aria-current={i === activeIndex ? 'true' : undefined}
                 onClick={() => emblaApi?.scrollTo(i)}
-                className={`h-1 transition-all duration-300 ${
-                  i === activeIndex ? 'w-6 bg-foreground' : 'w-1.5 bg-border'
+                className={`shrink-0 rounded-full p-0 leading-[0] transition-all duration-300 ${
+                  i === activeIndex ? 'h-2 w-2 bg-foreground' : 'h-1.5 w-1.5 bg-border'
                 }`}
               />
             ))}
@@ -194,16 +195,17 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </div>
 
       {/* Bottom action bar — 24px below template label / dots */}
-      <div className="mt-6 flex w-full max-w-lg shrink-0 gap-3 px-6 pb-6 mx-auto">
+      <div className="mx-auto mt-6 flex w-full max-w-[26rem] shrink-0 gap-3 pb-6">
         <button
           onClick={onBack}
-          className="flex items-center justify-center gap-2 px-6 py-4 border border-border text-xs font-body tracking-[0.15em] uppercase hover:bg-secondary transition-colors rounded-lg"
+          className="flex items-center justify-center gap-2 rounded-[4px] border border-border px-6 py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
+          Back
         </button>
         <button
           onClick={onGenerate}
-          className="flex-1 flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground text-xs font-body font-bold tracking-[0.15em] uppercase hover:opacity-90 transition-opacity rounded-lg"
+          className="flex flex-1 items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
         >
           Try This Template
         </button>

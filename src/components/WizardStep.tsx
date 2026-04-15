@@ -13,7 +13,7 @@ export function WizardStep({ children, visible }: WizardStepProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-      className="w-full h-[calc(100dvh-60px)] flex flex-col overflow-y-auto"
+      className="flex min-h-[100dvh] w-full flex-col overflow-y-auto"
     >
       {children}
     </motion.div>

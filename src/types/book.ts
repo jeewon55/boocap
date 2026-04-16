@@ -6,8 +6,6 @@ export interface Book {
   author: string;
   coverUrl: string;
   key: string;
-  /** Total pages when known (API or ISBN lookup); stack poster sums pageCount for each distinct book */
-  pageCount?: number;
 }
 
 export interface DayEntry {

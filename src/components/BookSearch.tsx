@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
-import { enrichBookWithPageCount, searchBooks } from '@/lib/bookApi';
+import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 
 interface BookSearchProps {
@@ -67,7 +67,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
               onClick={async () => {
                 setEnrichingKey(book.key);
                 try {
-                  onSelect(await enrichBookWithPageCount(book));
+                  onSelect(book);
                 } finally {
                   setEnrichingKey(null);
                 }

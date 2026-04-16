@@ -193,6 +193,18 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           Choose Template
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
+        {import.meta.env.DEV ? (
+          <div className="mt-3 text-center">
+            <a
+              href="/create/qa-posters"
+              target="_blank"
+              rel="noreferrer"
+              className="font-body text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Poster QA (new tab) — keep this tab for the product flow
+            </a>
+          </div>
+        ) : null}
       </div>
 
       {/* View existing book detail */}

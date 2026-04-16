@@ -226,20 +226,34 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </div>
 
       {/* Bottom action bar — 24px below template label / dots */}
-      <div className="mx-auto mt-6 flex w-full max-w-[26rem] shrink-0 gap-3 pb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center justify-center gap-2 rounded-[4px] border border-border px-6 py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back
-        </button>
-        <button
-          onClick={onGenerate}
-          className="flex flex-1 items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          Try This Template
-        </button>
+      <div className="mx-auto mt-6 w-full max-w-[26rem] shrink-0 pb-6">
+        <div className="flex gap-3">
+          <button
+            onClick={onBack}
+            className="flex items-center justify-center gap-2 rounded-[4px] border border-border px-6 py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back
+          </button>
+          <button
+            onClick={onGenerate}
+            className="flex flex-1 items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Try This Template
+          </button>
+        </div>
+        {import.meta.env.DEV ? (
+          <div className="mt-3 text-center">
+            <a
+              href="/create/qa-posters"
+              target="_blank"
+              rel="noreferrer"
+              className="font-body text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Poster QA (new tab)
+            </a>
+          </div>
+        ) : null}
       </div>
     </div>
   );

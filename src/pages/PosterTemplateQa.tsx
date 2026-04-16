@@ -93,6 +93,16 @@ export default function PosterTemplateQa() {
             <Link to="/create" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
               ← Back to create flow
             </Link>
+            {import.meta.env.DEV ? (
+              <a
+                href="/create"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
+                Create flow (new tab)
+              </a>
+            ) : null}
             <label className="flex items-center gap-2 font-body text-sm">
               <span className="text-muted-foreground">Mood</span>
               <select

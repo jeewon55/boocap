@@ -1,57 +1,5 @@
 import { Book } from '@/types/book';
 
-function coercePositiveInt(v: unknown): number | undefined {
-  if (typeof v === 'number' && Number.isFinite(v) && v > 0) return Math.round(v);
-  if (typeof v === 'string') {
-    const n = parseInt(v.replace(/[^0-9]/g, ''), 10);
-    if (Number.isFinite(n) && n > 0) return n;
-  }
-  return undefined;
-}
-
-/** Pull ISBN-like tokens from Kakao/Aladin `key` or raw isbn string for Google lookup */
-function extractIsbnCandidates(keyOrIsbn: string): string[] {
-  const s = keyOrIsbn.trim();
-  if (!s) return [];
-  const out: string[] = [];
-  for (const part of s.split(/\s+/)) {
-    const d = part.replace(/[^0-9Xx]/g, '');
-    if (d.length === 13 || d.length === 10) out.push(d.replace(/x$/i, 'X'));
-  }
-  const all = s.replace(/[^0-9Xx]/g, '');
-  if (all.length >= 13) out.push(all.slice(-13));
-  else if (all.length === 10) out.push(all.replace(/x$/i, 'X'));
-  return [...new Set(out)];
-}
-
-/** Google Books: first matching volume’s page count for an ISBN-10/13 */
-export async function fetchPageCountFromGoogleBooksByIsbn(keyOrIsbn: string): Promise<number | undefined> {
-  for (const isbn of extractIsbnCandidates(keyOrIsbn)) {
-    try {
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&maxResults=3`,
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const items = data.items as { volumeInfo?: { pageCount?: number } }[] | undefined;
-      if (!items?.length) continue;
-      const pc = coercePositiveInt(items[0].volumeInfo?.pageCount);
-      if (pc != null) return pc;
-    } catch {
-      /* try next candidate */
-    }
-  }
-  return undefined;
-}
-
-/** Fill `pageCount` when missing (e.g. Kakao search has no 쪽수 — resolve via Google by ISBN). */
-export async function enrichBookWithPageCount(book: Book): Promise<Book> {
-  if (coercePositiveInt(book.pageCount) != null) return book;
-  const n = await fetchPageCountFromGoogleBooksByIsbn(book.key);
-  if (n == null) return book;
-  return { ...book, pageCount: n };
-}
-
 // ── API Keys ──────────────────────────────────────────────
 // 카카오 REST API 키 (https://developers.kakao.com)
 const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY || 'e8dc40eabf2634c9bfe393fb82b38b47';
@@ -109,13 +57,11 @@ async function searchAladin(query: string): Promise<Book[]> {
     return (data.item || [])
       .filter((item: any) => item.cover)
       .map((item: any) => {
-        const pageCount = coercePositiveInt(item.itemPage);
         return {
           title: item.title || '',
           author: item.author?.split('(')[0]?.trim() || '',
           coverUrl: item.cover,
           key: item.isbn13 || item.isbn || `aladin-${Date.now()}-${Math.random()}`,
-          ...(pageCount != null ? { pageCount } : {}),
         } satisfies Book;
       });
   } catch {
@@ -151,13 +97,11 @@ async function searchGoogleBooks(query: string): Promise<Book[]> {
       .map((item: any) => {
         const coverUrl = getGoogleCoverUrl(item);
         if (!coverUrl) return null;
-        const pageCount = coercePositiveInt(item.volumeInfo?.pageCount);
         return {
           title: item.volumeInfo.title,
           author: item.volumeInfo.authors?.[0] || '',
           coverUrl,
           key: item.id,
-          ...(pageCount != null ? { pageCount } : {}),
         };
       })
       .filter(Boolean) as Book[];

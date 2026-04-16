@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
-import { enrichBookWithPageCount, searchBooks } from '@/lib/bookApi';
+import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
 import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
@@ -156,7 +156,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   onClick={async () => {
                     setEnrichingKey(book.key);
                     try {
-                      onSelect(await enrichBookWithPageCount(book));
+                      onSelect(book);
                     } finally {
                       setEnrichingKey(null);
                     }

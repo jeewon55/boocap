@@ -664,6 +664,23 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const TITLE_GAP_PX = 60;
       /** Nudge cover stack slightly above true vertical center of the band below the title */
       const STACK_COLLAGE_NUDGE_UP_PX = 20;
+      /** Titles can extend past covers; shift whole collage slightly left so the block feels centered. */
+      const STACK_COLLAGE_X_BIAS_PX = -14;
+
+      /** Uniform title column width per layout so long titles don’t shift cover centers. */
+      const getStackTitleSlotPx = (count: number): number => {
+        if (count <= 0) return Math.floor(INNER_W * 0.5);
+        if (count === 1) return Math.min(340, Math.floor(INNER_W * 0.65));
+        if (count === 2) return Math.floor(INNER_W * 0.42);
+        if (count === 3) return Math.floor(INNER_W * 0.29);
+        if (count === 4) return Math.floor(INNER_W * 0.36);
+        if (count === 5) return Math.floor(INNER_W * 0.28);
+        if (count === 6) return Math.floor(INNER_W * 0.27);
+        const cols = 4;
+        const sidePct = 4;
+        const cellWPct = (100 - 2 * sidePct) / cols;
+        return Math.max(72, Math.floor((INNER_W * cellWPct) / 100));
+      };
 
       /** Neat grid: no rotation, aligned rows/columns inside the safe zone */
       const getPositions = (count: number) => {
@@ -764,6 +781,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         books.length <= 3 ? 11 : books.length <= 5 ? 10 : books.length <= 8 ? 9 : books.length <= 14 ? 8 : 7;
 
       const positions = getPositions(books.length);
+      const stackTitleSlotPx = getStackTitleSlotPx(books.length);
       const titleBottomPx =
         TITLE_TOP_PX +
         TITLE_FONT_SIZE * 1.05 +
@@ -815,23 +833,12 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           }
         }
         if (!Number.isFinite(minL)) return 0;
-        return INNER_W / 2 - (minL + maxR) / 2;
+        return INNER_W / 2 - (minL + maxR) / 2 + STACK_COLLAGE_X_BIAS_PX;
       })();
 
       const stackBg = '#ffffff';
       const stackFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
       const stackBookWord = books.length === 1 ? 'book' : 'books';
-      const stackPageTotal = books.reduce((sum, b) => sum + (typeof b.pageCount === 'number' ? Math.max(0, b.pageCount) : 0), 0);
-      const stackPageWord = stackPageTotal === 1 ? 'page' : 'pages';
-
-      /** Title can extend past cover width; dense grid caps near column slot to limit overlap. */
-      const stackTitleMaxWidthPx = (coverW: number) => {
-        if (books.length > 6) {
-          const colSlot = Math.floor((INNER_W * 0.92 - STACK_DENSE_COL_GAP_PX * (4 - 1)) / 4);
-          return Math.min(Math.round(coverW * 1.42), colSlot + 14);
-        }
-        return Math.round(coverW * 1.22);
-      };
 
       return (
         <div
@@ -854,7 +861,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 {monthName}
               </p>
               <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_SUBLINE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2, textAlign: 'left' }}>
-                with {books.length} {stackBookWord}, {stackPageTotal} {stackPageWord}
+                with {books.length} {stackBookWord}
               </p>
             </div>
 
@@ -872,38 +879,47 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   const pos = positions[i]!;
                   const anchorCenter = 'centerX' in pos && pos.centerX === true;
                   return (
-                    <div key={book.key} style={{
-                      position: 'absolute',
-                      left: anchorCenter ? '50%' : pos.left,
-                      top: `calc(${pos.top} + ${yShiftPx}px)`,
-                      transform: anchorCenter ? `translateX(-50%) rotate(${pos.rotate}deg)` : `rotate(${pos.rotate}deg)`,
-                      zIndex: 10 + i * 2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      padding: '4px 10px',
-                    }}>
-                      <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden' }}>
-                        <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h }} />
+                    <div
+                      key={book.key}
+                      style={{
+                        position: 'absolute',
+                        left: anchorCenter ? '50%' : pos.left,
+                        top: `calc(${pos.top} + ${yShiftPx}px)`,
+                        transform: anchorCenter ? `translateX(-50%) rotate(${pos.rotate}deg)` : `rotate(${pos.rotate}deg)`,
+                        zIndex: 10 + i * 2,
+                        width: pos.w,
+                        boxSizing: 'border-box',
+                        paddingTop: 4,
+                      }}
+                    >
+                      <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden', width: pos.w }}>
+                        <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h, display: 'block' }} />
                       </div>
-                      <p style={{
-                        fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
-                        fontSize: titleFontSize,
-                        color: '#2C2C2C',
-                        opacity: 0.65,
-                        marginTop: 8,
-                        textAlign: 'center',
-                        letterSpacing: '-0.02em',
-                        maxWidth: stackTitleMaxWidthPx(pos.w),
-                        lineHeight: 1.35,
-                        whiteSpace: 'normal',
-                        overflow: 'visible',
-                        wordBreak: 'break-word',
-                        position: 'relative',
-                        zIndex: 10 + i * 2 + 1,
-                        padding: '1px 4px',
-                        borderRadius: 2,
-                      }}>
+                      <p
+                        style={{
+                          position: 'absolute',
+                          left: '50%',
+                          top: pos.h + 12,
+                          transform: 'translateX(-50%)',
+                          width: stackTitleSlotPx,
+                          maxWidth: stackTitleSlotPx,
+                          margin: 0,
+                          boxSizing: 'border-box',
+                          fontFamily: "'Pretendard', 'Noto Sans KR', sans-serif",
+                          fontSize: titleFontSize,
+                          color: '#2C2C2C',
+                          opacity: 0.65,
+                          textAlign: 'center',
+                          letterSpacing: '-0.02em',
+                          lineHeight: 1.35,
+                          whiteSpace: 'normal',
+                          overflow: 'visible',
+                          wordBreak: 'break-word',
+                          zIndex: 10 + i * 2 + 1,
+                          padding: '1px 4px',
+                          borderRadius: 2,
+                        }}
+                      >
                         {book.title}
                       </p>
                     </div>
@@ -1460,106 +1476,130 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── TIME-LINE SCATTER: newsletter dividers + vertical timeline + zigzag labels ───
+    // ─── TIMELINE: full month 1…last day; spine; read days left (+ title), unread right ───
     if (template === 'timeline') {
       const listMonthTitle =
         MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      const pad = 32;
-      const ink = moodConfig.textColor;
-      const lineHeavy = 4;
-      /** Same vertical size as baseStyle 600×(4/5) canvas */
+      const timelineInk = '#121212';
+      const lineHeavy = 2;
       const posterHeight = 750;
       const scatterFont = "'Pretendard', 'Noto Sans KR', sans-serif";
-      const reads = readsSortedByDay;
-
-      /** Vertical spine at 4/5 of poster width (600px → 480px). */
       const timelinePosterW = Number(baseStyle.width) || 600;
-      const lineX = Math.round((timelinePosterW * 4) / 5);
-      /** Horizontal connectors start past on-spine date numerals */
-      const spineClearance = 13;
-      /** Bottom of the two-line month/year header (pad + text + header block paddingBottom). */
-      const timelineHeaderBottomPx = pad + 56 * 1.02 * 2 + 10;
-      /** Space from header to spine — ~3× a typical 24px margin (was ~132, often overlapping title). */
-      const timelineHeaderToTrackGap = 24 * 3;
-      const trackTop = Math.round(timelineHeaderBottomPx + timelineHeaderToTrackGap);
-      const trackBottom = posterHeight - 86;
-      const trackH = Math.max(120, trackBottom - trackTop);
+      /** Vertical spine: inset from the poster’s right edge (~40px + 24px further left). */
+      const lineX = Math.round(timelinePosterW - 64);
+      const monthRailW = 56;
+      const readDatePx = 48;
+      const readTitlePx = 32;
 
-      /** Evenly space each read along the spine (order = chronological reads), with small top/bottom inset. */
-      const timelineReadY = (index: number, total: number) => {
-        if (total <= 0) return trackTop + trackH / 2;
-        const inset = Math.min(20, trackH * 0.045);
-        const usable = Math.max(trackH - 2 * inset, 1);
-        if (total === 1) return trackTop + inset + usable / 2;
-        return trackTop + inset + (index / (total - 1)) * usable;
+      const bookByDay = entries as Record<number, Book | undefined>;
+      const nDays = daysInMonth;
+      /**
+       * Timeline layout order:
+       * 1) Day 1 / last day centers pinned near poster top & bottom.
+       * 2) Read rows use fixed height; consecutive read days — minimum center gap only (no extra pad).
+       * 3) Unread font size maximized (binary search); slack only on 1↔2 and (n-1)↔n gaps.
+       */
+      /** One-line read row (~max of date & title); used for vertical packing. */
+      const readRowVisualH = Math.ceil(Math.max(readDatePx * 1.02, readTitlePx * 1.05) + 4);
+      /** Pull consecutive read-day centers closer than nominal half-heights (removes “air” between rows). */
+      const PAD_READ_READ = -14;
+      const PAD_READ_UNREAD = 0;
+      const PAD_UNREAD_UNREAD = 0;
+      /** Small screen padding so glyphs aren’t clipped at top/bottom. */
+      const TIMELINE_V_PAD = 4;
+
+      const rowBlockH = (dayIndex: number, unreadPx: number) =>
+        bookByDay[dayIndex + 1] ? readRowVisualH : unreadPx;
+
+      /** Min center-distance between calendar day (i+1) and (i+2). */
+      const minGapBetween = (i: number, unreadPx: number) => {
+        const readA = Boolean(bookByDay[i + 1]);
+        const readB = Boolean(bookByDay[i + 2]);
+        const ha = readA ? readRowVisualH : unreadPx;
+        const hb = readB ? readRowVisualH : unreadPx;
+        const base = (ha + hb) / 2;
+        if (readA && readB) return Math.max(readDatePx * 0.72, base + PAD_READ_READ);
+        if (!readA && !readB) return base + PAD_UNREAD_UNREAD;
+        return base + PAD_READ_UNREAD;
       };
 
-      /** One spine anchor per read so labels align with distributed blocks (same day can appear twice). */
-      const spineStops = reads.map((r, i) => ({
-        day: r.day,
-        y: timelineReadY(i, reads.length),
-        key: `${r.day}-${r.book.key}`,
-      })).sort((a, b) => a.y - b.y);
-
-      const desiredGapHalf = 12;
-      const verticalSpineSegments: { y1: number; y2: number }[] = (() => {
-        if (spineStops.length === 0) {
-          return [{ y1: trackTop, y2: trackBottom }];
-        }
-        const segs: { y1: number; y2: number }[] = [];
-        let cursor = trackTop;
-        for (let i = 0; i < spineStops.length; i++) {
-          const { y } = spineStops[i];
-          const prevY = i === 0 ? trackTop : spineStops[i - 1].y;
-          const nextY = i === spineStops.length - 1 ? trackBottom : spineStops[i + 1].y;
-          const spaceAbove = y - prevY;
-          const spaceBelow = nextY - y;
-          const halfUp = Math.min(desiredGapHalf, Math.max(2.5, spaceAbove / 2 - 0.5));
-          const halfDown = Math.min(desiredGapHalf, Math.max(2.5, spaceBelow / 2 - 0.5));
-          const segEnd = y - halfUp;
-          if (segEnd > cursor + 0.5) {
-            segs.push({ y1: cursor, y2: segEnd });
+      const computeRowCenters = (unreadPx: number): number[] | null => {
+        if (nDays <= 1) return [posterHeight / 2];
+        let sumMinGaps = 0;
+        for (let i = 0; i < nDays - 1; i++) sumMinGaps += minGapBetween(i, unreadPx);
+        const c0 = TIMELINE_V_PAD + rowBlockH(0, unreadPx) / 2;
+        const cLast = posterHeight - TIMELINE_V_PAD - rowBlockH(nDays - 1, unreadPx) / 2;
+        if (cLast - c0 < sumMinGaps) return null;
+        const gaps: number[] = [];
+        for (let i = 0; i < nDays - 1; i++) gaps.push(minGapBetween(i, unreadPx));
+        const slack = cLast - c0 - sumMinGaps;
+        if (slack > 0) {
+          if (nDays === 2) {
+            gaps[0] = (gaps[0] ?? 0) + slack;
+          } else {
+            const halfSlack = slack / 2;
+            gaps[0] = (gaps[0] ?? 0) + halfSlack;
+            gaps[nDays - 2] = (gaps[nDays - 2] ?? 0) + (slack - halfSlack);
           }
-          cursor = y + halfDown;
         }
-        if (trackBottom > cursor + 0.5) {
-          segs.push({ y1: cursor, y2: trackBottom });
+        const out: number[] = [];
+        let y = c0;
+        for (let i = 0; i < nDays; i++) {
+          out.push(y);
+          if (i < nDays - 1) y += gaps[i]!;
         }
-        return segs;
-      })();
+        return out;
+      };
+
+      let unreadDatePx = 10;
+      let rowCenterY: number[] = [];
+      if (nDays <= 1) {
+        rowCenterY = [posterHeight / 2];
+        const innerH = posterHeight - 2 * TIMELINE_V_PAD;
+        unreadDatePx = Math.min(120, Math.max(12, Math.floor(innerH * 0.42)));
+      } else {
+        const base = computeRowCenters(10);
+        if (!base) {
+          unreadDatePx = 10;
+          rowCenterY = Array.from({ length: nDays }, (_, i) => {
+            const h0 = rowBlockH(0, 10) / 2 + TIMELINE_V_PAD;
+            const h1 = rowBlockH(nDays - 1, 10) / 2 + TIMELINE_V_PAD;
+            return h0 + (i / (nDays - 1)) * (posterHeight - h0 - h1);
+          });
+        } else {
+          let lo = 10;
+          let hi = 120;
+          let bestU = 10;
+          let bestCenters = base;
+          while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            const c = computeRowCenters(mid);
+            if (c) {
+              bestU = mid;
+              bestCenters = c;
+              lo = mid + 1;
+            } else {
+              hi = mid - 1;
+            }
+          }
+          unreadDatePx = bestU;
+          rowCenterY = bestCenters;
+        }
+      }
 
       return (
-        <div ref={ref} style={{ ...baseStyle, textAlign: 'left' }}>
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              padding: pad,
-              paddingBottom: 10,
-              boxSizing: 'border-box',
-            }}
-          >
-            <p
-              style={{
-                fontFamily: scatterFont,
-                fontSize: 56,
-                fontWeight: 700,
-                lineHeight: 1.02,
-                letterSpacing: '-0.03em',
-                margin: 0,
-                color: ink,
-              }}
-            >
-              {listMonthTitle}
-              <br />
-              {year}
-            </p>
-          </div>
-
+        <div
+          ref={ref}
+          style={{
+            ...baseStyle,
+            color: timelineInk,
+            textAlign: 'left',
+            isolation: 'isolate',
+            overflow: 'visible',
+          }}
+        >
           <svg
-            width={600}
+            width={timelinePosterW}
             height={posterHeight}
             style={{
               position: 'absolute',
@@ -1567,113 +1607,153 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               top: 0,
               pointerEvents: 'none',
               overflow: 'visible',
+              zIndex: 1,
             }}
             aria-hidden
           >
-            {verticalSpineSegments.map((seg, si) => (
-              <line
-                key={`spine-${si}`}
-                x1={lineX}
-                y1={seg.y1}
-                x2={lineX}
-                y2={seg.y2}
-                stroke={ink}
-                strokeWidth={lineHeavy}
-                strokeLinecap="butt"
-              />
-            ))}
-            {spineStops.map(({ day, y, key }) => (
-              <text
-                key={`spine-${key}`}
-                x={lineX}
-                y={y}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill={ink}
-                style={{
-                  fontFamily: scatterFont,
-                  fontSize: 15,
-                  fontWeight: 700,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {day}
-              </text>
-            ))}
-            {reads.map((r, i) => {
-              const y = timelineReadY(i, reads.length);
-              /** Dashed connector: from spine leftward into the text column (all entries on the left). */
-              const gapFromLine = 12 + spineClearance;
-              const dashLen = 44;
-              const xAtSpine = lineX - spineClearance;
-              const xDashOuter = Math.max(pad + 24, xAtSpine - dashLen);
-              const x1 = xDashOuter;
-              const x2 = xAtSpine;
-              return (
-                <g key={`${r.day}-${r.book.key}`}>
-                  <line
-                    x1={x1}
-                    y1={y}
-                    x2={x2}
-                    y2={y}
-                    stroke={ink}
-                    strokeWidth={1}
-                    strokeDasharray="3 5"
-                    opacity={0.45}
-                  />
-                </g>
-              );
-            })}
+            <line
+              x1={lineX}
+              y1={0}
+              x2={lineX}
+              y2={posterHeight}
+              stroke={timelineInk}
+              strokeWidth={lineHeavy}
+              strokeLinecap="butt"
+            />
           </svg>
 
-          {reads.map((r, i) => {
-            const y = timelineReadY(i, reads.length);
-            const gapFromLine = 12 + spineClearance;
-            const textColW = Math.max(120, lineX - gapFromLine - pad);
-            const blockStyle: React.CSSProperties = {
-              position: 'absolute',
-              top: y,
-              left: pad,
-              width: textColW,
-              transform: 'translateY(-50%)',
-              textAlign: 'left',
-              boxSizing: 'border-box',
-            };
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const book = bookByDay[day];
+            const y = rowCenterY[i] ?? posterHeight / 2;
+            const dateGap = 8;
+            const leftBlockW = lineX - monthRailW - 10 - dateGap;
+
+            if (book) {
+              return (
+                <div
+                  key={`tl-${day}`}
+                  style={{
+                    position: 'absolute',
+                    left: monthRailW + 6,
+                    top: y,
+                    width: Math.max(80, leftBlockW),
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: 12,
+                    boxSizing: 'border-box',
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    paddingRight: dateGap,
+                    zIndex: 2,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: scatterFont,
+                      fontSize: readTitlePx,
+                      fontWeight: 600,
+                      lineHeight: 1,
+                      letterSpacing: '-0.02em',
+                      color: timelineInk,
+                      textAlign: 'right',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      minWidth: 0,
+                      flex: '1 1 auto',
+                    }}
+                    title={book.title}
+                  >
+                    {book.title}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: scatterFont,
+                      fontSize: readDatePx,
+                      fontWeight: 700,
+                      letterSpacing: '-0.03em',
+                      color: timelineInk,
+                      flexShrink: 0,
+                      lineHeight: 1,
+                      display: 'block',
+                    }}
+                  >
+                    {day}
+                  </span>
+                </div>
+              );
+            }
+
             return (
-              <div key={`txt-${r.day}-${r.book.key}`} style={blockStyle}>
-                <p
+              <div
+                key={`tl-${day}`}
+                style={{
+                  position: 'absolute',
+                  left: lineX + dateGap,
+                  top: y,
+                  transform: 'translateY(-50%)',
+                  zIndex: 2,
+                  margin: 0,
+                  padding: 0,
+                }}
+              >
+                <span
                   style={{
-                    margin: 0,
                     fontFamily: scatterFont,
-                    fontSize: 17,
-                    fontWeight: 800,
-                    lineHeight: 1.12,
-                    letterSpacing: '0.03em',
-                    textTransform: 'uppercase',
-                    color: ink,
-                    wordBreak: 'break-word',
+                    fontSize: unreadDatePx,
+                    fontWeight: 700,
+                    letterSpacing: 0,
+                    color: timelineInk,
+                    lineHeight: 1,
+                    margin: 0,
+                    padding: 0,
+                    display: 'block',
                   }}
                 >
-                  {r.book.title}
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    marginTop: 5,
-                    fontFamily: scatterFont,
-                    fontSize: 9,
-                    fontWeight: 500,
-                    lineHeight: 1.35,
-                    letterSpacing: '-0.01em',
-                    color: ink,
-                    opacity: 0.52,
-                  }}
-                >
-                  {r.book.author}
-                </p>
+                  {day}
+                </span>
               </div>
             );
           })}
+
+          {/* Template-only decor: top-right of horizontal string = (12,12) so “2026” ends at that corner after -90°. */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 12,
+              top: 12,
+              width: 0,
+              height: 0,
+              overflow: 'visible',
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+            aria-hidden
+          >
+            <span
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                display: 'inline-block',
+                transform: 'rotate(-90deg)',
+                transformOrigin: 'right top',
+                fontFamily: scatterFont,
+                fontSize: Math.min(112, Math.max(72, posterHeight * 0.136)),
+                fontWeight: 700,
+                letterSpacing: '-0.04em',
+                whiteSpace: 'nowrap',
+                color: '#ebebeb',
+                lineHeight: 1,
+              }}
+            >
+              {listMonthTitle}, {year}
+            </span>
+          </div>
         </div>
       );
     }
@@ -1736,10 +1816,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               flexShrink: 0,
               margin: 0,
               marginBottom: capsuleHeaderMarginBottom,
-              fontFamily: 'Arial',
+              fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif',
               fontSize: capsuleHeaderFontPx,
-              fontWeight: 600,
-              letterSpacing: '-0.5px',
+              fontWeight: 800,
+              letterSpacing: '-2px',
               color: moodConfig.textColor,
               textAlign: 'left',
               lineHeight: `${capsuleHeaderLinePx}px`,

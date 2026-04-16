@@ -46,24 +46,24 @@ export const MOODS: MoodConfig[] = [
 ];
 
 export const TEMPLATES: TemplateConfig[] = [
-  { id: 'grid', label: 'Grid', description: '균일한 그리드 레이아웃' },
+  { id: 'grid', label: 'Monthly Calendar', description: '균일한 그리드 레이아웃' },
   {
     id: 'grid2',
-    label: 'Grid 2',
+    label: 'Borderless Calendar',
     description: '무테 달력, 날짜·제목·표지 스택, 종이 질감 느낌',
   },
-  { id: 'stack', label: 'Stack', description: '뉴스레터 스타일' },
-  { id: 'list', label: 'List', description: '리스트 타이포그래피' },
+  { id: 'stack', label: 'Big Cover', description: '뉴스레터 스타일' },
+  { id: 'list', label: 'The Receipt', description: '리스트 타이포그래피' },
   {
     id: 'essay',
-    label: 'Essay',
+    label: 'The Typo Slash',
     description: '영문 산문형 — In (월), I have read … / 제목+번호 / 마무리 문장',
   },
-  { id: 'capsule', label: 'Capsule List', description: '상단 월·권수 제목, 캡슐 안에는 번호와 제목만' },
-  { id: 'mosaic', label: 'Mosaic', description: '연도·월 없이 표지만, 책 개수에 맞는 컬러 그리드' },
+  { id: 'capsule', label: 'Book Edge', description: '상단 월·권수 제목, 캡슐 안에는 번호와 제목만' },
+  { id: 'mosaic', label: 'Floating Cover', description: '연도·월 없이 표지만, 책 개수에 맞는 컬러 그리드' },
   {
     id: 'timeline',
-    label: 'Time-line Scatter',
+    label: 'Timeline',
     description: '굵은 디바이더와 세로 타임라인, 읽은 날짜에 점·지그재그 타이포',
   },
 ];

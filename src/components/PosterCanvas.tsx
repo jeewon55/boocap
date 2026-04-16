@@ -1,9 +1,8 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 import { Book, MOODS, MoodType, TemplateType } from '@/types/book';
 import { getPaleDominantCoverBackground, mosaicBackdropIfNearlyWhite } from '@/lib/mosaicCoverColor';
+import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
 import paperTexture from '@/assets/paper-texture.jpg';
-
-const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 function makeCoverUrl(src: string): string {
   if (!src || !/^https?:\/\//i.test(src)) return src;
@@ -175,124 +174,221 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       <p style={{ fontSize: 14, opacity: 0.3, letterSpacing: '0.2em', textAlign: 'center' }}>ADD BOOKS TO PREVIEW</p>
     );
 
-    // ─── GRID (bordered calendar, cover fills cell) ───
+    // ─── GRID (Monthly Calendar): same structure as Step1 “Mark Your Days” — Monday-first, horizontal rules only, two-digit dates
     if (template === 'grid') {
-      const GRID_FONT = "'DM Sans', system-ui, sans-serif";
-      const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      const firstDay = new Date(year, month, 1).getDay();
-      const blanks = Array.from({ length: firstDay });
-      const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-      /** Calendar borders + weekday labels + date numbers */
-      const gridLine = '#554D4A';
-      const weekdayColor = '#554D4A';
-
-      const cellBorder: React.CSSProperties = {
-        borderRight: `1px solid ${gridLine}`,
-        borderBottom: `1px solid ${gridLine}`,
-        boxSizing: 'border-box',
-      };
+      const weekRows = buildCalendarWeekRows(year, month);
+      const monthShort = MONTHS_SHORT[month];
+      const fg = moodConfig.textColor;
+      const darkPoster = mood === 'dark' || mood === 'bold';
+      const rowBorder = darkPoster ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.14)';
+      const weekdayMuted = darkPoster ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+      const adjacentDayColor = darkPoster ? 'rgba(255,255,255,0.32)' : '#d6d6d6';
+      const displayFont = 'var(--font-display), system-ui, sans-serif';
+      const bodyFont = 'var(--font-body), system-ui, sans-serif';
+      /** Narrower than 32+32 so 6 week rows × 3:4 cells fit without clipping (600 canvas). */
+      const GRID_INSET_X = 46;
+      const GRID_INSET_BOTTOM = 26;
+      /** Month + year → calendar gap (~1.5× prior spacing vs header bottom). */
+      const gridTop = 103;
 
       return (
-        <div ref={ref} style={{ ...baseStyle, fontFamily: GRID_FONT }}>
-          <p
-            style={{
-              position: 'absolute',
-              top: 80,
-              left: 0,
-              right: 0,
-              zIndex: 0,
-              textAlign: 'center',
-              fontSize: 64,
-              fontWeight: 700,
-              lineHeight: 1.2,
-              letterSpacing: '-3px',
-              color: moodConfig.textColor,
-              fontFamily: 'Pretendard',
-            }}
-          >
-            Read in {gridMonthTitle}
-          </p>
+        <div ref={ref} style={{ ...baseStyle, fontFamily: bodyFont }}>
           <div
             style={{
               position: 'absolute',
-              top: 174,
-              left: 32,
-              right: 32,
-              bottom: 32,
+              top: 28,
+              left: GRID_INSET_X,
+              right: GRID_INSET_X,
+              zIndex: 0,
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                width: '100%',
+                minWidth: 0,
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                gap: 12,
+                padding: '6px 4px 2px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <span
+                style={{
+                  flex: '1 1 auto',
+                  minWidth: 0,
+                  textAlign: 'left',
+                  fontFamily: displayFont,
+                  fontWeight: 900,
+                  letterSpacing: 0,
+                  color: fg,
+                  lineHeight: 0.82,
+                  fontSize: 50,
+                }}
+              >
+                {monthShort}
+              </span>
+              <span
+                style={{
+                  flexShrink: 0,
+                  alignSelf: 'baseline',
+                  fontFamily: '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
+                  fontSize: 34,
+                  fontWeight: 900,
+                  fontVariantNumeric: 'tabular-nums',
+                  lineHeight: 1,
+                  letterSpacing: -2,
+                  color: fg,
+                }}
+              >
+                {year}
+              </span>
+            </div>
+          </div>
+          <div
+            style={{
+              position: 'absolute',
+              top: gridTop,
+              left: GRID_INSET_X,
+              right: GRID_INSET_X,
+              bottom: GRID_INSET_BOTTOM,
               zIndex: 1,
               minHeight: 0,
               overflow: 'hidden',
               boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(7, 1fr)',
-                gridAutoRows: 'auto',
-                alignContent: 'start',
                 width: '100%',
-                maxWidth: '100%',
-                height: 'fit-content',
-                maxHeight: '100%',
-                borderLeft: `1px solid ${gridLine}`,
-                borderTop: `1px solid ${gridLine}`,
+                borderBottom: `1px solid ${rowBorder}`,
+                padding: '0 2px 6px',
                 boxSizing: 'border-box',
               }}
             >
-              {WEEKDAYS.map((d) => (
+              {WEEK_LETTERS_MON.map(({ letter, title }) => (
                 <div
-                  key={d}
+                  key={title}
                   style={{
-                    ...cellBorder,
                     textAlign: 'center',
-                    fontSize: 10,
-                    fontWeight: 800,
-                    letterSpacing: '0.08em',
-                    color: weekdayColor,
-                    padding: '6px 0 8px',
-                    fontFamily: GRID_FONT,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: weekdayMuted,
+                    fontFamily: bodyFont,
                   }}
                 >
-                  {d}
+                  {letter}
                 </div>
               ))}
-              {blanks.map((_, i) => (
-                <div key={`b${i}`} style={{ ...cellBorder, aspectRatio: '3/4', minHeight: 0 }} />
-              ))}
-              {days.map((day) => {
-                const book = entries[day];
-                return (
-                  <div
-                    key={day}
-                    style={{
-                      ...cellBorder,
-                      aspectRatio: '3/4',
-                      position: 'relative',
-                      minHeight: 0,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {book ? (
-                      <BookImg src={book.coverUrl} alt={book.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
-                    ) : (
-                      <span
+            </div>
+
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', fontFamily: bodyFont }}>
+              {weekRows.map((row, ri) => (
+                <div
+                  key={`w-${ri}`}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    width: '100%',
+                    flexShrink: 0,
+                    borderBottom: ri < weekRows.length - 1 ? `1px solid ${rowBorder}` : undefined,
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {row.map((cell, ci) => {
+                    if (cell.scope === 'adjacent') {
+                      return (
+                        <div
+                          key={`adj-${ri}-${ci}`}
+                          style={{
+                            aspectRatio: '3 / 4',
+                            minHeight: 0,
+                            minWidth: 0,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-start',
+                            padding: 6,
+                            boxSizing: 'border-box',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: displayFont,
+                              fontSize: 22,
+                              fontWeight: 700,
+                              fontVariantNumeric: 'tabular-nums',
+                              lineHeight: 1,
+                              letterSpacing: '-0.02em',
+                              color: adjacentDayColor,
+                            }}
+                          >
+                            {twoDigitDay(cell.day)}
+                          </span>
+                        </div>
+                      );
+                    }
+                    const day = cell.day;
+                    const book = entries[day];
+                    return (
+                      <div
+                        key={`day-${day}`}
                         style={{
-                          position: 'absolute',
-                          top: 6,
-                          left: 8,
-                          fontSize: 10,
-                          fontWeight: 500,
-                          color: gridLine,
-                          fontFamily: GRID_FONT,
+                          aspectRatio: '3 / 4',
+                          minHeight: 0,
+                          minWidth: 0,
+                          position: 'relative',
+                          overflow: book ? 'hidden' : 'visible',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: book ? 'stretch' : 'flex-start',
+                          justifyContent: book ? 'stretch' : 'flex-start',
+                          padding: book ? 0 : 6,
+                          boxSizing: 'border-box',
                         }}
                       >
-                        {day}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                        {book ? (
+                          <>
+                            <BookImg
+                              src={book.coverUrl}
+                              alt={book.title}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                pointerEvents: 'none',
+                                boxShadow: `inset 0 0 0 1px ${rowBorder}`,
+                              }}
+                              aria-hidden
+                            />
+                          </>
+                        ) : (
+                          <span
+                            style={{
+                              fontFamily: displayFont,
+                              fontSize: 22,
+                              fontWeight: 700,
+                              fontVariantNumeric: 'tabular-nums',
+                              lineHeight: 1,
+                              letterSpacing: '-0.02em',
+                              color: fg,
+                            }}
+                          >
+                            {twoDigitDay(day)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1327,7 +1423,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         .map(([day, y]) => ({ day, y }))
         .sort((a, b) => a.y - b.y);
 
-      const desiredGapHalf = 9;
+      const desiredGapHalf = 12;
       const verticalSpineSegments: { y1: number; y2: number }[] = (() => {
         if (spineStops.length === 0) {
           return [{ y1: trackTop, y2: trackBottom }];
@@ -1418,7 +1514,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 fill={ink}
                 style={{
                   fontFamily: scatterFont,
-                  fontSize: 11,
+                  fontSize: 15,
                   fontWeight: 700,
                   letterSpacing: '-0.02em',
                 }}

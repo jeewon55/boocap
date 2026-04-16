@@ -142,7 +142,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by title or author…"
-                className="w-full bg-transparent text-sm font-body outline-none placeholder:text-muted-foreground"
+                className="w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
               />
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
             </div>
@@ -234,34 +234,34 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Title *</label>
+              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Title *</label>
               <input
                 autoFocus={mode === 'manual'}
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
                 placeholder="e.g. Demian"
-                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Author</label>
+              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Author</label>
               <input
                 value={manualAuthor}
                 onChange={(e) => setManualAuthor(e.target.value)}
                 placeholder="e.g. Hermann Hesse"
-                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
             {!manualCoverUrl && (
               <div>
-                <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">Or cover image URL</label>
+                <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Or cover image URL</label>
                 <input
                   value={manualCoverUrl}
                   onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
                   placeholder="https://example.com/cover.jpg"
-                  className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+                  className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
                 />
               </div>
             )}

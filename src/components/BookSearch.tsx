@@ -53,7 +53,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for a book..."
-            className="w-full bg-transparent text-sm font-body outline-none placeholder:text-muted-foreground"
+            className="w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
           />
           {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
         </div>

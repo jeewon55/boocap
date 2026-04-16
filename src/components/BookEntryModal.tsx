@@ -66,38 +66,38 @@ export function BookEntryModal({ day, month, onConfirm, onClose }: BookEntryModa
 
           {/* Title */}
           <div>
-            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+            <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
               Title
             </label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Demian"
-              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-foreground"
             />
           </div>
 
           {/* Author */}
           <div>
-            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+            <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
               Author
             </label>
             <input
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
               placeholder="e.g. Hermann Hesse"
-              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-foreground"
             />
           </div>
           <div>
-            <label className="mb-2 block text-[10px] font-body tracking-[0.2em] text-muted-foreground">
+            <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
               Cover image URL
             </label>
             <input
               value={coverUrl}
               onChange={(e) => { setCoverUrl(e.target.value); setPreviewError(false); }}
               placeholder="https://example.com/cover.jpg"
-              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground"
+              className="w-full border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-foreground"
             />
           </div>
         </div>

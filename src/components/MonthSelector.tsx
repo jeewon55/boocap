@@ -46,13 +46,13 @@ export function MonthSelector({
             <button
               type="button"
               onClick={openPicker}
-              className="flex w-full min-w-0 cursor-pointer items-start justify-between gap-3 rounded-[4px] bg-transparent p-1 text-left transition-colors hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/20"
+              className="flex w-full min-w-0 cursor-pointer items-start justify-start gap-2 rounded-[4px] bg-transparent p-1 text-left transition-colors hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/20"
             >
-              <div className="min-w-0 flex-1 text-left">{compactLeading}</div>
+              <div className="min-w-0 w-fit text-left">{compactLeading}</div>
               <span
-                className="font-display shrink-0 self-start text-[20px] font-medium tabular-nums leading-none tracking-normal text-foreground"
+                className="font-['Helvetica_Neue'] shrink-0 self-end pb-[2px] text-[44px] font-bold tabular-nums leading-none tracking-normal text-foreground"
               >
-                {year}
+                , {year}
               </span>
             </button>
           </div>

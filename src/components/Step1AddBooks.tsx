@@ -5,6 +5,7 @@ import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { MonthSelector } from '@/components/MonthSelector';
 import { X, ArrowRight, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
 
 function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.MouseEvent) => void }) {
   const [imgOk, setImgOk] = useState(true);
@@ -33,17 +34,6 @@ function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.Mou
   );
 }
 
-/** Monday-first single-letter row (Sat / Sun both “S”; titles disambiguate). */
-const WEEK_LETTERS_MON: { letter: string; title: string }[] = [
-  { letter: 'M', title: 'Monday' },
-  { letter: 'T', title: 'Tuesday' },
-  { letter: 'W', title: 'Wednesday' },
-  { letter: 'T', title: 'Thursday' },
-  { letter: 'F', title: 'Friday' },
-  { letter: 'S', title: 'Saturday' },
-  { letter: 'S', title: 'Sunday' },
-];
-
 const MONTHS_SHORT = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -53,53 +43,6 @@ const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER',
 ];
-
-type CalendarGridCell =
-  | { scope: 'current'; day: number }
-  | { scope: 'adjacent'; day: number; which: 'prev' | 'next' };
-
-function twoDigitDay(n: number): string {
-  if (!Number.isFinite(n) || n < 1 || n > 31) return '  ';
-  return String(Math.trunc(n)).padStart(2, '0');
-}
-
-/** Monday-first ISO-style weeks; leading/trailing days are adjacent months. */
-function buildCalendarWeekRows(year: number, month: number): CalendarGridCell[][] {
-  const y = Number(year);
-  const m = Number(month);
-  if (!Number.isFinite(y) || !Number.isFinite(m)) return [];
-
-  const firstDaySun0 = new Date(y, m, 1).getDay();
-  const leadBlanks = (firstDaySun0 + 6) % 7;
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const prevMonthLast = new Date(y, m, 0).getDate();
-
-  const leading: CalendarGridCell[] = [];
-  for (let i = 0; i < leadBlanks; i++) {
-    leading.push({
-      scope: 'adjacent',
-      which: 'prev',
-      day: prevMonthLast - leadBlanks + 1 + i,
-    });
-  }
-
-  const current: CalendarGridCell[] = [];
-  for (let d = 1; d <= daysInMonth; d++) {
-    current.push({ scope: 'current', day: d });
-  }
-
-  const gridDays: CalendarGridCell[] = [...leading, ...current];
-  let nextTrail = 1;
-  while (gridDays.length % 7 !== 0) {
-    gridDays.push({ scope: 'adjacent', which: 'next', day: nextTrail++ });
-  }
-
-  const weekRows: CalendarGridCell[][] = [];
-  for (let i = 0; i < gridDays.length; i += 7) {
-    weekRows.push(gridDays.slice(i, i + 7));
-  }
-  return weekRows;
-}
 
 interface Step1Props {
   year: number;
@@ -114,8 +57,18 @@ interface Step1Props {
 export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, onRemoveBook, onNext }: Step1Props) {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isReplacing, setIsReplacing] = useState(false);
+  const [showNoBookModal, setShowNoBookModal] = useState(false);
 
   const weekRows = buildCalendarWeekRows(year, month);
+  const hasSelectedBooks = Object.keys(entries).length > 0;
+
+  const handleNext = () => {
+    if (!hasSelectedBooks) {
+      setShowNoBookModal(true);
+      return;
+    }
+    onNext();
+  };
 
   return (
     <div className="flex flex-col px-6">
@@ -224,7 +177,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
       {/* 하단 고정 버튼 - 화면이 짧아도 항상 보임 */}
       <div className="sticky bottom-0 mx-auto w-full max-w-[26rem] bg-background py-4">
         <button
-          onClick={onNext}
+          onClick={handleNext}
           className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
         >
           Choose Template
@@ -296,6 +249,32 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           }}
           onClose={() => { setSelectedDay(null); setIsReplacing(false); }}
         />
+      )}
+
+      {/* Guard modal: block next step when no book is selected */}
+      {showNoBookModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/25 px-6"
+          onClick={() => setShowNoBookModal(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.16 }}
+            className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-5 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-display text-[18px] font-bold tracking-[0] text-foreground">Please select a book first</p>
+            <p className="mt-2 text-sm text-muted-foreground">Add at least one book to the calendar before moving to the template step.</p>
+            <button
+              type="button"
+              onClick={() => setShowNoBookModal(false)}
+              className="mt-5 w-full rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              OK
+            </button>
+          </motion.div>
+        </div>
       )}
     </div>
   );

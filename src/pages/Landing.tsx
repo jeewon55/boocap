@@ -53,7 +53,7 @@ export default function Landing() {
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col lg:flex-row">
         <section className="flex flex-1 flex-col justify-center px-6 py-14 lg:py-24">
-          <h1 className="max-w-xl font-display text-3xl font-black leading-[1.12] tracking-[0] text-foreground sm:text-4xl md:text-5xl">
+          <h1 className="max-w-xl font-display text-3xl font-black leading-[52px] tracking-[0] text-foreground sm:text-4xl md:text-[50px]">
             Visualize your{' '}
             <span className="text-foreground">intellectual growth</span>
             <br />

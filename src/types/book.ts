@@ -70,3 +70,51 @@ export const TEMPLATES: TemplateConfig[] = [
     description: '굵은 디바이더와 세로 타임라인, 읽은 날짜에 점·지그재그 타이포',
   },
 ];
+
+/** Distinct books in the month (one per day slot). Assumes ≥1 in normal flow. */
+export function countBooksInEntries(entries: Record<number, Book | undefined>): number {
+  return Object.values(entries).filter(Boolean).length;
+}
+
+/**
+ * Which templates appear for a given book count (max 12).
+ * - grid, grid2, stack: always
+ * - list: ≤9
+ * - essay: ≤5
+ * - capsule: 4–8
+ * - mosaic: 9 books; even counts ≥2 except 10 (2,4,6,8,12)
+ * - timeline: ≥3
+ */
+export function isTemplateVisibleForBookCount(templateId: TemplateType, bookCount: number): boolean {
+  const n = bookCount;
+  if (n < 1) return true;
+  switch (templateId) {
+    case 'grid':
+    case 'grid2':
+    case 'stack':
+      return true;
+    case 'list':
+      return n <= 9;
+    case 'essay':
+      return n <= 5;
+    case 'capsule':
+      return n >= 4 && n <= 8;
+    case 'mosaic':
+      if (n === 10) return false;
+      if (n === 9) return true;
+      return n >= 2 && n % 2 === 0;
+    case 'timeline':
+      return n >= 3;
+    default:
+      return true;
+  }
+}
+
+export function visibleTemplatesForBookCount(bookCount: number): TemplateConfig[] {
+  return TEMPLATES.filter((t) => isTemplateVisibleForBookCount(t.id, bookCount));
+}
+
+export function firstVisibleTemplateForBookCount(bookCount: number): TemplateType {
+  const list = visibleTemplatesForBookCount(bookCount);
+  return list[0]?.id ?? 'grid';
+}

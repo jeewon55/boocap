@@ -74,11 +74,14 @@ function MosaicBookCell({
   cols,
   coverMaxW,
   fallbackBg,
+  displayScale = MOSAIC_COVER_DISPLAY_SCALE,
 }: {
   book: Book;
   cols: number;
   coverMaxW: number;
   fallbackBg: string;
+  /** Slightly < MOSAIC_COVER_DISPLAY_SCALE when many books (e.g. 8+) to avoid cramped covers. */
+  displayScale?: number;
 }) {
   const [bg, setBg] = useState(fallbackBg);
 
@@ -127,7 +130,7 @@ function MosaicBookCell({
             aspectRatio: '5 / 7',
             borderRadius: 2,
             display: 'block',
-            transform: `scale(${MOSAIC_COVER_DISPLAY_SCALE})`,
+            transform: `scale(${displayScale})`,
             transformOrigin: 'center center',
           }}
         />
@@ -651,6 +654,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const posterH = 750;
       const innerH = posterH - 2 * STACK_SAFE_PAD;
       const INNER_W = 600 - 2 * STACK_SAFE_PAD;
+      /** 4-column dense grid: horizontal gap between cover cells (px). */
+      const STACK_DENSE_COL_GAP_PX = 16;
       const TITLE_TOP_PX = 36;
       const TITLE_FONT_SIZE = 80;
       const TITLE_SUBLINE_FONT_SIZE = TITLE_FONT_SIZE / 2;
@@ -709,16 +714,21 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
         const cols = 4;
         const rows = Math.ceil(count / cols);
-        const gapPx = 16;
+        const gapPx = STACK_DENSE_COL_GAP_PX;
+        /** Many-book grid: cover size vs original caps (1.3× then +1.3× from that baseline ≈ 1.69×). */
+        const STACK_MANY_BOOK_COVER_SCALE = 1.3 * 1.3;
         /** Reserve vertical space under each cover for title lines (px in poster inner coords) */
         const stackTitleBelowCoverPx = count > 12 ? 40 : count > 8 ? 44 : 50;
         const bandTop = 22;
-        const bandBottom = 76;
+        /** Slightly lower bottom = taller band → a bit more vertical space between rows. */
+        const bandBottom = 79;
         const bandPx = ((bandBottom - bandTop) / 100) * innerH;
         const rowHpx = rows > 0 ? bandPx / rows : bandPx;
+        const coverWMax = Math.round(96 * STACK_MANY_BOOK_COVER_SCALE);
+        const coverWMin = Math.round(52 * STACK_MANY_BOOK_COVER_SCALE);
         let coverW = Math.max(
-          52,
-          Math.min(96, Math.floor((INNER_W * 0.9 - gapPx * (cols - 1)) / cols)),
+          coverWMin,
+          Math.min(coverWMax, Math.floor((INNER_W * 0.9 - gapPx * (cols - 1)) / cols)),
         );
         let coverH = Math.round(coverW * 1.43);
         if (coverH + stackTitleBelowCoverPx > rowHpx) {
@@ -814,6 +824,15 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const stackPageTotal = books.reduce((sum, b) => sum + (typeof b.pageCount === 'number' ? Math.max(0, b.pageCount) : 0), 0);
       const stackPageWord = stackPageTotal === 1 ? 'page' : 'pages';
 
+      /** Title can extend past cover width; dense grid caps near column slot to limit overlap. */
+      const stackTitleMaxWidthPx = (coverW: number) => {
+        if (books.length > 6) {
+          const colSlot = Math.floor((INNER_W * 0.92 - STACK_DENSE_COL_GAP_PX * (4 - 1)) / 4);
+          return Math.min(Math.round(coverW * 1.42), colSlot + 14);
+        }
+        return Math.round(coverW * 1.22);
+      };
+
       return (
         <div
           ref={ref}
@@ -875,7 +894,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         marginTop: 8,
                         textAlign: 'center',
                         letterSpacing: '-0.02em',
-                        maxWidth: pos.w,
+                        maxWidth: stackTitleMaxWidthPx(pos.w),
                         lineHeight: 1.35,
                         whiteSpace: 'normal',
                         overflow: 'visible',
@@ -1453,26 +1472,34 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const scatterFont = "'Pretendard', 'Noto Sans KR', sans-serif";
       const reads = readsSortedByDay;
 
-      /** Vertical timeline — horizontal center of 600px canvas */
-      const lineX = 300;
+      /** Vertical spine at 4/5 of poster width (600px → 480px). */
+      const timelinePosterW = Number(baseStyle.width) || 600;
+      const lineX = Math.round((timelinePosterW * 4) / 5);
       /** Horizontal connectors start past on-spine date numerals */
       const spineClearance = 13;
-      /** Keep dashed arms short of the title column (same formula as `gapFromLine` below). */
-      const dashTextGap = 4;
-      /** Track below two-line title (no divider under header) */
-      const trackTop = 132;
+      /** Bottom of the two-line month/year header (pad + text + header block paddingBottom). */
+      const timelineHeaderBottomPx = pad + 56 * 1.02 * 2 + 10;
+      /** Space from header to spine — ~3× a typical 24px margin (was ~132, often overlapping title). */
+      const timelineHeaderToTrackGap = 24 * 3;
+      const trackTop = Math.round(timelineHeaderBottomPx + timelineHeaderToTrackGap);
       const trackBottom = posterHeight - 86;
       const trackH = Math.max(120, trackBottom - trackTop);
 
-      const dayY = (d: number) => {
-        if (daysInMonth <= 1) return trackTop + trackH / 2;
-        return trackTop + ((d - 1) / (daysInMonth - 1)) * trackH;
+      /** Evenly space each read along the spine (order = chronological reads), with small top/bottom inset. */
+      const timelineReadY = (index: number, total: number) => {
+        if (total <= 0) return trackTop + trackH / 2;
+        const inset = Math.min(20, trackH * 0.045);
+        const usable = Math.max(trackH - 2 * inset, 1);
+        if (total === 1) return trackTop + inset + usable / 2;
+        return trackTop + inset + (index / (total - 1)) * usable;
       };
 
-      /** One anchor per calendar day on the spine (same y if multiple books that day). */
-      const spineStops = [...new Map(reads.map((r) => [r.day, dayY(r.day)])).entries()]
-        .map(([day, y]) => ({ day, y }))
-        .sort((a, b) => a.y - b.y);
+      /** One spine anchor per read so labels align with distributed blocks (same day can appear twice). */
+      const spineStops = reads.map((r, i) => ({
+        day: r.day,
+        y: timelineReadY(i, reads.length),
+        key: `${r.day}-${r.book.key}`,
+      })).sort((a, b) => a.y - b.y);
 
       const desiredGapHalf = 12;
       const verticalSpineSegments: { y1: number; y2: number }[] = (() => {
@@ -1555,9 +1582,9 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 strokeLinecap="butt"
               />
             ))}
-            {spineStops.map(({ day, y }) => (
+            {spineStops.map(({ day, y, key }) => (
               <text
-                key={`spine-day-${day}`}
+                key={`spine-${key}`}
                 x={lineX}
                 y={y}
                 textAnchor="middle"
@@ -1574,23 +1601,14 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               </text>
             ))}
             {reads.map((r, i) => {
-              const y = dayY(r.day);
-              const isRight = i % 2 === 0;
-              const sameSideBefore = reads.slice(0, i).filter((_, j) => (j % 2 === 0) === isRight).length;
-              const stackShift = sameSideBefore * 36;
-              const dashLen = 44 + stackShift;
-              const gapFromLine = 12 + stackShift + spineClearance;
-              let x1: number;
-              let x2: number;
-              if (isRight) {
-                x1 = lineX + spineClearance;
-                x2 = Math.min(lineX + dashLen, lineX + gapFromLine - dashTextGap);
-                if (x2 <= x1 + 2) x2 = x1 + 2;
-              } else {
-                x1 = lineX - dashLen;
-                x2 = lineX - gapFromLine - dashTextGap;
-                if (x2 <= x1 + 2) x1 = x2 - 2;
-              }
+              const y = timelineReadY(i, reads.length);
+              /** Dashed connector: from spine leftward into the text column (all entries on the left). */
+              const gapFromLine = 12 + spineClearance;
+              const dashLen = 44;
+              const xAtSpine = lineX - spineClearance;
+              const xDashOuter = Math.max(pad + 24, xAtSpine - dashLen);
+              const x1 = xDashOuter;
+              const x2 = xAtSpine;
               return (
                 <g key={`${r.day}-${r.book.key}`}>
                   <line
@@ -1609,26 +1627,18 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           </svg>
 
           {reads.map((r, i) => {
-            const y = dayY(r.day);
-            const isRight = i % 2 === 0;
-            const sameSideBefore = reads.slice(0, i).filter((_, j) => (j % 2 === 0) === isRight).length;
-            const stackShift = sameSideBefore * 36;
-            const gapFromLine = 12 + stackShift + spineClearance;
+            const y = timelineReadY(i, reads.length);
+            const gapFromLine = 12 + spineClearance;
+            const textColW = Math.max(120, lineX - gapFromLine - pad);
             const blockStyle: React.CSSProperties = {
               position: 'absolute',
               top: y,
+              left: pad,
+              width: textColW,
               transform: 'translateY(-50%)',
-              textAlign: isRight ? 'left' : 'right',
+              textAlign: 'left',
               boxSizing: 'border-box',
             };
-            if (isRight) {
-              blockStyle.left = lineX + gapFromLine;
-              blockStyle.width = Math.min(268, 600 - pad - (lineX + gapFromLine));
-            } else {
-              const w = Math.min(248, lineX - gapFromLine - pad);
-              blockStyle.left = lineX - gapFromLine - w;
-              blockStyle.width = w;
-            }
             return (
               <div key={`txt-${r.day}-${r.book.key}`} style={blockStyle}>
                 <p
@@ -1672,14 +1682,38 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     if (template === 'capsule') {
       const capsuleFont = "'Instrument Sans', 'Noto Sans KR', sans-serif";
       const capsuleHeadNumFont = "'Pretendard', 'Noto Sans KR', sans-serif";
-      const padY = 30;
       const n = readsSortedByDay.length;
-      const gap = n <= 5 ? 12 : n <= 9 ? 9 : n <= 14 ? 7 : 6;
-      const capsuleMinH = 60;
-      const capsuleDefaultH = 100;
-      const capsuleNumColW = 64;
-      const titleFontPx = 28;
-      const numFs = 38;
+      /** Poster inner height matches 600×4/5 canvas */
+      const CAPSULE_POSTER_H = 750;
+      const padY = n >= 8 ? 24 : n >= 7 ? 26 : 30;
+      const capsuleHeaderMarginBottom = n >= 8 ? 26 : n >= 7 ? 30 : 42;
+      const capsuleHeaderFontPx = n >= 8 ? 44 : 48;
+      const capsuleHeaderLinePx = n >= 8 ? 50 : 56;
+      const capsuleHeaderTextH = capsuleHeaderLinePx * 2;
+      let gap = n <= 5 ? 12 : n <= 9 ? 9 : n <= 14 ? 7 : 6;
+      let capsuleMinH = 60;
+      let capsuleDefaultH = 100;
+      let capsuleNumColW = 64;
+      let titleFontPx = 28;
+      let numFs = 38;
+      let capsuleTitleCellPadding = '12px 16px 12px 12px';
+      let capsuleNumCellPadding = '8px 4px';
+
+      if (n === 7 || n === 8) {
+        gap = n === 8 ? 5 : 6;
+        const listBudget = CAPSULE_POSTER_H - 2 * padY - capsuleHeaderTextH - capsuleHeaderMarginBottom;
+        const spare = 6;
+        capsuleDefaultH = Math.max(
+          54,
+          Math.min(80, Math.floor((listBudget - (n - 1) * gap - spare) / n)),
+        );
+        capsuleMinH = Math.min(56, capsuleDefaultH - 4);
+        capsuleNumColW = n === 8 ? 58 : 60;
+        titleFontPx = n === 8 ? 22 : 24;
+        numFs = n === 8 ? 30 : 34;
+        capsuleTitleCellPadding = n === 8 ? '6px 12px 6px 10px' : '8px 14px 8px 10px';
+        capsuleNumCellPadding = n === 8 ? '6px 3px' : '7px 4px';
+      }
 
       const capsuleFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
 
@@ -1701,14 +1735,14 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             style={{
               flexShrink: 0,
               margin: 0,
-              marginBottom: 42,
+              marginBottom: capsuleHeaderMarginBottom,
               fontFamily: 'Arial',
-              fontSize: 48,
+              fontSize: capsuleHeaderFontPx,
               fontWeight: 600,
               letterSpacing: '-0.5px',
               color: moodConfig.textColor,
               textAlign: 'left',
-              lineHeight: '56px',
+              lineHeight: `${capsuleHeaderLinePx}px`,
             }}
           >
             {n} BOOKS
@@ -1757,7 +1791,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: '8px 4px',
+                      padding: capsuleNumCellPadding,
                       fontFamily: capsuleHeadNumFont,
                       fontSize: numFs,
                       fontWeight: 800,
@@ -1779,7 +1813,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      padding: '12px 16px 12px 12px',
+                      padding: capsuleTitleCellPadding,
                       display: 'flex',
                       alignItems: 'center',
                     }}
@@ -1815,7 +1849,17 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const cellCount = cols * rows;
       const slots = Array.from({ length: cellCount }, (_, i) => books[i] ?? null);
       const coverBase = Math.min(300, Math.max(88, Math.floor(598 / cols)));
-      const coverMaxW = Math.round(coverBase * 2.72);
+      const nMosaic = books.length;
+      /** 8 & 12: denser grids — shrink covers a bit more than other counts. */
+      const mosaicExtraCompact = nMosaic === 8 || nMosaic === 12;
+      const mosaicManyBooks = nMosaic >= 8 && !mosaicExtraCompact;
+      const coverMaxWMult = mosaicExtraCompact ? 1.78 : mosaicManyBooks ? 2.05 : 2.72;
+      const mosaicCoverDisplayScale = mosaicExtraCompact
+        ? 0.76
+        : mosaicManyBooks
+          ? 0.9
+          : MOSAIC_COVER_DISPLAY_SCALE;
+      const coverMaxW = Math.round(coverBase * coverMaxWMult);
 
       return (
         <div ref={ref} style={{ ...baseStyle, padding: 0, overflow: 'hidden' }}>
@@ -1836,6 +1880,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   book={book}
                   cols={cols}
                   coverMaxW={coverMaxW}
+                  displayScale={mosaicCoverDisplayScale}
                   fallbackBg={MOSAIC_FALLBACK_COLORS[i % MOSAIC_FALLBACK_COLORS.length]}
                 />
               ) : (

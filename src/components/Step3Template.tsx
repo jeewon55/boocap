@@ -1,7 +1,13 @@
-import { Book, MoodType, TemplateType, TEMPLATES, MOODS } from '@/types/book';
+import {
+  Book,
+  MoodType,
+  TemplateType,
+  countBooksInEntries,
+  visibleTemplatesForBookCount,
+} from '@/types/book';
 import { ArrowLeft } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo, useLayoutEffect } from 'react';
 
 interface Step3Props {
   year: number;
@@ -17,6 +23,19 @@ interface Step3Props {
 export function Step3Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step3Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
+
+  const bookCount = useMemo(() => countBooksInEntries(entries), [entries]);
+  const visibleTemplates = useMemo(
+    () => visibleTemplatesForBookCount(bookCount),
+    [bookCount],
+  );
+
+  useLayoutEffect(() => {
+    if (visibleTemplates.length === 0) return;
+    if (!visibleTemplates.some((t) => t.id === template)) {
+      onTemplateChange(visibleTemplates[0]!.id);
+    }
+  }, [template, visibleTemplates, onTemplateChange]);
 
   useEffect(() => {
     const update = () => {
@@ -43,7 +62,7 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
 
         {/* Template options */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          {TEMPLATES.map((t) => (
+          {visibleTemplates.map((t) => (
             <button
               key={t.id}
               onClick={() => onTemplateChange(t.id)}

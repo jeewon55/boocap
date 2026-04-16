@@ -1,7 +1,13 @@
-import { Book, MoodType, TemplateType, TEMPLATES } from '@/types/book';
+import {
+  Book,
+  MoodType,
+  TemplateType,
+  countBooksInEntries,
+  visibleTemplatesForBookCount,
+} from '@/types/book';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
 
@@ -49,21 +55,35 @@ interface Step2Props {
 }
 
 export function Step2Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step2Props) {
+  const bookCount = useMemo(() => countBooksInEntries(entries), [entries]);
+  const visibleTemplates = useMemo(
+    () => visibleTemplatesForBookCount(bookCount),
+    [bookCount],
+  );
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'center',
     loop: true,
     skipSnaps: false,
   });
-  const [activeIndex, setActiveIndex] = useState(
-    TEMPLATES.findIndex((t) => t.id === template) || 0
+  const [activeIndex, setActiveIndex] = useState(() =>
+    Math.max(0, visibleTemplatesForBookCount(countBooksInEntries(entries)).findIndex((t) => t.id === template)),
   );
+
+  useLayoutEffect(() => {
+    if (visibleTemplates.length === 0) return;
+    if (!visibleTemplates.some((t) => t.id === template)) {
+      onTemplateChange(visibleTemplates[0]!.id);
+    }
+  }, [template, visibleTemplates, onTemplateChange]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     const idx = emblaApi.selectedScrollSnap();
     setActiveIndex(idx);
-    onTemplateChange(TEMPLATES[idx].id);
-  }, [emblaApi, onTemplateChange]);
+    const picked = visibleTemplates[idx];
+    if (picked) onTemplateChange(picked.id);
+  }, [emblaApi, onTemplateChange, visibleTemplates]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -73,17 +93,28 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
+    const idx = Math.max(0, visibleTemplates.findIndex((t) => t.id === template));
+    setActiveIndex(idx);
+  }, [template, visibleTemplates]);
+
+  useEffect(() => {
     if (!emblaApi) return;
-    const idx = TEMPLATES.findIndex((t) => t.id === template);
+    const idx = Math.max(0, visibleTemplates.findIndex((t) => t.id === template));
     if (idx >= 0 && idx !== emblaApi.selectedScrollSnap()) {
       emblaApi.scrollTo(idx, true);
     }
-  }, [emblaApi, template]);
+  }, [emblaApi, template, visibleTemplates]);
+
+  /** Re-init only when the slide list changes (book-count thresholds), not on every swipe. */
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.reInit();
+  }, [emblaApi, bookCount, visibleTemplates]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
-  const activeTemplate = TEMPLATES[activeIndex];
+  const activeTemplate = visibleTemplates[activeIndex] ?? visibleTemplates[0]!;
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -134,7 +165,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           className="flex h-fit w-full shrink-0 items-start overflow-hidden px-1 pt-6 pb-1 md:px-2"
         >
           <div className="flex h-[480px] max-h-[480px] min-h-0 w-full touch-pan-y items-center will-change-transform">
-            {TEMPLATES.map((t, index) => {
+            {visibleTemplates.map((t, index) => {
               const isActive = index === activeIndex;
               return (
                 <div
@@ -178,9 +209,9 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
             <p className="font-display text-sm font-bold tracking-[0] text-foreground">{activeTemplate.label}</p>
           </div>
           <div className="flex h-2 items-center justify-center gap-2">
-            {TEMPLATES.map((_, i) => (
+            {visibleTemplates.map((t, i) => (
               <button
-                key={i}
+                key={t.id}
                 type="button"
                 aria-label={`Go to template ${i + 1}`}
                 aria-current={i === activeIndex ? 'true' : undefined}

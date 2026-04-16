@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { WizardStep } from '@/components/WizardStep';
 import { Step1AddBooks } from '@/components/Step1AddBooks';
 import { Step2Template } from '@/components/Step2Template';
 import { Step3Download } from '@/components/Step3Download';
-import { Book, MoodType, TemplateType } from '@/types/book';
+import { Book, MoodType, TemplateType, MAX_BOOKS_PER_MONTH } from '@/types/book';
+import { toast } from '@/hooks/use-toast';
 
 function getInitial() {
   const params = new URLSearchParams(window.location.search);
@@ -22,6 +23,10 @@ export default function Index() {
   const [year, setYear] = useState(init.year);
   const [month, setMonth] = useState(init.month);
   const [entries, setEntries] = useState<Record<number, Book>>({});
+  const entriesRef = useRef(entries);
+  useEffect(() => {
+    entriesRef.current = entries;
+  }, [entries]);
   const [mood, setMood] = useState<MoodType>('minimal');
   const [template, setTemplate] = useState<TemplateType>('stack');
 
@@ -32,7 +37,16 @@ export default function Index() {
   }, []);
 
   const handleAddBook = useCallback((day: number, book: Book) => {
-    setEntries((prev) => ({ ...prev, [day]: book }));
+    const prev = entriesRef.current;
+    const isNewDay = !prev[day];
+    const count = Object.values(prev).filter(Boolean).length;
+    if (isNewDay && count >= MAX_BOOKS_PER_MONTH) {
+      toast({
+        title: 'You can add up to 12 books.',
+      });
+      return;
+    }
+    setEntries((p) => ({ ...p, [day]: book }));
   }, []);
 
   const handleRemoveBook = useCallback((day: number) => {

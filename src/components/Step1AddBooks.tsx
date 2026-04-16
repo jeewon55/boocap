@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Book } from '@/types/book';
+import { Book, MAX_BOOKS_PER_MONTH } from '@/types/book';
+import { toast } from '@/hooks/use-toast';
 import { BookSearchModal } from '@/components/BookSearchModal';
 import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { MonthSelector } from '@/components/MonthSelector';
@@ -140,7 +141,16 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
                         <button
                           key={cellKey}
                           type="button"
-                          onClick={() => setSelectedDay(day)}
+                          onClick={() => {
+                            const filledCount = Object.values(entries).filter(Boolean).length;
+                            if (!book && filledCount >= MAX_BOOKS_PER_MONTH) {
+                              toast({
+                                title: 'You can add up to 12 books.',
+                              });
+                              return;
+                            }
+                            setSelectedDay(day);
+                          }}
                           aria-label={`${MONTHS_SHORT[month]} ${twoDigitDay(day)}${book ? `, ${book.title}` : ''}`}
                           className={`group relative flex aspect-[3/4] w-full min-w-0 flex-col rounded-none text-left transition-colors hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground/25 ${
                             book ? 'overflow-hidden p-0' : 'items-start justify-start p-1.5'

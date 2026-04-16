@@ -1,3 +1,6 @@
+/** Max distinct books per month in the create flow (UI + poster limits assume this cap). */
+export const MAX_BOOKS_PER_MONTH = 12;
+
 export interface Book {
   title: string;
   author: string;
@@ -52,13 +55,13 @@ export const TEMPLATES: TemplateConfig[] = [
     label: 'Borderless Calendar',
     description: '무테 달력, 날짜·제목·표지 스택, 종이 질감 느낌',
   },
-  { id: 'stack', label: 'Big Cover', description: '뉴스레터 스타일' },
   { id: 'list', label: 'The Receipt', description: '리스트 타이포그래피' },
   {
     id: 'essay',
     label: 'The Typo Slash',
     description: '영문 산문형 — In (월), I have read … / 제목+번호 / 마무리 문장',
   },
+  { id: 'stack', label: 'Big Cover', description: '뉴스레터 스타일' },
   { id: 'capsule', label: 'Book Edge', description: '상단 월·권수 제목, 캡슐 안에는 번호와 제목만' },
   { id: 'mosaic', label: 'Floating Cover', description: '연도·월 없이 표지만, 책 개수에 맞는 컬러 그리드' },
   {

@@ -1204,6 +1204,9 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
       const essayRows = readsSortedByDay;
       const essayN = essayRows.length;
+      const darkPoster = mood === 'dark' || mood === 'bold';
+      const essayGridCell = 56;
+      const essayGridStroke = darkPoster ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)';
       const essayIntroHeadingPx = 64;
       const essayHeadlineBase: React.CSSProperties = {
         margin: 0,
@@ -1215,11 +1218,13 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         ...essayHeadlineBase,
         fontSize: essayIntroHeadingPx,
         lineHeight: 1.1,
+        transform: 'translate(-2px, -2px)',
       };
       const essayHeadlineOutro: React.CSSProperties = {
         ...essayHeadlineBase,
         fontSize: 48,
         lineHeight: 1.2,
+        height: 157,
       };
       let essayTitlePx = 28;
       let essayTitleGap = 20;
@@ -1239,9 +1244,18 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       }
 
       /** Poster inner height (600×4/5) minus vertical padding. */
+      const ESSAY_POSTER_W = 600;
       const ESSAY_POSTER_H = 750;
+      const essayGridCols = Math.max(1, Math.floor((ESSAY_POSTER_W - 64) / essayGridCell));
+      const essayGridRows = Math.max(1, Math.floor((ESSAY_POSTER_H - 64) / essayGridCell));
+      const essayGridW = essayGridCols * essayGridCell;
+      const essayGridH = essayGridRows * essayGridCell;
+      const essayGridStartX = (ESSAY_POSTER_W - essayGridW) / 2;
+      const essayGridStartY = (ESSAY_POSTER_H - essayGridH) / 2;
       const essayVertPad = 96;
-      const essayContentW = Number(baseStyle.width) - 64;
+      const essayContentW = essayGridW;
+      const essayTitleStartRow = 4;
+      const essayTitleStartOffset = (essayTitleStartRow - 1) * essayGridCell;
       const essayLineHeight = 1.38;
       const essayThumbTextGap = 10;
       /** Cover thumbnail height = title font size × this (width stays 5∶7 of height). */
@@ -1306,17 +1320,46 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
-            padding: '48px 32px 48px',
+            padding: `${essayGridStartY}px ${essayGridStartX}px`,
             minHeight: 0,
           }}
         >
-          <div style={{ flexShrink: 0, width: '100%', boxSizing: 'border-box' }}>
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              width: essayGridW,
+              height: essayGridH,
+              transform: 'translate(-50%, -50%)',
+              boxSizing: 'border-box',
+              backgroundImage: `
+                linear-gradient(to right, ${essayGridStroke} 1px, transparent 1px),
+                linear-gradient(to bottom, ${essayGridStroke} 1px, transparent 1px),
+                linear-gradient(to left, ${essayGridStroke} 1px, transparent 1px),
+                linear-gradient(to top, ${essayGridStroke} 1px, transparent 1px)
+              `,
+              backgroundSize: `${essayGridCell}px ${essayGridCell}px`,
+              backgroundPosition: '0 0',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              flexShrink: 0,
+              width: '100%',
+              boxSizing: 'border-box',
+              height: essayTitleStartOffset,
+              overflow: 'hidden',
+            }}
+          >
             <p style={essayHeadlineIntro}>
               In {monthName},
               <br />
-              I have read:
+              <span style={{ display: 'inline-block', transform: 'translateY(-14px)' }}>I have read:</span>
             </p>
-            <div style={{ height: essaySectionGap }} aria-hidden />
           </div>
           <div
             style={{
@@ -1328,7 +1371,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
             }}
           >
             {essayN === 0 ? (
@@ -1338,21 +1381,27 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 <div
                   key={`${book.key}-${i}`}
                   style={{
-                    marginBottom: i < essayN - 1 ? essayTitleGap : 0,
                     width: '100%',
                     minWidth: 0,
                     boxSizing: 'border-box',
-                    fontSize: essayTitlePx,
-                    lineHeight: 1.38,
                     color: moodConfig.textColor,
+                    height: essayGridCell,
+                    display: 'flex',
+                    alignItems: 'center',
+                    overflow: 'hidden',
                   }}
                 >
                   <span
                     style={{
+                      display: 'inline-block',
+                      fontSize: essayTitlePx,
+                      lineHeight: 1,
                       fontWeight: 600,
                       letterSpacing: '-0.02em',
-                      wordBreak: 'break-word',
-                      overflowWrap: 'break-word',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: '100%',
                     }}
                   >
                     {book.title}
@@ -1375,16 +1424,18 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           </div>
           <p style={{ ...essayHeadlineOutro, flexShrink: 0, width: '100%', boxSizing: 'border-box' }}>
             and these pages have{' '}
-            <span
-              style={{
-                display: 'inline-block',
-                transform: 'skewX(-10deg)',
-                transformOrigin: '50% 55%',
-              }}
-            >
-              reshaped
-            </span>{' '}
-            my thoughts.
+            <span style={{ display: 'inline-block', transform: 'translateY(-2px)' }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  transform: 'skewX(-10deg)',
+                  transformOrigin: '50% 55%',
+                }}
+              >
+                reshaped
+              </span>{' '}
+              my thoughts.
+            </span>
           </p>
         </div>
       );

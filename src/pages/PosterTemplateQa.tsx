@@ -80,7 +80,7 @@ export default function PosterTemplateQa() {
   const tdBase = 'border border-border align-top p-2';
 
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground">
+    <div className="min-h-[100dvh] bg-background text-foreground pt-12 sm:pt-14">
       <div className="border-b border-border px-4 py-6 md:px-8">
         <div className="mx-auto max-w-[160rem]">
           <p className="mb-1 font-body text-xs text-muted-foreground">Temporary QA</p>

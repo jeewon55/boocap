@@ -10,6 +10,8 @@ import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
+import { useLocale } from '@/contexts/LocaleContext';
+import { createFlowMessages } from '@/i18n/createFlow';
 
 function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -55,6 +57,8 @@ interface Step2Props {
 }
 
 export function Step2Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step2Props) {
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const bookCount = useMemo(() => countBooksInEntries(entries), [entries]);
   const visibleTemplates = useMemo(
     () => visibleTemplatesForBookCount(bookCount),
@@ -138,7 +142,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
           className="text-center"
         >
           <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
-            Frame Your Month.
+            {flow.frameYourMonthTitle}
           </h2>
         </motion.div>
       </div>
@@ -233,13 +237,13 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
             className="flex items-center justify-center gap-2 rounded-[4px] border border-border px-6 py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back
+            {flow.templateStepBack}
           </button>
           <button
             onClick={onGenerate}
             className="flex flex-1 items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
           >
-            Try This Template
+            {flow.tryThisTemplateCta}
           </button>
         </div>
         {import.meta.env.DEV ? (

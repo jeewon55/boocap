@@ -65,7 +65,7 @@ export default function Index() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background text-foreground">
+    <div className="flex min-h-[100dvh] flex-col bg-background text-foreground pt-12 sm:pt-14">
       <WizardStep visible={step === 0}>
         <Step1AddBooks
           year={year}

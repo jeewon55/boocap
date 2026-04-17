@@ -4,6 +4,8 @@ import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
 import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
+import { useLocale } from '@/contexts/LocaleContext';
+import { bookSearchModalMessages } from '@/i18n/bookSearchModal';
 
 function BookCoverThumb({ src, alt }: { src: string; alt: string }) {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
@@ -44,6 +46,8 @@ interface BookSearchModalProps {
 }
 
 export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchModalProps) {
+  const { locale } = useLocale();
+  const bs = bookSearchModalMessages[locale];
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
@@ -121,7 +125,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               mode === 'search' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
             }`}
           >
-            Search
+            {bs.tabSearch}
           </button>
           <button
             onClick={() => setMode('manual')}
@@ -129,7 +133,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               mode === 'manual' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
             }`}
           >
-            Manual entry
+            {bs.tabManual}
           </button>
         </div>
 
@@ -141,7 +145,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by title or author…"
+                placeholder={bs.searchPlaceholder}
                 className="w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
               />
               {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
@@ -193,7 +197,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   className="w-full flex items-center gap-2 p-3 text-muted-foreground hover:bg-secondary transition-colors text-left"
                 >
                   <PenLine className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-xs font-body">Can&apos;t find your book? Enter manually</span>
+                  <span className="text-xs font-body">{bs.cantFindEnterManually}</span>
                 </button>
               )}
             </div>
@@ -205,7 +209,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 <div className="relative group">
                   <img
                     src={manualCoverUrl}
-                    alt="Book cover"
+                    alt={bs.manualCoverImageAlt}
                     className="w-24 h-36 object-cover shadow-lg rounded"
                     onError={() => setPreviewError(true)}
                   />
@@ -224,43 +228,49 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   className="flex h-36 w-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[4px] border border-dashed border-border bg-secondary transition-colors hover:border-primary"
                 >
                   <Upload className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-[9px] font-body text-muted-foreground">Upload</span>
+                  <span className="text-[9px] font-body text-muted-foreground">{bs.manualUpload}</span>
                 </button>
               )}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
               {!manualCoverUrl && (
-                <p className="text-[10px] font-body text-muted-foreground">Upload a cover image or paste a URL below.</p>
+                <p className="text-[10px] font-body text-muted-foreground">{bs.manualUploadHint}</p>
               )}
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Title *</label>
+              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
+                {bs.manualLabelTitle}
+              </label>
               <input
                 autoFocus={mode === 'manual'}
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
-                placeholder="e.g. Demian"
+                placeholder={bs.manualPlaceholderTitle}
                 className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Author</label>
+              <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
+                {bs.manualLabelAuthor}
+              </label>
               <input
                 value={manualAuthor}
                 onChange={(e) => setManualAuthor(e.target.value)}
-                placeholder="e.g. Hermann Hesse"
+                placeholder={bs.manualPlaceholderAuthor}
                 className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
             {!manualCoverUrl && (
               <div>
-                <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">Or cover image URL</label>
+                <label className="mb-2 block text-[10px] font-body tracking-normal text-muted-foreground">
+                  {bs.manualLabelCoverUrl}
+                </label>
                 <input
                   value={manualCoverUrl}
                   onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
-                  placeholder="https://example.com/cover.jpg"
+                  placeholder={bs.manualPlaceholderCoverUrl}
                   className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
                 />
               </div>
@@ -271,7 +281,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
               disabled={!manualTitle.trim()}
               className="w-full rounded-[4px] bg-primary py-3 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-30"
             >
-              Save
+              {bs.manualSave}
             </button>
           </div>
         )}

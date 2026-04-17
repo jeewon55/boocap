@@ -4,6 +4,8 @@ import { Download, ArrowLeft } from 'lucide-react';
 import { Book, MoodType, TemplateType } from '@/types/book';
 import { PosterCanvas } from './PosterCanvas';
 import { motion } from 'framer-motion';
+import { useLocale } from '@/contexts/LocaleContext';
+import { createFlowMessages } from '@/i18n/createFlow';
 
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
@@ -21,10 +23,13 @@ interface Step3Props {
 }
 
 export function Step3Download({ year, month, entries, mood, template, onBack, onReset }: Step3Props) {
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const posterRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
   const [downloading, setDownloading] = useState(false);
+  const [showStartOverModal, setShowStartOverModal] = useState(false);
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -96,7 +101,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           className="text-center"
         >
           <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
-            Archive Visualized.
+            {flow.archiveVisualizedTitle}
           </h2>
         </motion.div>
       </div>
@@ -139,7 +144,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Download className="w-3.5 h-3.5" />
-          {downloading ? 'Exporting…' : 'Download Image'}
+          {downloading ? flow.downloadExporting : flow.downloadImageCta}
         </button>
         <div className="flex gap-3">
           <button
@@ -147,16 +152,63 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
             className="flex flex-1 items-center justify-center gap-2 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back
+            {flow.templateStepBack}
           </button>
           <button
-            onClick={onReset}
+            type="button"
+            onClick={() => setShowStartOverModal(true)}
             className="flex-1 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
           >
-            Start over
+            {flow.startOverCta}
           </button>
         </div>
       </div>
+
+      {showStartOverModal ? (
+        <div
+          className="fixed inset-0 z-[400] flex items-center justify-center bg-foreground/25 px-6"
+          onClick={() => setShowStartOverModal(false)}
+          role="presentation"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.16 }}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="start-over-modal-title"
+            className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-5 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p
+              id="start-over-modal-title"
+              className="font-display text-[18px] font-bold tracking-[0] text-foreground"
+            >
+              {flow.startOverModalTitle}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{flow.startOverModalBody}</p>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowStartOverModal(false)}
+                className="flex-1 rounded-[4px] border border-border py-3 text-xs font-semibold tracking-normal transition-colors hover:bg-secondary"
+              >
+                {flow.startOverModalCancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowStartOverModal(false);
+                  onReset();
+                }}
+                className="flex-1 rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                {flow.startOverModalConfirm}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
     </div>
   );
 }

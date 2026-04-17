@@ -4,6 +4,8 @@ import { BookEntryModal } from '@/components/BookEntryModal';
 import { BookSearchModal } from '@/components/BookSearchModal';
 import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useLocale } from '@/contexts/LocaleContext';
+import { createFlowMessages } from '@/i18n/createFlow';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const MONTHS = [
@@ -22,6 +24,8 @@ interface Step2Props {
 }
 
 export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, onBack, onNext }: Step2Props) {
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isReplacing, setIsReplacing] = useState(false);
 
@@ -97,7 +101,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
           onClick={onNext}
           className="flex flex-[2] items-center justify-center gap-2 rounded-[4px] bg-foreground py-4 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90"
         >
-          Choose Template
+          {flow.chooseTemplateCta}
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>

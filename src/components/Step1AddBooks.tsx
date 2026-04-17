@@ -7,6 +7,8 @@ import { MonthSelector } from '@/components/MonthSelector';
 import { X, ArrowRight, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
+import { useLocale } from '@/contexts/LocaleContext';
+import { createFlowMessages } from '@/i18n/createFlow';
 
 function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.MouseEvent) => void }) {
   const [imgOk, setImgOk] = useState(true);
@@ -56,6 +58,8 @@ interface Step1Props {
 }
 
 export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, onRemoveBook, onNext }: Step1Props) {
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isReplacing, setIsReplacing] = useState(false);
   const [showNoBookModal, setShowNoBookModal] = useState(false);
@@ -81,7 +85,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           className="text-center"
         >
           <h2 className="mt-2 mb-2 font-display text-[20px] font-extrabold leading-none tracking-[0] text-[#d6d6d6]">
-            Mark Your Days.
+            {flow.markYourDaysTitle}
           </h2>
         </motion.div>
 
@@ -190,7 +194,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           onClick={handleNext}
           className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
         >
-          Choose Template
+          {flow.chooseTemplateCta}
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
         {import.meta.env.DEV ? (
@@ -286,14 +290,14 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
             className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-5 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="font-display text-[18px] font-bold tracking-[0] text-foreground">Please select a book first</p>
-            <p className="mt-2 text-sm text-muted-foreground">Add at least one book to the calendar before moving to the template step.</p>
+            <p className="font-display text-[18px] font-bold tracking-[0] text-foreground">{flow.noBookModalTitle}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{flow.noBookModalBody}</p>
             <button
               type="button"
               onClick={() => setShowNoBookModal(false)}
               className="mt-5 w-full rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
             >
-              OK
+              {flow.noBookModalOk}
             </button>
           </motion.div>
         </div>

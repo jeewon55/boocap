@@ -209,7 +209,7 @@ export default function Landing() {
           id="landing-preview"
           className="relative mt-auto flex min-h-[min(44vh,416px)] w-full justify-center overflow-hidden pb-0 pt-4 md:min-h-[min(48vh,546px)] md:pt-8"
         >
-          <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-0 px-2">
+          <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-1 px-2 sm:gap-2 md:gap-2.5">
             {LANDING_EXAMPLE_POSTERS.map((poster, i) => {
               const alt = locale === 'ko' ? poster.altKo : poster.altEn;
               /** Side cards sit above center (z-2 vs z-0) and nudge inward so edges overlap like stacked prints. */

@@ -9,6 +9,7 @@ import Landing from "./pages/Landing.tsx";
 import Index from "./pages/Index.tsx";
 import PosterTemplateQa from "./pages/PosterTemplateQa.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { Analytics } from "@vercel/analytics/react";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </LocaleProvider>
+    <Analytics />
   </QueryClientProvider>
 );
 

@@ -58,7 +58,7 @@ function LandingExamplePoster({
         or Safari draws black wedges at the card corners. Image is slightly oversized to hide AA gaps.
       */}
       <div
-        className="relative aspect-[4/5] w-[min(72vw,220px)] overflow-hidden rounded-[4px] bg-white shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)] [transform:translateZ(0)] sm:w-[240px] md:w-[260px]"
+        className="relative aspect-[4/5] w-[min(94vw,286px)] overflow-hidden rounded-[4px] bg-white shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)] [transform:translateZ(0)] sm:w-[312px] md:w-[338px]"
         style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
       >
         <img
@@ -207,26 +207,29 @@ export default function Landing() {
         {/* Product strip — bottom-cropped row */}
         <section
           id="landing-preview"
-          className="relative mt-auto flex min-h-[min(42vh,320px)] w-full justify-center overflow-hidden pb-0 pt-4 md:min-h-[min(46vh,420px)] md:pt-8"
+          className="relative mt-auto flex min-h-[min(44vh,416px)] w-full justify-center overflow-hidden pb-0 pt-4 md:min-h-[min(48vh,546px)] md:pt-8"
         >
-          <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-2 px-2 sm:gap-4 md:gap-8">
+          <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-0 px-2">
             {LANDING_EXAMPLE_POSTERS.map((poster, i) => {
               const alt = locale === 'ko' ? poster.altKo : poster.altEn;
+              /** Side cards sit above center (z-2 vs z-0) and nudge inward so edges overlap like stacked prints. */
               const tiltScale =
                 i === 0
                   ? {
-                      tiltClass: '-rotate-[4deg] translate-y-4 md:translate-y-6',
+                      tiltClass:
+                        'relative z-[2] -rotate-[4deg] translate-x-3 translate-y-4 sm:translate-x-4 md:translate-x-5 md:translate-y-6',
                       scaleClass: 'scale-[0.92] md:scale-95',
                     }
                   : i === 1
                     ? {
-                        tiltClass: 'rotate-0 z-[1] -translate-y-1 md:-translate-y-2',
+                        tiltClass: 'relative z-0 rotate-0 -translate-y-1 md:-translate-y-2',
                         scaleClass: 'scale-100',
                       }
                     : {
-                        tiltClass: 'rotate-[4deg] translate-y-4 md:translate-y-6',
-                        scaleClass: 'scale-[0.92] md:scale-95',
-                      };
+                      tiltClass:
+                        'relative z-[2] rotate-[4deg] -translate-x-3 translate-y-4 sm:-translate-x-4 md:-translate-x-5 md:translate-y-6',
+                      scaleClass: 'scale-[0.92] md:scale-95',
+                    };
               return (
                 <LandingExamplePoster
                   key={poster.src}

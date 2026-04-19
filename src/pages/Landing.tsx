@@ -58,7 +58,7 @@ function LandingExamplePoster({
         or Safari draws black wedges at the card corners. Image is slightly oversized to hide AA gaps.
       */}
       <div
-        className="relative aspect-[4/5] w-[min(72vw,220px)] overflow-hidden rounded-[4px] bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.16)] [transform:translateZ(0)] sm:w-[240px] md:w-[260px]"
+        className="relative aspect-[4/5] w-[min(72vw,220px)] overflow-hidden rounded-[4px] bg-white shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)] [transform:translateZ(0)] sm:w-[240px] md:w-[260px]"
         style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
       >
         <img

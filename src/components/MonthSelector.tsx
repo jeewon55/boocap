@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MONTHS = [
@@ -14,6 +14,11 @@ interface MonthSelectorProps {
   compactHeader?: boolean;
   /** With `compactHeader`: [leading][year]; tap opens month picker. */
   compactLeading?: ReactNode;
+  /** Controlled month-picker visibility. When set, use `onPickerOpenChange` to update it. */
+  pickerOpen?: boolean;
+  onPickerOpenChange?: (open: boolean) => void;
+  /** If provided and returns `false`, the picker does not open (e.g. parent shows a confirm dialog first). */
+  onRequestOpen?: () => boolean;
 }
 
 export function MonthSelector({
@@ -22,18 +27,38 @@ export function MonthSelector({
   onChange,
   compactHeader = false,
   compactLeading,
+  pickerOpen: pickerOpenProp,
+  onPickerOpenChange,
+  onRequestOpen,
 }: MonthSelectorProps) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const controlled = pickerOpenProp !== undefined;
+  const open = controlled ? pickerOpenProp : uncontrolledOpen;
+
+  const setPickerOpen = (next: boolean) => {
+    if (!controlled) setUncontrolledOpen(next);
+    onPickerOpenChange?.(next);
+  };
+
   const [pickerYear, setPickerYear] = useState(year);
 
+  useEffect(() => {
+    if (open) setPickerYear(year);
+  }, [open, year]);
+
   const handleSelect = (m: number) => {
+    if (pickerYear === year && m === month) {
+      setPickerOpen(false);
+      return;
+    }
     onChange(pickerYear, m);
-    setOpen(false);
+    setPickerOpen(false);
   };
 
   const openPicker = () => {
+    if (onRequestOpen && !onRequestOpen()) return;
     setPickerYear(year);
-    setOpen(true);
+    setPickerOpen(true);
   };
 
   const yearTracking = 'tracking-[-2px]';
@@ -89,7 +114,7 @@ export function MonthSelector({
         {open && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20"
-            onClick={() => setOpen(false)}
+            onClick={() => setPickerOpen(false)}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -100,7 +125,7 @@ export function MonthSelector({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header with year navigation */}
-              <div className="flex items-center justify-between border-b border-border p-4">
+              <div className="flex items-center justify-between border-b border-border/50 p-4">
                 <button
                   onClick={() => setPickerYear((y) => y - 1)}
                   className="rounded-[4px] px-2 py-1 text-xs font-body text-muted-foreground transition-colors hover:text-foreground"
@@ -141,7 +166,8 @@ export function MonthSelector({
               {/* Close */}
               <div className="px-4 pb-4">
                 <button
-                  onClick={() => setOpen(false)}
+                  type="button"
+                  onClick={() => setPickerOpen(false)}
                   className="w-full rounded-[4px] border border-border py-3 text-xs font-body tracking-normal transition-colors hover:bg-muted"
                 >
                   Cancel

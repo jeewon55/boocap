@@ -37,7 +37,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
         className="mx-4 flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-[4px] border border-border bg-background font-body"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border/50">
           <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
             {month} {day}
           </span>
@@ -46,7 +46,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 p-4 border-b border-border">
+        <div className="flex items-center gap-2 p-4 border-b border-border/50">
           <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           <input
             autoFocus
@@ -72,7 +72,7 @@ export function BookSearch({ day, month, onSelect, onClose }: BookSearchProps) {
                   setEnrichingKey(null);
                 }
               }}
-              className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0 disabled:opacity-50"
+              className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border/50 last:border-0 disabled:opacity-50"
             >
               <img
                 src={book.coverUrl}

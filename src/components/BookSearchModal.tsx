@@ -108,7 +108,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border p-4">
+        <div className="flex items-center justify-between border-b border-border/50 p-4">
           <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
             {MONTH_NAMES[month]} {day}
           </span>
@@ -118,7 +118,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
         </div>
 
         {/* Mode tabs */}
-        <div className="flex border-b border-border">
+        <div className="flex border-b border-border/50">
           <button
             onClick={() => setMode('search')}
             className={`flex-1 rounded-none py-2.5 text-xs font-body font-medium tracking-normal transition-colors ${
@@ -139,7 +139,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
         {mode === 'search' ? (
           <>
-            <div className="flex items-center gap-2 p-4 border-b border-border">
+            <div className="flex items-center gap-2 p-4 border-b border-border/50">
               <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <input
                 autoFocus
@@ -165,7 +165,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                       setEnrichingKey(null);
                     }
                   }}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border last:border-0 disabled:opacity-50"
+                  className="w-full flex items-center gap-3 p-3 hover:bg-secondary transition-colors text-left border-b border-border/50 last:border-0 disabled:opacity-50"
                 >
                   <BookCoverThumb src={book.coverUrl} alt={book.title} />
                   <div className="min-w-0">

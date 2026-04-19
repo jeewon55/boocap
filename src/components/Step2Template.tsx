@@ -246,18 +246,6 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
             {flow.tryThisTemplateCta}
           </button>
         </div>
-        {import.meta.env.DEV ? (
-          <div className="mt-3 text-center">
-            <a
-              href="/create/qa-posters"
-              target="_blank"
-              rel="noreferrer"
-              className="font-body text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            >
-              Poster QA (new tab)
-            </a>
-          </div>
-        ) : null}
       </div>
     </div>
   );

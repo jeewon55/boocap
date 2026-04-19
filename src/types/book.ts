@@ -57,7 +57,7 @@ export const TEMPLATES: TemplateConfig[] = [
   {
     id: 'essay',
     label: 'The Typo Slash',
-    description: '영문 산문형 — In (월), I have read … / 제목+번호 / 마무리 문장',
+    description: '영문 산문형 — In (월), I read … / 제목+번호 / 마무리 문장',
   },
   { id: 'stack', label: 'Big Cover', description: '뉴스레터 스타일' },
   { id: 'capsule', label: 'Book Edge', description: '상단 월·권수 제목, 캡슐 안에는 번호와 제목만' },

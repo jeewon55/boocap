@@ -43,7 +43,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
  * @see https://images.weserv.nl/docs/quick-reference.html
  */
 function proxiedCoverUrl(original: string): string {
-  return `https://images.weserv.nl/?url=${encodeURIComponent(original)}&w=96&h=140&fit=cover&output=png`;
+  return `https://images.weserv.nl/?url=${encodeURIComponent(original)}&w=96&h=140&fit=cover&output=webp`;
 }
 
 function shouldTryProxy(original: string): boolean {
@@ -136,14 +136,13 @@ export async function getPaleDominantCoverBackground(imageUrl: string): Promise<
 
   const seed = hashStr(trimmed);
 
-  let color = await extractFromUrl(trimmed, seed);
-  if (color) return color;
-
+  // Prefer small proxied image first: fast, CORS-friendly; original is often huge or blocked by CORS.
   if (shouldTryProxy(trimmed)) {
-    color = await extractFromUrl(proxiedCoverUrl(trimmed), seed);
+    const fromProxy = await extractFromUrl(proxiedCoverUrl(trimmed), seed);
+    if (fromProxy) return fromProxy;
   }
 
-  return color;
+  return extractFromUrl(trimmed, seed);
 }
 
 const MOSAIC_NEAR_WHITE_LUM = 241;

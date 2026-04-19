@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { PosterCanvas } from '@/components/PosterCanvas';
 import {
   Book,
@@ -19,6 +19,10 @@ const BOOK_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 
 /** Scaled poster in table cells — larger for QA; table scrolls as needed. */
 const CELL_SCALE = 0.22;
+
+/** Production only. Dev builds always skip the gate. Secret is still shipped in client JS — use hosting access rules for stronger isolation. */
+const QA_ACCESS_SECRET = (import.meta.env.VITE_POSTER_QA_SECRET as string | undefined)?.trim() ?? '';
+const QA_ACCESS_STORAGE_KEY = 'boocap-poster-qa';
 
 function makeFakeEntries(bookCount: number): Record<number, Book> {
   const entries: Record<number, Book> = {};
@@ -64,6 +68,19 @@ function ScaledPoster({
  * Route: `/create/qa-posters`
  */
 export default function PosterTemplateQa() {
+  const isDev = import.meta.env.DEV;
+  const [accessOk, setAccessOk] = useState(() => {
+    if (isDev) return true;
+    if (!QA_ACCESS_SECRET) return false;
+    try {
+      return sessionStorage.getItem(QA_ACCESS_STORAGE_KEY) === QA_ACCESS_SECRET;
+    } catch {
+      return false;
+    }
+  });
+  const [accessPw, setAccessPw] = useState('');
+  const [accessErr, setAccessErr] = useState(false);
+
   const [mood, setMood] = useState<MoodType>('minimal');
   const moodLabel = useMemo(() => MOODS.find((m) => m.id === mood)?.label ?? mood, [mood]);
 
@@ -79,8 +96,61 @@ export default function PosterTemplateQa() {
     'border border-border bg-background px-2 py-2 text-left font-body text-xs font-semibold text-foreground';
   const tdBase = 'border border-border align-top p-2';
 
+  if (!isDev && !QA_ACCESS_SECRET) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!isDev && QA_ACCESS_SECRET && !accessOk) {
+    return (
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6 text-foreground">
+        <form
+          className="w-full max-w-sm space-y-4 rounded-[4px] border border-border bg-card p-5 shadow-sm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (accessPw === QA_ACCESS_SECRET) {
+              try {
+                sessionStorage.setItem(QA_ACCESS_STORAGE_KEY, QA_ACCESS_SECRET);
+              } catch {
+                /* ignore */
+              }
+              setAccessErr(false);
+              setAccessOk(true);
+            } else {
+              setAccessErr(true);
+            }
+          }}
+        >
+          <h1 className="font-display text-lg font-bold tracking-tight">Poster QA</h1>
+          <p className="font-body text-xs leading-relaxed text-muted-foreground">
+            Restricted page. Enter the passphrase configured as{' '}
+            <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">VITE_POSTER_QA_SECRET</code> for
+            this deployment.
+          </p>
+          <input
+            type="password"
+            value={accessPw}
+            onChange={(e) => {
+              setAccessPw(e.target.value);
+              setAccessErr(false);
+            }}
+            className="w-full rounded border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-foreground"
+            placeholder="Passphrase"
+            autoComplete="current-password"
+          />
+          {accessErr ? <p className="font-body text-xs text-destructive">Does not match.</p> : null}
+          <button
+            type="submit"
+            className="w-full rounded-[4px] bg-foreground py-2.5 text-xs font-semibold text-background transition-opacity hover:opacity-90"
+          >
+            Continue
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-[100dvh] bg-background text-foreground pt-12 sm:pt-14">
+    <div className="min-h-[100dvh] bg-background text-foreground">
       <div className="border-b border-border px-4 py-6 md:px-8">
         <div className="mx-auto max-w-[160rem]">
           <p className="mb-1 font-body text-xs text-muted-foreground">Temporary QA</p>

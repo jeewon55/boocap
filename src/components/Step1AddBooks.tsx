@@ -55,17 +55,36 @@ interface Step1Props {
   onAddBook: (day: number, book: Book) => void;
   onRemoveBook: (day: number) => void;
   onNext: () => void;
+  /** True while parent shows transition spinner to template step */
+  nextBusy?: boolean;
 }
 
-export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, onRemoveBook, onNext }: Step1Props) {
+export function Step1AddBooks({
+  year,
+  month,
+  entries,
+  onMonthChange,
+  onAddBook,
+  onRemoveBook,
+  onNext,
+  nextBusy = false,
+}: Step1Props) {
   const { locale } = useLocale();
   const flow = createFlowMessages[locale];
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [isReplacing, setIsReplacing] = useState(false);
   const [showNoBookModal, setShowNoBookModal] = useState(false);
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [monthLossConfirmOpen, setMonthLossConfirmOpen] = useState(false);
 
   const weekRows = buildCalendarWeekRows(year, month);
   const hasSelectedBooks = Object.keys(entries).length > 0;
+
+  const handleRequestOpenMonthPicker = () => {
+    if (!hasSelectedBooks) return true;
+    setMonthLossConfirmOpen(true);
+    return false;
+  };
 
   const handleNext = () => {
     if (!hasSelectedBooks) {
@@ -93,6 +112,9 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           year={year}
           month={month}
           onChange={onMonthChange}
+          pickerOpen={monthPickerOpen}
+          onPickerOpenChange={setMonthPickerOpen}
+          onRequestOpen={handleRequestOpenMonthPicker}
           compactHeader
           compactLeading={
             <span
@@ -191,24 +213,14 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
       {/* 하단 고정 버튼 - 화면이 짧아도 항상 보임 */}
       <div className="sticky bottom-0 mx-auto w-full max-w-[26rem] bg-background py-4">
         <button
+          type="button"
           onClick={handleNext}
-          className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+          disabled={nextBusy}
+          className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-60"
         >
           {flow.chooseTemplateCta}
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
-        {import.meta.env.DEV ? (
-          <div className="mt-3 text-center">
-            <a
-              href="/create/qa-posters"
-              target="_blank"
-              rel="noreferrer"
-              className="font-body text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            >
-              Poster QA (new tab) — keep this tab for the product flow
-            </a>
-          </div>
-        ) : null}
       </div>
 
       {/* View existing book detail */}
@@ -221,7 +233,7 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
               className="flex w-full max-h-[85vh] flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
               onClick={(e) => e.stopPropagation()}
             >
-            <div className="flex items-center justify-between p-5 border-b border-border">
+            <div className="flex items-center justify-between border-b border-border/50 p-5">
               <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
                 {MONTHS[month]} {String(selectedDay).padStart(2, '0')}
               </span>
@@ -302,6 +314,52 @@ export function Step1AddBooks({ year, month, entries, onMonthChange, onAddBook, 
           </motion.div>
         </div>
       )}
+
+      {monthLossConfirmOpen ? (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/25 px-6"
+          onClick={() => setMonthLossConfirmOpen(false)}
+          role="presentation"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.16 }}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="month-change-modal-title"
+            className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-5 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p
+              id="month-change-modal-title"
+              className="font-display text-[18px] font-bold tracking-[0] text-foreground"
+            >
+              {flow.monthChangeModalTitle}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{flow.monthChangeModalBody}</p>
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setMonthLossConfirmOpen(false)}
+                className="flex-1 rounded-[4px] border border-border py-3 text-xs font-semibold tracking-normal transition-colors hover:bg-secondary"
+              >
+                {flow.monthChangeModalCancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMonthLossConfirmOpen(false);
+                  setMonthPickerOpen(true);
+                }}
+                className="flex-1 rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                {flow.monthChangeModalConfirm}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
     </div>
   );
 }

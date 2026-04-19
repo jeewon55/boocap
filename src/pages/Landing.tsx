@@ -20,63 +20,55 @@ function getDefaultMonth() {
   return { year: y, month: m };
 }
 
-function LandingPosterMock({
-  month,
-  year,
-  locale,
-  monthLabel,
-  booksLabel,
+const LANDING_EXAMPLE_POSTERS = [
+  {
+    src: '/landing-examples/december-2025.png',
+    altEn: 'Example: December 2025 reading list poster',
+    altKo: '예시: 2025년 12월 독서 기록 포스터',
+  },
+  {
+    src: '/landing-examples/march-2026.png',
+    altEn: 'Example: March 2026 reading list poster',
+    altKo: '예시: 2026년 3월 독서 기록 포스터',
+  },
+  {
+    src: '/landing-examples/january-2026.png',
+    altEn: 'Example: January 2026 reading list poster',
+    altKo: '예시: 2026년 1월 독서 기록 포스터',
+  },
+] as const;
+
+function LandingExamplePoster({
+  src,
+  alt,
   tiltClass,
   scaleClass,
 }: {
-  month: number;
-  year: number;
-  locale: Locale;
-  monthLabel: string;
-  booksLabel: string;
+  src: string;
+  alt: string;
   tiltClass: string;
   scaleClass: string;
 }) {
   return (
     <div
-      className={`shrink-0 origin-bottom shadow-[0_24px_48px_-12px_rgba(0,0,0,0.18)] transition-transform duration-500 ${tiltClass} ${scaleClass}`}
+      className={`shrink-0 origin-bottom transition-transform duration-500 will-change-transform ${tiltClass} ${scaleClass}`}
     >
-      <div className="w-[min(72vw,220px)] sm:w-[240px] md:w-[260px] border border-foreground/15 bg-card aspect-[4/5] flex flex-col p-5 md:p-6 rounded-[2px]">
-        <div>
-          <p className="text-[8px] md:text-[9px] font-body font-semibold uppercase tracking-[0.35em] text-foreground">
-            {monthLabel}
-          </p>
-          <p className="font-display text-xl md:text-2xl font-bold tracking-[0] mt-2 text-foreground">
-            {locale === 'ko' ? `${month + 1}월` : MONTHS[month]}
-          </p>
-          <p className="text-muted-foreground text-[10px] md:text-[11px] font-body tabular-nums mt-0.5">{year}</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-1.5 md:gap-2 my-4 md:my-6 flex-1 content-center">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[2/3] border border-border bg-muted rounded-[1px]"
-              style={{
-                backgroundImage: `linear-gradient(135deg, hsl(0 0% ${88 - i * 3}%) 0%, hsl(0 0% ${78 - i * 4}%) 100%)`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="flex justify-between items-end pt-2 border-t border-border">
-          <div>
-            <p className="font-display text-2xl md:text-3xl font-bold tabular-nums leading-none tracking-[0]">6</p>
-            <p className="text-muted-foreground text-[8px] md:text-[9px] font-body tracking-[0.2em] uppercase mt-1">
-              {booksLabel}
-            </p>
-          </div>
-          <div className="flex gap-0.5 items-end h-10 md:h-12">
-            {[20, 45, 30, 60, 50, 35].map((h, i) => (
-              <div key={i} className="w-1.5 bg-foreground/25 rounded-[1px]" style={{ height: `${h * 0.4}px` }} />
-            ))}
-          </div>
-        </div>
+      {/*
+        Drop shadow must sit on the same layer as border-radius (not on the transformed wrapper),
+        or Safari draws black wedges at the card corners. Image is slightly oversized to hide AA gaps.
+      */}
+      <div
+        className="relative aspect-[4/5] w-[min(72vw,220px)] overflow-hidden rounded-[4px] bg-white shadow-[0_24px_48px_-12px_rgba(0,0,0,0.16)] [transform:translateZ(0)] sm:w-[240px] md:w-[260px]"
+        style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[103%] w-[103%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center select-none"
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+        />
       </div>
     </div>
   );
@@ -218,35 +210,35 @@ export default function Landing() {
           className="relative mt-auto flex min-h-[min(42vh,320px)] w-full justify-center overflow-hidden pb-0 pt-4 md:min-h-[min(46vh,420px)] md:pt-8"
         >
           <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-2 px-2 sm:gap-4 md:gap-8">
-            <LandingPosterMock
-              month={month}
-              year={year}
-              locale={locale}
-              monthLabel={t.monthlyRecap}
-              booksLabel={t.booksLabel}
-              tiltClass="-rotate-[4deg] translate-y-4 md:translate-y-6"
-              scaleClass="scale-[0.92] md:scale-95"
-            />
-            <LandingPosterMock
-              month={month}
-              year={year}
-              locale={locale}
-              monthLabel={t.monthlyRecap}
-              booksLabel={t.booksLabel}
-              tiltClass="rotate-0 z-[1] -translate-y-1 md:-translate-y-2"
-              scaleClass="scale-100"
-            />
-            <LandingPosterMock
-              month={month}
-              year={year}
-              locale={locale}
-              monthLabel={t.monthlyRecap}
-              booksLabel={t.booksLabel}
-              tiltClass="rotate-[4deg] translate-y-4 md:translate-y-6"
-              scaleClass="scale-[0.92] md:scale-95"
-            />
+            {LANDING_EXAMPLE_POSTERS.map((poster, i) => {
+              const alt = locale === 'ko' ? poster.altKo : poster.altEn;
+              const tiltScale =
+                i === 0
+                  ? {
+                      tiltClass: '-rotate-[4deg] translate-y-4 md:translate-y-6',
+                      scaleClass: 'scale-[0.92] md:scale-95',
+                    }
+                  : i === 1
+                    ? {
+                        tiltClass: 'rotate-0 z-[1] -translate-y-1 md:-translate-y-2',
+                        scaleClass: 'scale-100',
+                      }
+                    : {
+                        tiltClass: 'rotate-[4deg] translate-y-4 md:translate-y-6',
+                        scaleClass: 'scale-[0.92] md:scale-95',
+                      };
+              return (
+                <LandingExamplePoster
+                  key={poster.src}
+                  src={poster.src}
+                  alt={alt}
+                  tiltClass={tiltScale.tiltClass}
+                  scaleClass={tiltScale.scaleClass}
+                />
+              );
+            })}
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[hsl(0_0%_96%)] to-transparent md:h-32" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent md:h-32" />
         </section>
       </main>
     </div>

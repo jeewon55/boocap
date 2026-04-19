@@ -4,11 +4,15 @@ import { getPaleDominantCoverBackground, mosaicBackdropIfNearlyWhite } from '@/l
 import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
 import paperTexture from '@/assets/paper-texture.jpg';
 
+/** Poster canvas is 600px wide; largest cover cell ≈200px — ~2× for sharpness without pulling full-resolution originals. */
+const WSRV_COVER_W = 420;
+const WSRV_COVER_H = Math.round(WSRV_COVER_W * (7 / 5));
+
 function makeCoverUrl(src: string): string {
   if (!src || !/^https?:\/\//i.test(src)) return src;
   const noProto = src.replace(/^https?:\/\//i, '');
-  // wsrv.nl: image proxy with proper CORS headers so canvas exports keep covers.
-  return `https://wsrv.nl/?url=${encodeURIComponent(noProto)}&default=maxage:7d`;
+  // wsrv.nl: CORS-friendly proxy; bounded size + WebP keeps loads and decode much lighter than full originals.
+  return `https://wsrv.nl/?url=${encodeURIComponent(noProto)}&w=${WSRV_COVER_W}&h=${WSRV_COVER_H}&fit=cover&output=webp&default=maxage:7d`;
 }
 
 /** Mosaic poster: 1–3 books = one row; 4 = 2×2; then wider tiles up to 9 = 3×3; scales beyond. */
@@ -49,6 +53,7 @@ const BookImg = ({ src, alt, style }: { src: string; alt: string; style?: React.
     src={makeCoverUrl(src)}
     alt={alt}
     referrerPolicy="no-referrer"
+    decoding="async"
     style={{ objectFit: 'cover', ...style }}
     onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
   />
@@ -66,21 +71,24 @@ const MOSAIC_FALLBACK_COLORS = [
   '#E8F6E4',
 ];
 
-/** `maxWidth` alone doesn’t grow covers once it exceeds the grid cell — use scale for a real size bump. */
-const MOSAIC_COVER_DISPLAY_SCALE = 1.2;
+/** Mosaic covers stay ≤1 so they never spill past padded inset (drop-shadow only). */
+const MOSAIC_COVER_DISPLAY_SCALE = 1;
 
 function MosaicBookCell({
   book,
-  cols,
   coverMaxW,
+  coverMaxH,
   fallbackBg,
+  padX,
+  padY,
   displayScale = MOSAIC_COVER_DISPLAY_SCALE,
 }: {
   book: Book;
-  cols: number;
   coverMaxW: number;
+  coverMaxH: number;
   fallbackBg: string;
-  /** Slightly < MOSAIC_COVER_DISPLAY_SCALE when many books (e.g. 8+) to avoid cramped covers. */
+  padX: number;
+  padY: number;
   displayScale?: number;
 }) {
   const [bg, setBg] = useState(fallbackBg);
@@ -103,7 +111,8 @@ function MosaicBookCell({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: cols <= 2 ? 1 : 0,
+        padding: `${padY}px ${padX}px`,
+        boxSizing: 'border-box',
         minHeight: 0,
         minWidth: 0,
         overflow: 'hidden',
@@ -126,10 +135,11 @@ function MosaicBookCell({
             width: '100%',
             height: '100%',
             maxWidth: coverMaxW,
-            maxHeight: '100%',
+            maxHeight: coverMaxH,
             aspectRatio: '5 / 7',
             borderRadius: 2,
             display: 'block',
+            objectFit: 'cover',
             transform: `scale(${displayScale})`,
             transformOrigin: 'center center',
           }}
@@ -1233,7 +1243,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       );
     }
 
-    // ─── ESSAY: prose block — “In {month}, I have read …” + titled list + closing line ───
+    // ─── ESSAY: prose block — “In {month}, I read …” + titled list + closing line ───
     if (template === 'essay') {
       const essayFont = "'Pretendard', 'Noto Sans KR', sans-serif";
       const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
@@ -1393,7 +1403,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             <p style={essayHeadlineIntro}>
               In {monthName},
               <br />
-              <span style={{ display: 'inline-block', transform: 'translateY(-14px)' }}>I have read:</span>
+              <span style={{ display: 'inline-block', transform: 'translateY(-14px)' }}>I read:</span>
             </p>
           </div>
           <div
@@ -1925,21 +1935,25 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── MOSAIC: colored cells, covers only; grid shape follows book count ───
     if (template === 'mosaic') {
+      const POSTER_W = 600;
+      const POSTER_H = 750;
       const { cols, rows } = mosaicGridDims(books.length);
       const cellCount = cols * rows;
       const slots = Array.from({ length: cellCount }, (_, i) => books[i] ?? null);
-      const coverBase = Math.min(300, Math.max(88, Math.floor(598 / cols)));
+      const cellW = POSTER_W / cols;
+      const cellH = POSTER_H / rows;
+      /** Inset from cell edges (~2.5× prior 9% / 8% ratios); capped so a minimum cover area remains in tiny cells. */
+      const padXIdeal = Math.round(cellW * 0.09 * 2.5);
+      const padYIdeal = Math.round(cellH * 0.08 * 2.5);
+      const padX = Math.min(Math.max(20, Math.min(50, padXIdeal)), Math.max(0, Math.floor((cellW - 40) / 2)));
+      const padY = Math.min(Math.max(15, Math.min(45, padYIdeal)), Math.max(0, Math.floor((cellH - 40) / 2)));
+      const innerW = cellW - 2 * padX;
+      const innerH = cellH - 2 * padY;
+      const coverMaxW = Math.max(36, Math.floor(Math.min(innerW, (innerH * 5) / 7)));
+      const coverMaxH = Math.min(Math.round((coverMaxW * 7) / 5), Math.floor(innerH));
       const nMosaic = books.length;
-      /** 8 & 12: denser grids — shrink covers a bit more than other counts. */
       const mosaicExtraCompact = nMosaic === 8 || nMosaic === 12;
-      const mosaicManyBooks = nMosaic >= 8 && !mosaicExtraCompact;
-      const coverMaxWMult = mosaicExtraCompact ? 1.78 : mosaicManyBooks ? 2.05 : 2.72;
-      const mosaicCoverDisplayScale = mosaicExtraCompact
-        ? 0.76
-        : mosaicManyBooks
-          ? 0.9
-          : MOSAIC_COVER_DISPLAY_SCALE;
-      const coverMaxW = Math.round(coverBase * coverMaxWMult);
+      const mosaicCoverDisplayScale = mosaicExtraCompact ? 0.96 : MOSAIC_COVER_DISPLAY_SCALE;
 
       return (
         <div ref={ref} style={{ ...baseStyle, padding: 0, overflow: 'hidden' }}>
@@ -1958,8 +1972,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 <MosaicBookCell
                   key={book.key}
                   book={book}
-                  cols={cols}
                   coverMaxW={coverMaxW}
+                  coverMaxH={coverMaxH}
+                  padX={padX}
+                  padY={padY}
                   displayScale={mosaicCoverDisplayScale}
                   fallbackBg={MOSAIC_FALLBACK_COLORS[i % MOSAIC_FALLBACK_COLORS.length]}
                 />

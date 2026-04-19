@@ -114,7 +114,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
               className="flex w-full max-h-[85vh] animate-fade-in flex-col overflow-hidden rounded-t-[4px] border border-border bg-background font-body sm:rounded-[4px]"
               onClick={(e) => e.stopPropagation()}
             >
-            <div className="flex items-center justify-between p-5 border-b border-border">
+            <div className="flex items-center justify-between border-b border-border/50 p-5">
               <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
                 {MONTHS[month]} {selectedDay}
               </span>

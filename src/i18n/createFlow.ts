@@ -20,6 +20,10 @@ export const createFlowMessages: Record<
     noBookModalTitle: string;
     noBookModalBody: string;
     noBookModalOk: string;
+    monthChangeModalTitle: string;
+    monthChangeModalBody: string;
+    monthChangeModalCancel: string;
+    monthChangeModalConfirm: string;
   }
 > = {
   en: {
@@ -40,6 +44,11 @@ export const createFlowMessages: Record<
     noBookModalBody:
       'Add at least one book to the calendar before moving to the template step.',
     noBookModalOk: 'OK',
+    monthChangeModalTitle: 'Switch month?',
+    monthChangeModalBody:
+      'Books you added for this month will be cleared. If you continue, you can pick which month to open next.',
+    monthChangeModalCancel: 'Cancel',
+    monthChangeModalConfirm: 'Continue',
   },
   ko: {
     markYourDaysTitle: '읽은 책을 등록해 주세요.',
@@ -58,5 +67,10 @@ export const createFlowMessages: Record<
     noBookModalTitle: '먼저 책을 추가해 주세요',
     noBookModalBody: '템플릿 단계로 넘어가기 전에 달력에 책을 한 권 이상 추가해 주세요.',
     noBookModalOk: '확인',
+    monthChangeModalTitle: '다른 달로 이동할까요?',
+    monthChangeModalBody:
+      '이번 달에 등록한 책 정보가 모두 사라져요. 되돌릴 수 없어요. 계속하면 달을 고르는 화면이 열려요.',
+    monthChangeModalCancel: '취소',
+    monthChangeModalConfirm: '계속',
   },
 };

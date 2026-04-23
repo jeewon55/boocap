@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { useVisualViewportKeyboardInset } from '@/hooks/useVisualViewportKeyboardInset';
+import { useVisualViewportLayout } from '@/hooks/useVisualViewportLayout';
 
 type Props = { children: ReactNode; className?: string };
 
 /** Lifts bottom-sheet content above the mobile soft keyboard (visualViewport). */
 export function BottomSheetKeyboardLift({ children, className }: Props) {
-  const inset = useVisualViewportKeyboardInset();
+  const { keyboardInset: inset } = useVisualViewportLayout();
   return (
     <div
       className={cn('pointer-events-none w-full sm:mx-4 sm:max-w-md', className)}

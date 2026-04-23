@@ -28,10 +28,10 @@ function CalendarCover({ book, onRemove }: { book: Book; onRemove: (e: React.Mou
         </div>
       )}
       <div
-        className="absolute right-0 top-0 cursor-pointer rounded-bl-sm bg-primary/80 p-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute right-0 top-0 cursor-pointer rounded-bl-md bg-primary/80 p-1 opacity-100 transition-opacity group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
         onClick={onRemove}
       >
-        <X className="h-2.5 w-2.5 text-primary-foreground" />
+        <X className="h-3 w-3 text-primary-foreground" strokeWidth={2} />
       </div>
     </>
   );
@@ -95,7 +95,7 @@ export function Step1AddBooks({
   };
 
   return (
-    <div className="flex flex-col px-6">
+    <div className="flex flex-col px-4 sm:px-6">
       <div className="mx-auto w-full max-w-[26rem] pt-2 flex flex-col">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -155,7 +155,7 @@ export function Step1AddBooks({
                           key={cellKey}
                           className="pointer-events-none flex aspect-[3/4] w-full min-w-0 items-start justify-start p-1.5"
                         >
-                          <span className="font-display text-[22px] font-bold tabular-nums leading-none tracking-tighter text-[#d6d6d6]">
+                          <span className="font-display text-[clamp(0.8125rem,3.8vw,1.375rem)] font-bold tabular-nums leading-none tracking-tighter text-[#d6d6d6]">
                             {twoDigitDay(cell.day)}
                           </span>
                         </div>
@@ -193,7 +193,7 @@ export function Step1AddBooks({
                               />
                             </div>
                           ) : (
-                            <span className="font-display text-[22px] font-bold tabular-nums leading-none tracking-tighter text-foreground">
+                            <span className="font-display text-[clamp(0.8125rem,3.8vw,1.375rem)] font-bold tabular-nums leading-none tracking-tighter text-foreground">
                               {twoDigitDay(day)}
                             </span>
                           )}
@@ -211,7 +211,7 @@ export function Step1AddBooks({
       </div>
 
       {/* 하단 고정 버튼 - 화면이 짧아도 항상 보임 */}
-      <div className="sticky bottom-0 mx-auto w-full max-w-[26rem] bg-background py-4">
+      <div className="sticky bottom-0 z-10 mx-auto w-full max-w-[26rem] border-t border-border/40 bg-background pt-4 pb-[max(1rem,calc(1rem+env(safe-area-inset-bottom,0px)))]">
         <button
           type="button"
           onClick={handleNext}
@@ -256,7 +256,7 @@ export function Step1AddBooks({
               </div>
             </div>
 
-            <div className="p-5 pt-0 flex gap-3">
+            <div className="flex gap-3 p-5 pt-0 pb-[max(1.25rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))]">
               <button
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
                 className="flex-1 rounded-[4px] border border-border py-3 font-body text-xs font-medium tracking-normal transition-colors hover:bg-secondary"

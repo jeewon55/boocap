@@ -153,7 +153,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
   }, [emblaApi]);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden px-6">
+    <div className="flex flex-1 flex-col overflow-hidden px-4 sm:px-6">
       {/* Header — same shell as Step1 “Mark Your Days.” */}
       <div className="mx-auto w-full max-w-[26rem] shrink-0 pt-2">
         <motion.div
@@ -258,7 +258,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
       </div>
 
       {/* Bottom action bar — 24px below template label / dots */}
-      <div className="mx-auto mt-6 w-full max-w-[26rem] shrink-0 pb-6">
+      <div className="mx-auto mt-6 w-full max-w-[26rem] shrink-0 pb-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))]">
         <div className="flex gap-3">
           <button
             onClick={onBack}

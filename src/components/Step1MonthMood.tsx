@@ -14,7 +14,7 @@ interface Step1Props {
 
 export function Step1MonthMood({ year, month, mood, onMonthChange, onMoodChange, onNext }: Step1Props) {
   return (
-    <div className="flex flex-1 flex-col px-6">
+    <div className="flex flex-1 flex-col px-4 sm:px-6">
       <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center">
         <div className="text-center">
           <p className="mb-2 font-display text-[10px] uppercase tracking-[0] text-muted-foreground">Step 1</p>
@@ -29,7 +29,7 @@ export function Step1MonthMood({ year, month, mood, onMonthChange, onMoodChange,
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-[26rem] py-6">
+      <div className="mx-auto w-full max-w-[26rem] pt-6 pb-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))]">
         <button
           onClick={onNext}
           className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-foreground py-4 text-xs font-body font-medium tracking-normal text-background transition-opacity hover:opacity-90"

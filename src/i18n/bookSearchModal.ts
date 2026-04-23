@@ -6,6 +6,7 @@ export const bookSearchModalMessages: Record<
   {
     tabSearch: string;
     tabManual: string;
+    close: string;
     searchPlaceholder: string;
     cantFindEnterManually: string;
     manualUpload: string;
@@ -23,6 +24,7 @@ export const bookSearchModalMessages: Record<
   en: {
     tabSearch: 'Search',
     tabManual: 'Manual entry',
+    close: 'Close',
     searchPlaceholder: 'Search by title or author…',
     cantFindEnterManually: "Can't find your book? Enter manually",
     manualUpload: 'Upload',
@@ -39,6 +41,7 @@ export const bookSearchModalMessages: Record<
   ko: {
     tabSearch: '검색',
     tabManual: '직접 입력',
+    close: '닫기',
     searchPlaceholder: '제목 또는 저자로 검색…',
     cantFindEnterManually: '책을 찾을 수 없나요? 직접 입력하기',
     manualUpload: '업로드',

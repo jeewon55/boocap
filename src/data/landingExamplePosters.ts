@@ -9,11 +9,11 @@ export type LandingExamplePosterDef = {
 
 export const LANDING_EXAMPLE_POSTER_DEFS: readonly LandingExamplePosterDef[] = [
   {
-    id: 'dec-2025',
-    imgEn: '/landing-examples/december-2025-en.png',
-    imgKo: '/landing-examples/december-2025-ko.png',
-    altEn: 'Example: December 2025 reading list poster',
-    altKo: '예시: 2025년 12월 독서 기록 포스터',
+    id: 'jan-2026',
+    imgEn: '/landing-examples/january-2026-en.png',
+    imgKo: '/landing-examples/january-2026-ko.png',
+    altEn: 'Example: January 2026 reading list poster',
+    altKo: '예시: 2026년 1월 독서 기록 포스터',
   },
   {
     id: 'mar-2026',
@@ -23,10 +23,10 @@ export const LANDING_EXAMPLE_POSTER_DEFS: readonly LandingExamplePosterDef[] = [
     altKo: '예시: 2026년 3월 독서 기록 포스터',
   },
   {
-    id: 'jan-2026',
-    imgEn: '/landing-examples/january-2026-en.png',
-    imgKo: '/landing-examples/january-2026-ko.png',
-    altEn: 'Example: January 2026 reading list poster',
-    altKo: '예시: 2026년 1월 독서 기록 포스터',
+    id: 'dec-2025',
+    imgEn: '/landing-examples/december-2025-en.png',
+    imgKo: '/landing-examples/december-2025-ko.png',
+    altEn: 'Example: December 2025 reading list poster',
+    altKo: '예시: 2025년 12월 독서 기록 포스터',
   },
 ] as const;

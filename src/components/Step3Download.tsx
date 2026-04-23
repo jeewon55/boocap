@@ -92,7 +92,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const scaledH = 750 * scale;
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto px-6">
+    <div className="flex flex-1 flex-col overflow-auto px-4 sm:px-6">
       <div className="mx-auto w-full max-w-[26rem] shrink-0 pt-2">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -138,7 +138,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         </motion.div>
       </div>
 
-      <div className="mx-auto w-full max-w-[26rem] space-y-3 pt-2 pb-4">
+      <div className="mx-auto w-full max-w-[26rem] space-y-3 pt-2 pb-[max(1rem,calc(1rem+env(safe-area-inset-bottom,0px)))]">
         <button
           onClick={handleDownload}
           disabled={downloading}

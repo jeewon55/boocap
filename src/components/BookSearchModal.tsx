@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
 import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
+import { useVisualViewportLayout } from '@/hooks/useVisualViewportLayout';
 import { useLocale } from '@/contexts/LocaleContext';
 import { bookSearchModalMessages } from '@/i18n/bookSearchModal';
 
@@ -59,6 +60,14 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   const [manualCoverUrl, setManualCoverUrl] = useState('');
   const [previewError, setPreviewError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { visibleHeight } = useVisualViewportLayout();
+
+  const sheetMaxHeight = useMemo(() => {
+    if (typeof window === 'undefined') return undefined;
+    const cap = Math.round(window.innerHeight * 0.85);
+    const visibleCap = Math.max(240, visibleHeight - 16);
+    return Math.min(cap, visibleCap);
+  }, [visibleHeight]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,7 +113,8 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          style={{ maxHeight: sheetMaxHeight }}
+          className="flex min-h-0 w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
@@ -112,8 +122,13 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
             {MONTH_NAMES[month]} {day}
           </span>
-          <button onClick={onClose} className="rounded-[4px] p-1 transition-colors hover:bg-secondary">
-            <X className="w-4 h-4" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={bs.close}
+            className="rounded-[4px] p-1 transition-colors hover:bg-secondary"
+          >
+            <X className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
@@ -139,16 +154,16 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
         {mode === 'search' ? (
           <>
-            <div className="flex items-center gap-2 p-4 border-b border-border/50">
-              <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex items-center gap-2 border-b border-border/50 p-4">
+              <Search className="h-4 w-4 flex-shrink-0 text-muted-foreground" aria-hidden />
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={bs.searchPlaceholder}
-                className="w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
+                className="min-w-0 w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
               />
-              {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground flex-shrink-0" />}
+              {loading && <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" aria-hidden />}
             </div>
 
             <div className="overflow-y-auto flex-1">

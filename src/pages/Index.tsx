@@ -92,7 +92,7 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col bg-background text-foreground">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-background text-foreground">
       {templateStepPending ? (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-background/55 backdrop-blur-[2px]"

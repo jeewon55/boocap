@@ -36,7 +36,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
   const bookCount = Object.keys(entries).length;
 
   return (
-    <div className="flex flex-1 flex-col px-6">
+    <div className="flex flex-1 flex-col px-4 sm:px-6">
       <div className="mx-auto w-full max-w-[26rem] flex-1 pt-2">
         <div className="text-center">
           <p className="mb-2 font-display text-[10px] uppercase tracking-[0] text-muted-foreground">Step 2</p>
@@ -74,10 +74,10 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                     <div
-                      className="absolute top-0 right-0 p-0.5 bg-foreground/70 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-bl-sm"
+                      className="absolute right-0 top-0 cursor-pointer rounded-bl-md bg-foreground/70 p-1 opacity-100 transition-opacity group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"
                       onClick={(e) => { e.stopPropagation(); onRemoveBook(day); }}
                     >
-                      <X className="w-2.5 h-2.5 text-background" />
+                      <X className="h-3 w-3 text-background" strokeWidth={2} />
                     </div>
                   </>
                 ) : (
@@ -89,7 +89,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[26rem] gap-3 py-6">
+      <div className="mx-auto flex w-full max-w-[26rem] gap-3 pt-6 pb-[max(1.5rem,calc(1.5rem+env(safe-area-inset-bottom,0px)))]">
         <button
           onClick={onBack}
           className="flex flex-1 items-center justify-center gap-2 rounded-[4px] border border-border py-4 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"
@@ -137,7 +137,7 @@ export function Step2AddBooks({ year, month, entries, onAddBook, onRemoveBook, o
               </div>
             </div>
 
-            <div className="p-5 pt-0 flex gap-3">
+            <div className="flex gap-3 p-5 pt-0 pb-[max(1.25rem,calc(1.25rem+env(safe-area-inset-bottom,0px)))]">
               <button
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
                 className="flex-1 rounded-[4px] border border-border py-3 text-xs font-body font-medium tracking-normal transition-colors hover:bg-secondary"

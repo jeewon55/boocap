@@ -8,6 +8,7 @@ import {
 import { ArrowLeft } from 'lucide-react';
 import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect, useMemo, useLayoutEffect } from 'react';
+import { useLocale } from '@/contexts/LocaleContext';
 
 interface Step3Props {
   year: number;
@@ -21,6 +22,7 @@ interface Step3Props {
 }
 
 export function Step3Template({ year, month, entries, mood, template, onTemplateChange, onBack, onGenerate }: Step3Props) {
+  const { locale } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
 
@@ -86,6 +88,7 @@ export function Step3Template({ year, month, entries, mood, template, onTemplate
               entries={entries}
               mood={mood}
               template={template}
+              posterLocale={locale}
             />
           </div>
         </div>

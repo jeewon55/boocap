@@ -1,4 +1,7 @@
 import "@testing-library/jest-dom";
+import { installResizeObserverPolyfill } from "@/lib/resizeObserverPolyfill";
+
+installResizeObserverPolyfill();
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

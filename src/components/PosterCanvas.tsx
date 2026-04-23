@@ -1,4 +1,11 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react';
+import type { Locale } from '@/contexts/LocaleContext';
+import {
+  posterGrid2MonthLine,
+  posterGrid2Subtitle,
+  posterListHeaderMonthYear,
+  posterTimelineVerticalLabel,
+} from '@/i18n/posterStrings';
 import { Book, MOODS, MoodType, TemplateType } from '@/types/book';
 import { getPaleDominantCoverBackground, mosaicBackdropIfNearlyWhite } from '@/lib/mosaicCoverColor';
 import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
@@ -46,6 +53,8 @@ interface PosterCanvasProps {
   entries: Record<number, Book>;
   mood: MoodType;
   template?: TemplateType;
+  /** Month labels & template chrome (e.g. “Reading Journey”) — book text comes from `entries`. */
+  posterLocale?: Locale;
 }
 
 const BookImg = ({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) => (
@@ -150,7 +159,7 @@ function MosaicBookCell({
 }
 
 export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
-  ({ year, month, entries, mood, template = 'stack' }, ref) => {
+  ({ year, month, entries, mood, template = 'stack', posterLocale = 'en' }, ref) => {
     const moodConfig = MOODS.find((m) => m.id === mood)!;
     const books = useMemo(() => {
       const unique = new Map<string, Book>();
@@ -420,7 +429,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       /** Match top inset; used for grid area height + cover sizing math. */
       const GRID2_BOTTOM_PAD = 16;
       const GRID2_SIDE_PAD = 24;
-      const gridMonthTitle = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const gridMonthTitle = posterGrid2MonthLine(posterLocale, month);
+      const grid2Subtitle = posterGrid2Subtitle(posterLocale);
       const firstDay = new Date(year, month, 1).getDay();
       const prevMonthLastDay = new Date(year, month, 0).getDate();
       /** Taller rows when that calendar week has no books (grid flows : blanks + days). */
@@ -538,7 +548,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             >
               {gridMonthTitle}
               <br />
-              Reading Journey
+              {grid2Subtitle}
             </p>
             <span
               style={{
@@ -945,8 +955,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     // ─── LIST ───
     if (template === 'list') {
       const listFont = "'Pretendard', system-ui, sans-serif";
-      const listMonthTitle =
-        MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const listMonthTitle = posterListHeaderMonthYear(posterLocale, month, year);
       const listBg = '#ffffff';
       const listFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
       const listInk = '#1a1a1a';
@@ -1099,8 +1108,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   color: listInk,
                 }}
               >
-                {listMonthTitle}{' '}
-                <span style={{ letterSpacing: '-2px' }}>{year}</span>
+                {listMonthTitle}
               </p>
             </div>
             <div
@@ -1488,8 +1496,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── TIMELINE: full month 1…last day; spine; read days left (+ title), unread right ───
     if (template === 'timeline') {
-      const listMonthTitle =
-        MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const timelineVerticalLabel = posterTimelineVerticalLabel(posterLocale, month, year);
       const timelineInk = '#121212';
       const lineHeavy = 2;
       const posterHeight = 750;
@@ -1761,7 +1768,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 lineHeight: 1,
               }}
             >
-              {listMonthTitle}, {year}
+              {timelineVerticalLabel}
             </span>
           </div>
         </div>

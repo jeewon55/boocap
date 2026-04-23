@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen } from 'lucide-react';
-import { useLocale, type Locale } from '@/contexts/LocaleContext';
+import { useLocale } from '@/contexts/LocaleContext';
 import { formatMonthYear, landingMessages } from '@/i18n/landing';
+import { LANDING_EXAMPLE_POSTER_DEFS } from '@/data/landingExamplePosters';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -20,24 +21,6 @@ function getDefaultMonth() {
   return { year: y, month: m };
 }
 
-const LANDING_EXAMPLE_POSTERS = [
-  {
-    src: '/landing-examples/december-2025.png',
-    altEn: 'Example: December 2025 reading list poster',
-    altKo: '예시: 2025년 12월 독서 기록 포스터',
-  },
-  {
-    src: '/landing-examples/march-2026.png',
-    altEn: 'Example: March 2026 reading list poster',
-    altKo: '예시: 2026년 3월 독서 기록 포스터',
-  },
-  {
-    src: '/landing-examples/january-2026.png',
-    altEn: 'Example: January 2026 reading list poster',
-    altKo: '예시: 2026년 1월 독서 기록 포스터',
-  },
-] as const;
-
 function LandingExamplePoster({
   src,
   alt,
@@ -53,10 +36,6 @@ function LandingExamplePoster({
     <div
       className={`shrink-0 origin-bottom transition-transform duration-500 will-change-transform ${tiltClass} ${scaleClass}`}
     >
-      {/*
-        Drop shadow must sit on the same layer as border-radius (not on the transformed wrapper),
-        or Safari draws black wedges at the card corners. Image is slightly oversized to hide AA gaps.
-      */}
       <div
         className="relative aspect-[4/5] w-[min(94vw,286px)] overflow-hidden rounded-[4px] bg-white shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)] [transform:translateZ(0)] sm:w-[312px] md:w-[338px]"
         style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
@@ -170,7 +149,7 @@ export default function Landing() {
                       </button>
                     ))}
                   </div>
-                  <div className="grid grid-cols-3 gap-px bg-border">
+                  <div className="grid grid-cols-3 gap-px bg-card">
                     {t.monthPickerLabels.map((label, i) => (
                       <button
                         key={label}
@@ -204,15 +183,15 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Product strip — bottom-cropped row */}
+        {/* Product strip — locale picks `imgEn` / `imgKo` from `public/landing-examples/` */}
         <section
           id="landing-preview"
           className="relative mt-auto flex min-h-[min(44vh,416px)] w-full justify-center overflow-hidden pb-0 pt-4 md:min-h-[min(48vh,546px)] md:pt-8"
         >
           <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-1 px-2 sm:gap-2 md:gap-2.5">
-            {LANDING_EXAMPLE_POSTERS.map((poster, i) => {
-              const alt = locale === 'ko' ? poster.altKo : poster.altEn;
-              /** Side cards sit above center (z-2 vs z-0) and nudge inward so edges overlap like stacked prints. */
+            {LANDING_EXAMPLE_POSTER_DEFS.map((def, i) => {
+              const src = locale === 'ko' ? def.imgKo : def.imgEn;
+              const alt = locale === 'ko' ? def.altKo : def.altEn;
               const tiltScale =
                 i === 0
                   ? {
@@ -232,8 +211,8 @@ export default function Landing() {
                     };
               return (
                 <LandingExamplePoster
-                  key={poster.src}
-                  src={poster.src}
+                  key={def.id}
+                  src={src}
                   alt={alt}
                   tiltClass={tiltScale.tiltClass}
                   scaleClass={tiltScale.scaleClass}

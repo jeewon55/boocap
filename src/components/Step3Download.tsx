@@ -130,6 +130,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
                   entries={entries}
                   mood={mood}
                   template={template}
+                  posterLocale={locale}
                 />
               </div>
             </div>

@@ -10,10 +10,24 @@ import { PosterCanvas } from './PosterCanvas';
 import { useRef, useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 import { motion } from 'framer-motion';
 import useEmblaCarousel from 'embla-carousel-react';
-import { useLocale } from '@/contexts/LocaleContext';
+import { useLocale, type Locale } from '@/contexts/LocaleContext';
 import { createFlowMessages } from '@/i18n/createFlow';
 
-function PosterScaled({ year, month, entries, mood, template }: { year: number; month: number; entries: Record<number, Book>; mood: MoodType; template: TemplateType }) {
+function PosterScaled({
+  year,
+  month,
+  entries,
+  mood,
+  template,
+  posterLocale,
+}: {
+  year: number;
+  month: number;
+  entries: Record<number, Book>;
+  mood: MoodType;
+  template: TemplateType;
+  posterLocale: Locale;
+}) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.35);
 
@@ -38,7 +52,14 @@ function PosterScaled({ year, month, entries, mood, template }: { year: number; 
     >
       <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0 }}>
         <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-          <PosterCanvas year={year} month={month} entries={entries} mood={mood} template={template} />
+          <PosterCanvas
+            year={year}
+            month={month}
+            entries={entries}
+            mood={mood}
+            template={template}
+            posterLocale={posterLocale}
+          />
         </div>
       </div>
     </div>
@@ -197,7 +218,14 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
                           maxHeight: 480,
                         }}
                       >
-                        <PosterScaled year={year} month={month} entries={entries} mood={mood} template={t.id} />
+                        <PosterScaled
+                          year={year}
+                          month={month}
+                          entries={entries}
+                          mood={mood}
+                          template={t.id}
+                          posterLocale={locale}
+                        />
                       </div>
                     </div>
                   </div>

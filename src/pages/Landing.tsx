@@ -159,7 +159,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-white pb-0 text-foreground max-md:h-[100dvh] max-md:max-h-[100dvh] md:pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="landing-tall-root flex min-h-[100dvh] flex-col overflow-x-hidden bg-white pb-0 text-foreground max-md:h-[100dvh] max-md:max-h-[100dvh] md:pb-[env(safe-area-inset-bottom,0px)]">
       <nav className="grid shrink-0 grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center px-4 pt-[max(0.35rem,env(safe-area-inset-top,0px))] pb-2 max-md:pb-1.5 md:pb-4 sm:px-6 md:pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
         <div aria-hidden className="min-w-0" />
         <span className="text-center font-display text-[16px] font-bold tracking-[0] uppercase md:text-[20px]">
@@ -168,9 +168,9 @@ export default function Landing() {
         <div aria-hidden className="min-w-0" />
       </nav>
 
-      <main className="flex min-h-0 flex-1 flex-col max-md:min-h-0 md:min-h-0">
+      <main className="landing-tall-main flex min-h-0 flex-1 flex-col max-md:min-h-0 md:min-h-0">
         {/* Copy — 모바일: 맨 위 / md+: 히어로 중앙 + CTA 동반 */}
-        <section className="shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-1 md:flex-col md:items-center md:justify-center md:px-6 md:pb-8 md:pt-10">
+        <section className="landing-tall-hero shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-none md:flex-col md:items-center md:justify-center md:px-6 md:pb-8 md:pt-10">
           <h1 className="mx-auto max-w-[20rem] font-display text-[1.45rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-foreground max-md:max-w-[min(100%,19rem)] sm:max-w-xl sm:text-4xl sm:leading-[1.12] md:max-w-2xl md:text-5xl md:leading-[58px]">
             {t.heroSingleLines ? (
               <>
@@ -215,7 +215,7 @@ export default function Landing() {
         {/* 포스터 — 모바일: 남는 높이 안에 축소 · md+: 기존 대형 스트립 */}
         <section
           id="landing-preview"
-          className="relative z-0 flex w-full min-h-0 flex-1 flex-col items-start justify-center overflow-x-hidden overflow-y-visible pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:overflow-x-visible max-md:pt-0 max-md:pb-4 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-start md:justify-center md:overflow-x-hidden md:overflow-y-visible md:pb-8 md:pt-8"
+          className="landing-tall-preview relative z-0 flex w-full min-h-0 flex-1 flex-col items-start justify-center overflow-x-hidden overflow-y-visible pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:overflow-x-visible max-md:pt-0 max-md:pb-4 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-center md:justify-center md:overflow-x-hidden md:overflow-y-visible md:pb-6 md:pt-6"
         >
           {/* 모바일: overflow-x-auto 시 overflow-y가 auto로 바뀌어 그림자가 잘림 → 안쪽에 pb로 스크롤 박스 안에 그림자 공간 확보 */}
           <div

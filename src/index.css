@@ -117,3 +117,49 @@
     font-family: var(--font-display);
   }
 }
+
+/* 랜딩(/): 데스크톱 + 뷰포트 높이 1080px 이상에서 페이지 세로 스크롤 제거 */
+@media (min-width: 768px) and (min-height: 1080px) {
+  html:has(.landing-tall-root),
+  body:has(.landing-tall-root) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #root:has(.landing-tall-root) {
+    height: 100%;
+  }
+
+  .landing-tall-root {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .landing-tall-main {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .landing-tall-hero {
+    flex-shrink: 0;
+    padding-top: 2rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+
+  .landing-tall-preview {
+    flex: 1 1 0%;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .landing-tall-preview [data-landing-poster-strip] {
+    max-height: min(100%, 52vh);
+    min-height: 0;
+  }
+}

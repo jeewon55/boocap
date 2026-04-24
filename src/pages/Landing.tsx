@@ -1,3 +1,4 @@
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
@@ -62,10 +63,42 @@ function LandingExamplePoster({
   );
 }
 
+const MD_BREAKPOINT_PX = 768;
+
 export default function Landing() {
   const navigate = useNavigate();
   const { locale } = useLocale();
   const t = landingMessages[locale];
+  const mobileCarouselRef = useRef<HTMLDivElement>(null);
+
+  /** 모바일 가로 캐러셀: 첫 페인트·리사이즈마다 가운데(두 번째) 포스터를 뷰포트 중앙에 맞춤 */
+  const centerMobileCarousel = useCallback(() => {
+    const viewport = mobileCarouselRef.current;
+    if (!viewport || typeof window === 'undefined' || window.innerWidth >= MD_BREAKPOINT_PX) return;
+    const centerEl = viewport.querySelector('[data-landing-carousel-center]') as HTMLElement | null;
+    if (!centerEl) return;
+    const v = viewport.getBoundingClientRect();
+    const c = centerEl.getBoundingClientRect();
+    const delta = c.left + c.width / 2 - (v.left + v.width / 2);
+    viewport.scrollLeft += Math.round(delta);
+  }, []);
+
+  useLayoutEffect(() => {
+    centerMobileCarousel();
+    const el = mobileCarouselRef.current;
+    if (!el) return undefined;
+    const inner = el.querySelector('[data-landing-poster-strip]');
+    const ro = new ResizeObserver(() => {
+      requestAnimationFrame(() => centerMobileCarousel());
+    });
+    ro.observe(el);
+    if (inner) ro.observe(inner);
+    window.addEventListener('resize', centerMobileCarousel);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', centerMobileCarousel);
+    };
+  }, [centerMobileCarousel, locale]);
 
   const handleCreate = () => {
     const { year, month } = getDefaultMonth();
@@ -133,12 +166,14 @@ export default function Landing() {
         >
           {/* 모바일: overflow-x-auto 시 overflow-y가 auto로 바뀌어 그림자가 잘림 → 안쪽에 pb로 스크롤 박스 안에 그림자 공간 확보 */}
           <div
+            ref={mobileCarouselRef}
             className="pointer-events-none max-md:pointer-events-auto relative z-10 w-full min-w-0 max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:overflow-y-visible max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden motion-reduce:max-md:snap-none md:overflow-visible"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div
+              data-landing-poster-strip
               className={cn(
-                'pointer-events-none max-md:pointer-events-auto flex items-end justify-center gap-0 px-1 max-md:w-max max-md:justify-start max-md:gap-4 max-md:px-[max(1rem,calc(50vw-min(25.35vw,86px)))] max-md:pb-14 max-md:pt-2',
+                'pointer-events-none max-md:pointer-events-auto flex items-end justify-center gap-0 px-1 max-md:w-max max-md:justify-start max-md:gap-3 max-md:px-[max(0.75rem,calc(50vw-min(25.35vw,86px)-2.25rem))] max-md:pb-14 max-md:pt-2',
                 'max-md:[perspective:min(100vw,960px)] max-md:[perspective-origin:50%_90%] max-md:[transform-style:preserve-3d]',
                 'w-full max-w-5xl md:gap-2.5 md:justify-center md:px-2 md:pb-0 md:pt-0',
               )}
@@ -166,6 +201,7 @@ export default function Landing() {
                 return (
                   <div
                     key={def.id}
+                    data-landing-carousel-center={i === 1 ? '' : undefined}
                     className="snap-center shrink-0 max-md:snap-always md:contents"
                   >
                     <div

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import { Download, ArrowLeft } from 'lucide-react';
 import { Book, MoodType, TemplateType } from '@/types/book';
+import { coverUrlForRasterExport } from '@/lib/coverExportUrl';
 import { PosterCanvas } from './PosterCanvas';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/contexts/LocaleContext';
@@ -44,9 +45,21 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const handleDownload = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
+    const swapBack: { el: HTMLImageElement; prev: string }[] = [];
     try {
       const TARGET_W = 1080;
-      const images = posterRef.current.querySelectorAll('img');
+      const root = posterRef.current;
+      const images = root.querySelectorAll('img');
+
+      for (const img of Array.from(images)) {
+        const prev = img.src;
+        const next = coverUrlForRasterExport(prev);
+        if (next !== prev) {
+          swapBack.push({ el: img, prev });
+          img.src = next;
+        }
+      }
+
       await Promise.all(
         Array.from(images).map(async (img) => {
           if (!img.complete) {
@@ -62,20 +75,25 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           }
         })
       );
-      // Small extra delay for rendering stability
-      await new Promise((r) => setTimeout(r, 300));
+      // One paint after decode; avoids a fixed 300ms wait (html-to-image is already heavy).
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
 
       const exportOptions = {
-        cacheBust: true,
+        // Re-fetching every asset with a new query string makes export much slower.
+        cacheBust: false,
         includeQueryParams: true,
         pixelRatio: 1,
         canvasWidth: TARGET_W,
         canvasHeight: 1350,
-        skipFonts: false,
+        // Embedding all @font-face files (Google Fonts, Pretendard, …) is usually the slowest step;
+        // fonts are already loaded for on-screen poster — skip duplicate downloads.
+        skipFonts: true,
         backgroundColor: null,
       } as const;
 
-      const dataUrl = await toPng(posterRef.current, exportOptions);
+      const dataUrl = await toPng(root, exportOptions);
 
       const link = document.createElement('a');
       link.download = `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`;
@@ -84,6 +102,9 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     } catch (e) {
       console.error('Export failed', e);
     } finally {
+      for (const { el, prev } of swapBack) {
+        el.src = prev;
+      }
       setDownloading(false);
     }
   };

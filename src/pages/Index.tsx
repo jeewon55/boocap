@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { WizardStep } from '@/components/WizardStep';
 import { Step1AddBooks } from '@/components/Step1AddBooks';
@@ -22,6 +23,7 @@ function getInitial() {
 }
 
 export default function Index() {
+  const navigate = useNavigate();
   const init = getInitial();
   const [step, setStep] = useState(0);
   const [templateStepPending, setTemplateStepPending] = useState(false);
@@ -78,6 +80,7 @@ export default function Index() {
     setTemplate('stack');
     templateAdvanceLock.current = false;
     setTemplateStepPending(false);
+    navigate('/', { replace: true });
   };
 
   const goToTemplateStep = useCallback(() => {

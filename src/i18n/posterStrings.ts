@@ -26,17 +26,14 @@ export function posterListHeaderMonthYear(locale: Locale, monthIndex: number, ye
   return `${m} ${year}`;
 }
 
-/** Grid2: first line month only — “March” / “3월” */
-export function posterGrid2MonthLine(locale: Locale, monthIndex: number): string {
-  if (locale === 'ko') {
-    return `${MONTH_KO_SHORT[monthIndex]}월`;
-  }
+/** Grid2 (borderless calendar): first line month — always English full name */
+export function posterGrid2MonthLine(monthIndex: number): string {
   return MONTH_EN_FULL[monthIndex];
 }
 
-/** Grid2: second line under month */
-export function posterGrid2Subtitle(locale: Locale): string {
-  return locale === 'ko' ? '독서 여정' : 'Reading Journey';
+/** Grid2 (borderless calendar): second line under month — fixed label in all locales */
+export function posterGrid2Subtitle(): string {
+  return 'Reading Journey';
 }
 
 /** Timeline vertical rail (rotated) */

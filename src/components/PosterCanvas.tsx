@@ -11,15 +11,13 @@ import { getPaleDominantCoverBackground, mosaicBackdropIfNearlyWhite } from '@/l
 import { buildCalendarWeekRows, twoDigitDay, WEEK_LETTERS_MON } from '@/lib/calendarGrid';
 import paperTexture from '@/assets/paper-texture.jpg';
 
-/** Poster canvas is 600px wide; largest cover cell ≈200px — ~2× for sharpness without pulling full-resolution originals. */
-const WSRV_COVER_W = 420;
-const WSRV_COVER_H = Math.round(WSRV_COVER_W * (7 / 5));
-
+/**
+ * Cover URL for <img src>. We use the original URL so pasted / manual URLs and CDNs
+ * render in the browser. Routing through an image proxy breaks many sources when the
+ * proxy cannot fetch them (while the browser often can with referrerPolicy).
+ */
 function makeCoverUrl(src: string): string {
-  if (!src || !/^https?:\/\//i.test(src)) return src;
-  const noProto = src.replace(/^https?:\/\//i, '');
-  // wsrv.nl: CORS-friendly proxy; bounded size + WebP keeps loads and decode much lighter than full originals.
-  return `https://wsrv.nl/?url=${encodeURIComponent(noProto)}&w=${WSRV_COVER_W}&h=${WSRV_COVER_H}&fit=cover&output=webp&default=maxage:7d`;
+  return typeof src === 'string' ? src.trim() : src;
 }
 
 /** Mosaic poster: 1–3 books = one row; 4 = 2×2; then wider tiles up to 9 = 3×3; scales beyond. */
@@ -429,8 +427,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       /** Match top inset; used for grid area height + cover sizing math. */
       const GRID2_BOTTOM_PAD = 16;
       const GRID2_SIDE_PAD = 24;
-      const gridMonthTitle = posterGrid2MonthLine(posterLocale, month);
-      const grid2Subtitle = posterGrid2Subtitle(posterLocale);
+      const gridMonthTitle = posterGrid2MonthLine(month);
+      const grid2Subtitle = posterGrid2Subtitle();
       const firstDay = new Date(year, month, 1).getDay();
       const prevMonthLastDay = new Date(year, month, 0).getDate();
       /** Taller rows when that calendar week has no books (grid flows : blanks + days). */
@@ -665,7 +663,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
     // ─── STACK (Creative Collage) ───
     if (template === 'stack') {
-      const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
+      const monthName =
+        posterLocale === 'ko'
+          ? `${month + 1}월에는`
+          : MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
 
       /** Safe zone: Tailwind p-6 (24px) — keeps type & covers off the poster edge */
       const STACK_SAFE_PAD = 24;
@@ -678,10 +679,19 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const STACK_DENSE_COL_GAP_PX = 16;
       const TITLE_TOP_PX = 36;
       const TITLE_FONT_SIZE = 80;
+      /** Month line only: slightly smaller in KO so Hangul + “월에는” fits the band */
+      const STACK_MONTH_TITLE_FONT_SIZE = posterLocale === 'ko' ? 72 : TITLE_FONT_SIZE;
       const TITLE_SUBLINE_FONT_SIZE = TITLE_FONT_SIZE / 2;
       const TITLE_FONT_FAMILY = "'Instrument Sans', sans-serif";
       const STACK_TITLE_COLOR = '#000000';
       const TITLE_GAP_PX = 60;
+      /** Second-line marginTop vs first line; EN keeps legacy tight -2. KO adds 2× nominal gap for breathing room */
+      const STACK_SUBLINE_MARGIN_TOP_EN = -2;
+      const STACK_KO_TITLE_INTERLINE_BASE_PX = 8;
+      const STACK_SUBLINE_MARGIN_TOP =
+        posterLocale === 'ko'
+          ? STACK_SUBLINE_MARGIN_TOP_EN + 2 * STACK_KO_TITLE_INTERLINE_BASE_PX
+          : STACK_SUBLINE_MARGIN_TOP_EN;
       /** Nudge cover stack slightly above true vertical center of the band below the title */
       const STACK_COLLAGE_NUDGE_UP_PX = 20;
       /** Titles can extend past covers; shift whole collage slightly left so the block feels centered. */
@@ -804,9 +814,9 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       const stackTitleSlotPx = getStackTitleSlotPx(books.length);
       const titleBottomPx =
         TITLE_TOP_PX +
-        TITLE_FONT_SIZE * 1.05 +
-        TITLE_SUBLINE_FONT_SIZE * 1.05 -
-        2; // main line + smaller subline; marginTop -2 between
+        STACK_MONTH_TITLE_FONT_SIZE * 1.05 +
+        STACK_SUBLINE_MARGIN_TOP +
+        TITLE_SUBLINE_FONT_SIZE * 1.05;
 
       /** Vertical band for covers (below title); center cover stack in this band */
       const collageBandTop = titleBottomPx + TITLE_GAP_PX;
@@ -858,7 +868,10 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
       const stackBg = '#ffffff';
       const stackFrameBorder = '1px solid rgba(0, 0, 0, 0.08)';
-      const stackBookWord = books.length === 1 ? 'book' : 'books';
+      const stackReadLine =
+        posterLocale === 'ko'
+          ? `${books.length}권의 책을 읽었어요`
+          : `with ${books.length} ${books.length === 1 ? 'book' : 'books'}`;
 
       return (
         <div
@@ -877,11 +890,11 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
           <div className="absolute inset-6 z-[5] overflow-visible">
             {/* Title section */}
             <div style={{ position: 'absolute', top: TITLE_TOP_PX, left: 0, right: 0, zIndex: 30 }}>
-              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', textAlign: 'left' }}>
+              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: STACK_MONTH_TITLE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', textAlign: 'left' }}>
                 {monthName}
               </p>
-              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_SUBLINE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: -2, textAlign: 'left' }}>
-                with {books.length} {stackBookWord}
+              <p style={{ fontFamily: TITLE_FONT_FAMILY, fontSize: TITLE_SUBLINE_FONT_SIZE, fontWeight: 700, color: STACK_TITLE_COLOR, lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: STACK_SUBLINE_MARGIN_TOP, textAlign: 'left' }}>
+                {stackReadLine}
               </p>
             </div>
 

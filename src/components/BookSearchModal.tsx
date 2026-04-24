@@ -161,7 +161,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={bs.searchPlaceholder}
-                className="min-w-0 w-full bg-transparent text-sm font-body outline-none placeholder:text-placeholder-muted"
+                className="min-w-0 w-full bg-transparent text-base font-body outline-none placeholder:text-placeholder-muted"
               />
               {loading && <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" aria-hidden />}
             </div>
@@ -261,7 +261,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
                 placeholder={bs.manualPlaceholderTitle}
-                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-base font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
@@ -273,7 +273,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 value={manualAuthor}
                 onChange={(e) => setManualAuthor(e.target.value)}
                 placeholder={bs.manualPlaceholderAuthor}
-                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
+                className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-base font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
               />
             </div>
 
@@ -286,7 +286,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                   value={manualCoverUrl}
                   onChange={(e) => { setManualCoverUrl(e.target.value); setPreviewError(false); }}
                   placeholder={bs.manualPlaceholderCoverUrl}
-                  className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
+                  className="w-full rounded border border-border bg-transparent px-3 py-2.5 text-base font-body outline-none transition-colors placeholder:text-placeholder-muted focus:border-primary"
                 />
               </div>
             )}

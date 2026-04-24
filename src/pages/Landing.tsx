@@ -3,6 +3,18 @@ import { ArrowRight } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { landingMessages } from '@/i18n/landing';
 import { LANDING_EXAMPLE_POSTER_DEFS } from '@/data/landingExamplePosters';
+import { cn } from '@/lib/utils';
+
+/** Mobile-only Y rotation for carousel “wheel”; md+ uses flat layout via `md:contents`. */
+const LANDING_POSTER_WHEEL_Y: Record<number, string> = {
+  0: 'max-md:[transform:rotateY(24deg)] max-md:motion-reduce:transform-none',
+  1: 'max-md:[transform:rotateY(0deg)_translateZ(32px)] max-md:motion-reduce:transform-none',
+  2: 'max-md:[transform:rotateY(-24deg)] max-md:motion-reduce:transform-none',
+};
+
+function landingPosterWheelY(i: number) {
+  return LANDING_POSTER_WHEEL_Y[i] ?? 'max-md:motion-reduce:transform-none';
+}
 
 function getDefaultMonth() {
   const now = new Date();
@@ -30,18 +42,21 @@ function LandingExamplePoster({
     <div
       className={`shrink-0 origin-bottom transition-transform duration-500 will-change-transform ${tiltClass} ${scaleClass}`}
     >
-      <div
-        className="relative aspect-[4/5] w-[min(50.7vw,172px)] overflow-hidden rounded-[4px] bg-white shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)] [transform:translateZ(0)] md:w-[min(122.2vw,372px)] lg:w-[406px] xl:w-[439px]"
-        style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
-      >
-        <img
-          src={src}
-          alt={alt}
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[103%] w-[103%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center select-none"
-          loading="lazy"
-          decoding="async"
-          draggable={false}
-        />
+      {/* 그림자는 overflow 바깥 래퍼에 두어 이미지 마스크와 분리 */}
+      <div className="rounded-[4px] shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)]">
+        <div
+          className="relative aspect-[4/5] w-[min(50.7vw,172px)] overflow-hidden rounded-[4px] bg-white md:w-[min(122.2vw,372px)] lg:w-[406px] xl:w-[439px]"
+          style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
+        >
+          <img
+            src={src}
+            alt={alt}
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[103%] w-[103%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover object-center select-none"
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        </div>
       </div>
     </div>
   );
@@ -58,7 +73,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-white pb-0 text-foreground max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:overflow-hidden md:pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-white pb-0 text-foreground max-md:h-[100dvh] max-md:max-h-[100dvh] md:pb-[env(safe-area-inset-bottom,0px)]">
       <nav className="grid shrink-0 grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center px-4 pt-[max(0.35rem,env(safe-area-inset-top,0px))] pb-2 max-md:pb-1.5 md:pb-4 sm:px-6 md:pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
         <div aria-hidden className="min-w-0" />
         <span className="text-center font-display text-[16px] font-bold tracking-[0] uppercase md:text-[20px]">
@@ -69,7 +84,7 @@ export default function Landing() {
 
       <main className="flex min-h-0 flex-1 flex-col max-md:min-h-0 md:min-h-0">
         {/* Copy — 모바일: 맨 위 / md+: 히어로 중앙 + CTA 동반 */}
-        <section className="shrink-0 px-4 pt-8 text-center max-md:pb-4 sm:px-6 md:flex md:flex-1 md:flex-col md:items-center md:justify-center md:px-6 md:pb-8 md:pt-10">
+        <section className="shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-1 md:flex-col md:items-center md:justify-center md:px-6 md:pb-8 md:pt-10">
           <h1 className="mx-auto max-w-[20rem] font-display text-[1.45rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-foreground max-md:max-w-[min(100%,19rem)] sm:max-w-xl sm:text-4xl sm:leading-[1.12] md:max-w-2xl md:text-5xl md:leading-[58px]">
             {t.heroSingleLines ? (
               <>
@@ -114,45 +129,69 @@ export default function Landing() {
         {/* 포스터 — 모바일: 남는 높이 안에 축소 · md+: 기존 대형 스트립 */}
         <section
           id="landing-preview"
-          className="relative flex w-full min-h-0 flex-1 flex-col items-start justify-center overflow-hidden pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:pt-0 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-start md:justify-center md:pt-8"
+          className="relative z-0 flex w-full min-h-0 flex-1 flex-col items-start justify-center overflow-x-hidden overflow-y-visible pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:overflow-x-visible max-md:pt-0 max-md:pb-4 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-start md:justify-center md:overflow-x-hidden md:overflow-y-visible md:pb-8 md:pt-8"
         >
-          <div className="pointer-events-none flex w-full max-w-5xl items-end justify-center gap-0 px-1 max-md:max-h-full max-md:pb-0 sm:gap-2 md:gap-2.5 md:px-2">
-            {LANDING_EXAMPLE_POSTER_DEFS.map((def, i) => {
-              const src = locale === 'ko' ? def.imgKo : def.imgEn;
-              const alt = locale === 'ko' ? def.altKo : def.altEn;
-              const tiltScale =
-                i === 0
-                  ? {
-                      tiltClass:
-                        'relative z-[2] -rotate-[2deg] translate-x-0.5 translate-y-0.5 md:-rotate-[4deg] md:translate-x-5 md:translate-y-6',
-                      scaleClass: 'scale-[0.92] md:scale-95',
-                    }
-                  : i === 1
+          {/* 모바일: overflow-x-auto 시 overflow-y가 auto로 바뀌어 그림자가 잘림 → 안쪽에 pb로 스크롤 박스 안에 그림자 공간 확보 */}
+          <div
+            className="pointer-events-none max-md:pointer-events-auto relative z-10 w-full min-w-0 max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:overflow-y-visible max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden motion-reduce:max-md:snap-none md:overflow-visible"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div
+              className={cn(
+                'pointer-events-none max-md:pointer-events-auto flex items-end justify-center gap-0 px-1 max-md:w-max max-md:justify-start max-md:gap-4 max-md:px-[max(1rem,calc(50vw-min(25.35vw,86px)))] max-md:pb-14 max-md:pt-2',
+                'max-md:[perspective:min(100vw,960px)] max-md:[perspective-origin:50%_90%] max-md:[transform-style:preserve-3d]',
+                'w-full max-w-5xl md:gap-2.5 md:justify-center md:px-2 md:pb-0 md:pt-0',
+              )}
+            >
+              {LANDING_EXAMPLE_POSTER_DEFS.map((def, i) => {
+                const src = locale === 'ko' ? def.imgKo : def.imgEn;
+                const alt = locale === 'ko' ? def.altKo : def.altEn;
+                const tiltScale =
+                  i === 0
                     ? {
-                        tiltClass: 'relative z-0 rotate-0 translate-y-0 md:-translate-y-2',
-                        scaleClass: 'scale-100',
+                        tiltClass:
+                          'relative z-[2] -rotate-[2deg] translate-x-0.5 translate-y-0.5 md:-rotate-[4deg] md:translate-x-5 md:translate-y-6',
+                        scaleClass: 'scale-[0.92] md:scale-95',
                       }
-                    : {
-                      tiltClass:
-                        'relative z-[2] rotate-[2deg] -translate-x-0.5 translate-y-0.5 md:rotate-[4deg] md:-translate-x-5 md:translate-y-6',
-                      scaleClass: 'scale-[0.92] md:scale-95',
-                    };
-              return (
-                <LandingExamplePoster
-                  key={def.id}
-                  src={src}
-                  alt={alt}
-                  tiltClass={tiltScale.tiltClass}
-                  scaleClass={tiltScale.scaleClass}
-                />
-              );
-            })}
+                    : i === 1
+                      ? {
+                          tiltClass: 'relative z-0 rotate-0 translate-y-0 md:-translate-y-2',
+                          scaleClass: 'scale-100',
+                        }
+                      : {
+                          tiltClass:
+                            'relative z-[2] rotate-[2deg] -translate-x-0.5 translate-y-0.5 md:rotate-[4deg] md:-translate-x-5 md:translate-y-6',
+                          scaleClass: 'scale-[0.92] md:scale-95',
+                        };
+                return (
+                  <div
+                    key={def.id}
+                    className="snap-center shrink-0 max-md:snap-always md:contents"
+                  >
+                    <div
+                      className={cn(
+                        'origin-bottom transition-transform duration-500 ease-out will-change-transform max-md:[transform-style:preserve-3d] md:contents',
+                        landingPosterWheelY(i),
+                      )}
+                    >
+                      <LandingExamplePoster
+                        src={src}
+                        alt={alt}
+                        tiltClass={tiltScale.tiltClass}
+                        scaleClass={tiltScale.scaleClass}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent max-md:h-12 md:h-32" />
+          {/* z-0: 포스터·그림자(z-10) 아래에만 깔려 잘린 듯한 가로선이 생기지 않게 함 */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-16 bg-gradient-to-t from-white/85 via-white/35 to-transparent max-md:h-20 md:h-32" />
         </section>
 
         {/* 모바일만: 맨 아래 CTA */}
-        <div className="shrink-0 px-4 pb-[max(0.5rem,calc(0.5rem+env(safe-area-inset-bottom,0px)))] pt-2 md:hidden">
+        <div className="shrink-0 px-4 pb-[max(2rem,calc(2rem+env(safe-area-inset-bottom,0px)))] pt-2 md:hidden">
           <div className="mx-auto w-full max-w-xs">
             <button
               type="button"

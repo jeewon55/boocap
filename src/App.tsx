@@ -9,6 +9,7 @@ import { RootErrorBoundary } from "@/components/RootErrorBoundary";
 import Landing from "./pages/Landing.tsx";
 import Index from "./pages/Index.tsx";
 import PosterTemplateQa from "./pages/PosterTemplateQa.tsx";
+import InsightTest from "./pages/InsightTest.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/" element={<Landing />} />
               <Route path="/create" element={<Index />} />
               <Route path="/create/qa-posters" element={<PosterTemplateQa />} />
+              <Route path="/insight-test" element={<InsightTest />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

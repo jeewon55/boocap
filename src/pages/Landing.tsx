@@ -97,7 +97,7 @@ function LandingExamplePoster({
       {/* 그림자는 overflow 바깥 래퍼에 두어 이미지 마스크와 분리 */}
       <div className="rounded-[4px] shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)]">
         <div
-          className="relative aspect-[4/5] w-[min(60.84vw,206px)] overflow-hidden rounded-[4px] bg-white md:w-[min(146.64vw,446px)] lg:w-[487px] xl:w-[527px]"
+          className="relative aspect-[4/5] w-[min(60.84vw,206px)] overflow-hidden rounded-[4px] bg-white md:w-[min(117.312vw,357px)] lg:w-[390px] xl:w-[422px]"
           style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
         >
           <img
@@ -170,7 +170,7 @@ export default function Landing() {
 
       <main className="landing-tall-main flex min-h-0 flex-1 flex-col max-md:min-h-0 md:min-h-0">
         {/* Copy — 모바일: 맨 위 / md+: 히어로 중앙 + CTA 동반 */}
-        <section className="landing-tall-hero shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-none md:flex-col md:items-center md:justify-center md:px-6 md:pb-8 md:pt-10">
+        <section className="landing-tall-hero shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-none md:flex-col md:items-center md:justify-center md:px-6 md:pb-[40px] md:pt-[72px]">
           <h1 className="mx-auto max-w-[20rem] font-display text-[1.45rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-foreground max-md:max-w-[min(100%,19rem)] sm:max-w-xl sm:text-4xl sm:leading-[1.12] md:max-w-2xl md:text-5xl md:leading-[58px]">
             {t.heroSingleLines ? (
               <>

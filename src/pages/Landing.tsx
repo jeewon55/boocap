@@ -1,9 +1,9 @@
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { landingMessages } from '@/i18n/landing';
-import { LANDING_EXAMPLE_POSTER_DEFS } from '@/data/landingExamplePosters';
+import { getLandingCarouselItems } from '@/data/landingExamplePosters';
 import { cn } from '@/lib/utils';
 
 /** Mobile-only Y rotation for carousel “wheel”; md+ uses flat layout via `md:contents`. */
@@ -15,6 +15,57 @@ const LANDING_POSTER_WHEEL_Y: Record<number, string> = {
 
 function landingPosterWheelY(i: number) {
   return LANDING_POSTER_WHEEL_Y[i] ?? 'max-md:motion-reduce:transform-none';
+}
+
+function landingPosterWheelYSlot(i: number, total: number) {
+  if (total === 5) {
+    if (i === 0) return landingPosterWheelY(0);
+    if (i === 1) return 'max-md:[transform:rotateY(14deg)] max-md:motion-reduce:transform-none';
+    if (i === 2) return landingPosterWheelY(1);
+    if (i === 3) return 'max-md:[transform:rotateY(-14deg)] max-md:motion-reduce:transform-none';
+    if (i === 4) return landingPosterWheelY(2);
+  }
+  return landingPosterWheelY(i);
+}
+
+type TiltScale = { tiltClass: string; scaleClass: string };
+
+const LANDING_TILT_SCALE_3: readonly TiltScale[] = [
+  {
+    tiltClass:
+      'relative z-[2] -rotate-[2deg] translate-x-0.5 translate-y-0.5 md:-rotate-[4deg] md:translate-x-5 md:translate-y-6',
+    scaleClass: 'scale-[0.92] md:scale-95',
+  },
+  {
+    tiltClass: 'relative z-0 rotate-0 translate-y-0 md:-translate-y-2',
+    scaleClass: 'scale-100',
+  },
+  {
+    tiltClass:
+      'relative z-[2] rotate-[2deg] -translate-x-0.5 translate-y-0.5 md:rotate-[4deg] md:-translate-x-5 md:translate-y-6',
+    scaleClass: 'scale-[0.92] md:scale-95',
+  },
+];
+
+function getLandingTiltScale(i: number, total: number): TiltScale {
+  if (total === 5) {
+    if (i === 0) return LANDING_TILT_SCALE_3[0];
+    if (i === 1)
+      return {
+        tiltClass:
+          'relative z-[1] -rotate-[1.5deg] translate-x-0.5 translate-y-0.5 md:-rotate-[3deg] md:translate-x-3 md:translate-y-4',
+        scaleClass: 'scale-[0.94] md:scale-[0.97]',
+      };
+    if (i === 2) return LANDING_TILT_SCALE_3[1];
+    if (i === 3)
+      return {
+        tiltClass:
+          'relative z-[1] rotate-[1.5deg] -translate-x-0.5 translate-y-0.5 md:rotate-[3deg] md:-translate-x-3 md:translate-y-4',
+        scaleClass: 'scale-[0.94] md:scale-[0.97]',
+      };
+    if (i === 4) return LANDING_TILT_SCALE_3[2];
+  }
+  return LANDING_TILT_SCALE_3[Math.min(Math.max(i, 0), 2)];
 }
 
 function getDefaultMonth() {
@@ -46,7 +97,7 @@ function LandingExamplePoster({
       {/* 그림자는 overflow 바깥 래퍼에 두어 이미지 마스크와 분리 */}
       <div className="rounded-[4px] shadow-[0_-10px_28px_-12px_rgba(0,0,0,0.07),0_6px_20px_-8px_rgba(0,0,0,0.06),0_24px_48px_-12px_rgba(0,0,0,0.14)]">
         <div
-          className="relative aspect-[4/5] w-[min(50.7vw,172px)] overflow-hidden rounded-[4px] bg-white md:w-[min(122.2vw,372px)] lg:w-[406px] xl:w-[439px]"
+          className="relative aspect-[4/5] w-[min(60.84vw,206px)] overflow-hidden rounded-[4px] bg-white md:w-[min(146.64vw,446px)] lg:w-[487px] xl:w-[527px]"
           style={{ WebkitBackfaceVisibility: 'hidden', backfaceVisibility: 'hidden' }}
         >
           <img
@@ -70,6 +121,8 @@ export default function Landing() {
   const { locale } = useLocale();
   const t = landingMessages[locale];
   const mobileCarouselRef = useRef<HTMLDivElement>(null);
+  const carouselItems = useMemo(() => getLandingCarouselItems(locale), [locale]);
+  const carouselCenterIndex = Math.floor(carouselItems.length / 2);
 
   /** 모바일 가로 캐러셀: 첫 페인트·리사이즈마다 가운데(두 번째) 포스터를 뷰포트 중앙에 맞춤 */
   const centerMobileCarousel = useCallback(() => {
@@ -98,7 +151,7 @@ export default function Landing() {
       ro.disconnect();
       window.removeEventListener('resize', centerMobileCarousel);
     };
-  }, [centerMobileCarousel, locale]);
+  }, [centerMobileCarousel, locale, carouselItems.length]);
 
   const handleCreate = () => {
     const { year, month } = getDefaultMonth();
@@ -173,46 +226,28 @@ export default function Landing() {
             <div
               data-landing-poster-strip
               className={cn(
-                'pointer-events-none max-md:pointer-events-auto flex items-end justify-center gap-0 px-1 max-md:w-max max-md:justify-start max-md:gap-3 max-md:px-[max(0.75rem,calc(50vw-min(25.35vw,86px)-2.25rem))] max-md:pb-14 max-md:pt-2',
+                'pointer-events-none max-md:pointer-events-auto flex items-end justify-center gap-0 px-1 max-md:w-max max-md:justify-start max-md:gap-3 max-md:px-[max(0.75rem,calc(50vw-min(30.42vw,103px)-2.25rem))] max-md:pb-14 max-md:pt-2',
                 'max-md:[perspective:min(100vw,960px)] max-md:[perspective-origin:50%_90%] max-md:[transform-style:preserve-3d]',
-                'w-full max-w-5xl md:gap-2.5 md:justify-center md:px-2 md:pb-0 md:pt-0',
+                'w-full max-w-5xl md:mx-auto md:gap-2.5 md:justify-center md:px-2 md:pb-0 md:pt-0',
               )}
             >
-              {LANDING_EXAMPLE_POSTER_DEFS.map((def, i) => {
-                const src = locale === 'ko' ? def.imgKo : def.imgEn;
-                const alt = locale === 'ko' ? def.altKo : def.altEn;
-                const tiltScale =
-                  i === 0
-                    ? {
-                        tiltClass:
-                          'relative z-[2] -rotate-[2deg] translate-x-0.5 translate-y-0.5 md:-rotate-[4deg] md:translate-x-5 md:translate-y-6',
-                        scaleClass: 'scale-[0.92] md:scale-95',
-                      }
-                    : i === 1
-                      ? {
-                          tiltClass: 'relative z-0 rotate-0 translate-y-0 md:-translate-y-2',
-                          scaleClass: 'scale-100',
-                        }
-                      : {
-                          tiltClass:
-                            'relative z-[2] rotate-[2deg] -translate-x-0.5 translate-y-0.5 md:rotate-[4deg] md:-translate-x-5 md:translate-y-6',
-                          scaleClass: 'scale-[0.92] md:scale-95',
-                        };
+              {carouselItems.map((item, i) => {
+                const tiltScale = getLandingTiltScale(i, carouselItems.length);
                 return (
                   <div
-                    key={def.id}
-                    data-landing-carousel-center={i === 1 ? '' : undefined}
+                    key={item.id}
+                    data-landing-carousel-center={i === carouselCenterIndex ? '' : undefined}
                     className="snap-center shrink-0 max-md:snap-always md:contents"
                   >
                     <div
                       className={cn(
                         'origin-bottom transition-transform duration-500 ease-out will-change-transform max-md:[transform-style:preserve-3d] md:contents',
-                        landingPosterWheelY(i),
+                        landingPosterWheelYSlot(i, carouselItems.length),
                       )}
                     >
                       <LandingExamplePoster
-                        src={src}
-                        alt={alt}
+                        src={item.src}
+                        alt={item.alt}
                         tiltClass={tiltScale.tiltClass}
                         scaleClass={tiltScale.scaleClass}
                       />

@@ -215,12 +215,12 @@ export default function Landing() {
         {/* 포스터 — 모바일: 남는 높이 안에 축소 · md+: 기존 대형 스트립 */}
         <section
           id="landing-preview"
-          className="landing-tall-preview relative z-0 flex w-full min-h-0 flex-1 flex-col items-start justify-center overflow-x-hidden overflow-y-visible pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:overflow-x-visible max-md:pt-0 max-md:pb-4 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-center md:justify-center md:overflow-x-hidden md:overflow-y-visible md:pb-6 md:pt-6"
+          className="landing-tall-preview relative z-0 flex w-full min-h-0 flex-1 flex-col items-start justify-center [overflow-x:clip] overflow-y-visible pb-0 pt-1 max-md:min-h-0 max-md:flex-1 max-md:overflow-x-visible max-md:pt-0 max-md:pb-4 md:mt-auto md:min-h-[min(48vh,710px)] md:flex-none md:flex-row md:items-center md:justify-center md:[overflow-x:clip] md:overflow-y-visible md:pb-6 md:pt-6"
         >
           {/* 모바일: overflow-x-auto 시 overflow-y가 auto로 바뀌어 그림자가 잘림 → 안쪽에 pb로 스크롤 박스 안에 그림자 공간 확보 */}
           <div
             ref={mobileCarouselRef}
-            className="pointer-events-none max-md:pointer-events-auto relative z-10 w-full min-w-0 max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:overflow-y-visible max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden motion-reduce:max-md:snap-none md:overflow-visible"
+            className="pointer-events-none max-md:pointer-events-auto relative z-10 w-full min-w-0 max-md:snap-x max-md:snap-mandatory max-md:overflow-x-auto max-md:overflow-y-hidden max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden motion-reduce:max-md:snap-none md:overflow-visible"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div

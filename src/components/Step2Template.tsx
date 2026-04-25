@@ -168,8 +168,8 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
         </motion.div>
       </div>
 
-      {/* Carousel — no flex-1 so content doesn’t stretch; gap to buttons via mt-6 on action bar */}
-      <div className="relative flex shrink-0 flex-col justify-start py-1">
+      {/* Carousel — no flex-1 so content doesn't stretch; gap to buttons via mt-6 on action bar */}
+      <div className="relative flex shrink-0 flex-col justify-start py-1 md:w-full md:max-w-[960px] md:mx-auto md:overflow-hidden">
         {/* Nav arrows - desktop */}
         <button
           onClick={scrollPrev}
@@ -195,24 +195,26 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex h-[480px] max-h-[480px] min-w-0 shrink-0 flex-[0_0_70%] items-center justify-center px-1 min-[480px]:flex-[0_0_55%] md:flex-[0_0_38%] md:px-1.5"
+                  className="flex h-[480px] max-h-[480px] min-w-0 shrink-0 flex-[0_0_70%] items-center justify-center px-3 min-[480px]:flex-[0_0_55%] md:flex-[0_0_33.33%] md:px-3"
                 >
                   {/* Embla loop translates this outer slide node — no transform transition here */}
                   <div
-                    className="flex h-[480px] max-h-[480px] w-full max-w-full shrink-0 items-center justify-center overflow-hidden"
+                    className="flex h-[480px] max-h-[480px] w-full max-w-full shrink-0 items-center justify-center"
                   >
                     <div
                       className="origin-center transition-[transform,opacity,filter] duration-500 ease-out motion-reduce:transition-none [transition-timing-function:cubic-bezier(0.25,1,0.5,1)]"
                       style={{
                         transform: isActive ? 'scale(1)' : 'scale(0.88)',
                         opacity: isActive ? 1 : 0.38,
-                        filter: isActive ? 'none' : 'brightness(0.55)',
+                        filter: isActive
+                          ? 'drop-shadow(0 4px 20px rgba(0,0,0,0.10)) drop-shadow(0 1px 6px rgba(0,0,0,0.05))'
+                          : 'brightness(0.55) drop-shadow(0 2px 10px rgba(0,0,0,0.06))',
                         width: '100%',
                         maxWidth: 'min(100%, 384px)',
                       }}
                     >
                       <div
-                        className="mx-auto w-full overflow-hidden bg-transparent"
+                        className="mx-auto w-full overflow-hidden bg-transparent ring-1 ring-inset ring-black/[0.08] rounded-[12px]"
                         style={{
                           aspectRatio: '4/5',
                           maxHeight: 480,

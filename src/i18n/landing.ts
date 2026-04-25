@@ -19,12 +19,12 @@ export const landingMessages: Record<
   }
 > = {
   en: {
-    heroSingleLines: ['Frame your monthly journey', 'into a single archive.'] as const,
+    heroSingleLines: ['Frame your monthly journey', 'into your reading recap.'] as const,
     heroLine1: '',
     heroAccent: '',
     heroLine2: '',
-    subhead: 'Turn your monthly readings',
-    subheadSecond: 'into a clean grid-based poster.',
+    subhead: 'Add your books, pick a mood,',
+    subheadSecond: 'and download your curated poster.',
     createRecap: 'Create Recap',
     monthlyRecap: 'Monthly recap',
     booksLabel: 'Books',
@@ -44,13 +44,13 @@ export const landingMessages: Record<
     ],
   },
   ko: {
-    heroSingleLines: ['한 달의 독서 여정을', '정돈된 한 장의 기록으로.'] as const,
+    heroSingleLines: ['한 달의 독서 여정을', '한 장의 기록으로.'] as const,
     heroLine1: '',
     heroAccent: '',
     heroLine2: '',
     subhead: '흩어진 독서의 흔적들을 모아',
     subheadSecond: '나만의 포스터를 완성해 보세요.',
-    createRecap: '포스터 만들기',
+    createRecap: '시작하기',
     monthlyRecap: '월간 리캡',
     booksLabel: '권',
     monthPickerLabels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],

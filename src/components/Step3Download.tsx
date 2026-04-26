@@ -49,33 +49,40 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     try {
       const TARGET_W = 1080;
       const root = posterRef.current;
-      const images = root.querySelectorAll('img');
-
-      for (const img of Array.from(images)) {
-        const prev = img.src;
-        const next = coverUrlForRasterExport(prev);
-        if (next !== prev) {
-          swapBack.push({ el: img, prev });
-          img.src = next;
-        }
-      }
+      const images = Array.from(root.querySelectorAll('img'));
 
       await Promise.all(
-        Array.from(images).map(async (img) => {
-          if (!img.complete) {
-            await new Promise<void>((resolve) => {
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            });
-          }
+        images.map(async (img) => {
+          const prev = img.src;
+          if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
+          const proxyUrl = coverUrlForRasterExport(prev);
           try {
-            await img.decode();
+            const res = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            swapBack.push({ el: img, prev });
+            img.src = dataUrl;
           } catch {
-            // Ignore decode failures; export can continue.
+            if (proxyUrl !== prev) {
+              swapBack.push({ el: img, prev });
+              img.src = proxyUrl;
+              if (!img.complete) {
+                await new Promise<void>((resolve) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                });
+              }
+            }
           }
         })
       );
-      // One paint after decode; avoids a fixed 300ms wait (html-to-image is already heavy).
+
       await new Promise<void>((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
       });

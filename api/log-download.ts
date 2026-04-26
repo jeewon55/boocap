@@ -8,12 +8,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).end();
   }
   try {
-    await fetch(GAS_URL, {
+    const body = JSON.stringify(req.body);
+    console.log('[log-download] calling GAS with body:', body);
+    const gasRes = await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify(req.body),
+      headers: { 'Content-Type': 'text/plain' },
+      body,
     });
-  } catch {
-    // silent fail — logging is best-effort
+    const text = await gasRes.text();
+    console.log('[log-download] GAS response:', gasRes.status, text);
+  } catch (err) {
+    console.error('[log-download] GAS fetch error:', err);
   }
   res.status(200).end();
 }

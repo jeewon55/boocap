@@ -13,6 +13,34 @@ import { toast } from '@/hooks/use-toast';
 /** Brief spinner when leaving book step so the template step does not pop in abruptly. */
 const STEP_1_TO_2_SPINNER_MS = 420;
 
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/** Pre-fetch a book cover as data URL so export works without CORS. Non-blocking. */
+async function prefetchCoverDataUrl(coverUrl: string): Promise<string | undefined> {
+  if (!coverUrl || coverUrl.startsWith('data:') || coverUrl.startsWith('/') || coverUrl.startsWith('blob:')) {
+    return undefined;
+  }
+  const proxies = [
+    `/api/img-proxy?url=${encodeURIComponent(coverUrl)}`,
+    `https://images.weserv.nl/?url=${encodeURIComponent(coverUrl)}&w=600&h=840&fit=cover&output=webp`,
+  ];
+  for (const url of proxies) {
+    try {
+      const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
+      if (!res.ok) continue;
+      return await blobToDataUrl(await res.blob());
+    } catch { /* try next proxy */ }
+  }
+  return undefined;
+}
+
 function getInitial() {
   const params = new URLSearchParams(window.location.search);
   const y = params.get('year');
@@ -64,6 +92,15 @@ export default function Index() {
       return;
     }
     setEntries((p) => ({ ...p, [day]: book }));
+    // Non-blocking: pre-fetch cover as data URL so export doesn't need a proxy at download time
+    prefetchCoverDataUrl(book.coverUrl).then((coverDataUrl) => {
+      if (!coverDataUrl) return;
+      setEntries((p) => {
+        const current = p[day];
+        if (!current || current.key !== book.key) return p; // book was replaced
+        return { ...p, [day]: { ...current, coverDataUrl } };
+      });
+    });
   }, []);
 
   const handleRemoveBook = useCallback((day: number) => {

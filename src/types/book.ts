@@ -5,6 +5,8 @@ export interface Book {
   title: string;
   author: string;
   coverUrl: string;
+  /** Pre-fetched data URL for export — avoids CORS issues at download time. */
+  coverDataUrl?: string;
   key: string;
 }
 

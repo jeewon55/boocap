@@ -109,14 +109,19 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/40"
-      style={{ paddingBottom: keyboardInset, transition: 'padding 0.18s ease-out' }}
       onClick={onClose}
     >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ maxHeight: sheetMaxHeight }}
-          className="flex min-h-0 w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:mx-4 sm:max-w-md sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          style={{
+            // Extend the sheet behind the keyboard so there is no visible gap.
+            // paddingBottom pushes content up; the extra height fills the keyboard area
+            // with bg-card colour so the calendar never shows through.
+            maxHeight: sheetMaxHeight != null ? sheetMaxHeight + keyboardInset : undefined,
+            paddingBottom: keyboardInset,
+          }}
+          className="flex min-h-0 w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:max-h-[85vh] sm:rounded-[4px] sm:mx-4 sm:max-w-md sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}

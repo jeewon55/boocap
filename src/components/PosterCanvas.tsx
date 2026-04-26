@@ -136,7 +136,7 @@ function MosaicBookCell({
         }}
       >
         <BookImg
-          src={book.coverUrl}
+          src={book.coverDataUrl ?? book.coverUrl}
           alt={book.title}
           style={{
             width: '100%',
@@ -375,7 +375,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         {book ? (
                           <>
                             <BookImg
-                              src={book.coverUrl}
+                              src={book.coverDataUrl ?? book.coverUrl}
                               alt={book.title}
                               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                             />
@@ -641,7 +641,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         }}
                       >
                         <BookImg
-                          src={book.coverUrl}
+                          src={book.coverDataUrl ?? book.coverUrl}
                           alt={book.title}
                           style={{
                             width: '100%',
@@ -926,7 +926,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       }}
                     >
                       <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden', width: pos.w }}>
-                        <BookImg src={book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h, display: 'block' }} />
+                        <BookImg src={book.coverDataUrl ?? book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h, display: 'block' }} />
                       </div>
                       <p
                         style={{
@@ -1209,7 +1209,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         }}
                       >
                         <BookImg
-                          src={book.coverUrl}
+                          src={book.coverDataUrl ?? book.coverUrl}
                           alt={book.title}
                           style={{ width: '100%', height: '100%', display: 'block' }}
                         />
@@ -1473,7 +1473,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     {book.title}
                   </span>
                   <BookImg
-                    src={book.coverUrl}
+                    src={book.coverDataUrl ?? book.coverUrl}
                     alt=""
                     style={{
                       display: 'inline-block',

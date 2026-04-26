@@ -203,15 +203,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
                 </div>
               )}
 
-              {(!query || results.length > 0) && (
-                <button
-                  onClick={() => setMode('manual')}
-                  className="w-full flex items-center gap-2 p-3 text-muted-foreground hover:bg-secondary transition-colors text-left"
-                >
-                  <PenLine className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-xs font-body">{bs.cantFindEnterManually}</span>
-                </button>
-              )}
             </div>
           </>
         ) : (

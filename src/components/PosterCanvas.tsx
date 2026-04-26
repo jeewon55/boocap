@@ -149,11 +149,14 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
   ({ year, month, entries, mood, template = 'stack', posterLocale = 'en' }, ref) => {
     const moodConfig = MOODS.find((m) => m.id === mood)!;
     const books = useMemo(() => {
-      const unique = new Map<string, Book>();
+      const seen = new Map<string, Book>();
       Object.values(entries).forEach((b) => {
-        if (b) unique.set(b.key, b);
+        if (b) {
+          const k = b.title.trim().toLowerCase();
+          if (!seen.has(k)) seen.set(k, b);
+        }
       });
-      return Array.from(unique.values());
+      return Array.from(seen.values());
     }, [entries]);
 
     /** Reading days sorted (capsule template). */

@@ -73,7 +73,11 @@ export const TEMPLATES: TemplateConfig[] = [
 
 /** Distinct books in the month (one per day slot). Assumes ≥1 in normal flow. */
 export function countBooksInEntries(entries: Record<number, Book | undefined>): number {
-  return Object.values(entries).filter(Boolean).length;
+  const seen = new Set<string>();
+  Object.values(entries).forEach((b) => {
+    if (b) seen.add(b.title.trim().toLowerCase());
+  });
+  return seen.size;
 }
 
 /**

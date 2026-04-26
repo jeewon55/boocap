@@ -1465,42 +1465,34 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     overflow: 'hidden',
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      display: 'inline-flex',
-                      maxWidth: essayContentW,
-                      minWidth: 0,
-                      alignItems: 'center',
+                      display: 'inline-block',
+                      maxWidth: essayContentW - essayCoverThumbW - 10,
+                      fontSize: essayTitlePx,
+                      lineHeight: 1,
+                      fontWeight: 600,
+                      letterSpacing: '-0.02em',
+                      whiteSpace: 'nowrap',
                       overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      verticalAlign: 'middle',
                     }}
                   >
-                    <span
-                      style={{
-                        flex: '0 1 auto',
-                        minWidth: 0,
-                        fontSize: essayTitlePx,
-                        lineHeight: 1,
-                        fontWeight: 600,
-                        letterSpacing: '-0.02em',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {book.title}
-                    </span>
-                    <BookImg
-                      src={book.coverDataUrl ?? book.coverUrl}
-                      alt=""
-                      style={{
-                        flexShrink: 0,
-                        height: essayCoverThumbH,
-                        width: essayCoverThumbW,
-                        borderRadius: 2,
-                        marginLeft: 10,
-                      }}
-                    />
-                  </div>
+                    {book.title}
+                  </span>
+                  <BookImg
+                    src={book.coverDataUrl ?? book.coverUrl}
+                    alt=""
+                    style={{
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                      height: essayCoverThumbH,
+                      width: essayCoverThumbW,
+                      borderRadius: 2,
+                      marginLeft: 10,
+                    }}
+                  />
                 </div>
               ))
             )}

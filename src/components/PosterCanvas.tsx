@@ -1468,7 +1468,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                   <div
                     style={{
                       display: 'inline-flex',
-                      maxWidth: '100%',
+                      maxWidth: essayContentW,
                       minWidth: 0,
                       alignItems: 'center',
                       overflow: 'hidden',

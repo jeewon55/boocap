@@ -195,7 +195,7 @@ export function Step2Template({ year, month, entries, mood, template, onTemplate
               return (
                 <div
                   key={t.id}
-                  className="flex h-[480px] max-h-[480px] min-w-0 shrink-0 flex-[0_0_70%] items-center justify-center px-3 min-[480px]:flex-[0_0_55%] md:flex-[0_0_33.33%] md:px-3"
+                  className="flex h-[480px] max-h-[480px] min-w-0 shrink-0 flex-[0_0_82%] items-center justify-center px-1.5 min-[480px]:flex-[0_0_66%] md:flex-[0_0_33.33%] md:px-3"
                 >
                   {/* Embla loop translates this outer slide node — no transform transition here */}
                   <div

@@ -166,6 +166,16 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       [entries],
     );
 
+    /** Same list but with duplicate books removed — used in templates that don't show dates. */
+    const readsSortedByDayUnique = useMemo(() => {
+      const seen = new Set<string>();
+      return readsSortedByDay.filter(({ book }) => {
+        if (seen.has(book.key)) return false;
+        seen.add(book.key);
+        return true;
+      });
+    }, [readsSortedByDay]);
+
     const readDays = Object.keys(entries).length;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const baseStyle: React.CSSProperties = {
@@ -1258,7 +1268,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     if (template === 'essay') {
       const essayFont = "'Pretendard', 'Noto Sans KR', sans-serif";
       const monthName = MONTHS[month].charAt(0) + MONTHS[month].slice(1).toLowerCase();
-      const essayRows = readsSortedByDay;
+      const essayRows = readsSortedByDayUnique;
       const essayN = essayRows.length;
       const darkPoster = mood === 'dark' || mood === 'bold';
       const essayGridCell = 56;
@@ -1780,7 +1790,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
     if (template === 'capsule') {
       const capsuleFont = "'Instrument Sans', 'Noto Sans KR', sans-serif";
       const capsuleHeadNumFont = "'Pretendard', 'Noto Sans KR', sans-serif";
-      const n = readsSortedByDay.length;
+      const n = readsSortedByDayUnique.length;
       /** Poster inner height matches 600×4/5 canvas */
       const CAPSULE_POSTER_H = 750;
       const padY = n >= 8 ? 24 : n >= 7 ? 26 : 30;
@@ -1860,7 +1870,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 gap,
               }}
             >
-              {readsSortedByDay.map(({ day, book }, i) => (
+              {readsSortedByDayUnique.map(({ day, book }, i) => (
                 <div
                   key={`${day}-${book.key}`}
                   style={{

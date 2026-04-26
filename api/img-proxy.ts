@@ -42,10 +42,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const upstream = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Boocap/1.0)',
-        Accept: 'image/*,*/*;q=0.8',
+        'User-Agent':
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        Accept: 'image/webp,image/png,image/jpeg,image/*,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+        Referer: 'https://search.kakao.com/',
       },
-      // 10-second timeout via AbortSignal
       signal: AbortSignal.timeout(10_000),
     });
 

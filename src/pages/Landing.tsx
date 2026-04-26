@@ -162,7 +162,7 @@ export default function Landing() {
     <div className="landing-tall-root flex min-h-[100dvh] flex-col overflow-x-hidden bg-white pb-0 text-foreground max-md:h-[100dvh] max-md:max-h-[100dvh] md:pb-[env(safe-area-inset-bottom,0px)]">
       <nav className="grid shrink-0 grid-cols-[minmax(2.75rem,1fr)_auto_minmax(2.75rem,1fr)] items-center px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-2 max-md:pb-1.5 md:pb-4 sm:px-6 md:pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
         <div aria-hidden className="min-w-0" />
-        <img src="/logo.png" alt="Boocap" className="h-4 w-auto md:h-5 opacity-30" />
+        <img src="/logo.png" alt="Boocap" className="h-4 w-auto md:h-5 opacity-100" />
         <div aria-hidden className="min-w-0" />
       </nav>
 

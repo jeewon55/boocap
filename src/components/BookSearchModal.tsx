@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Search, X, Loader2, PenLine, Upload, BookOpen } from 'lucide-react';
+import { Search, X, Loader2, PenLine, Upload, BookOpen, ArrowLeft } from 'lucide-react';
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
@@ -108,7 +108,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/15" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/40" onClick={onClose}>
       <BottomSheetKeyboardLift>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -119,9 +119,19 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
         >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border/50 p-4">
-          <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
-            {MONTH_NAMES[month]} {day}
-          </span>
+          {mode === 'manual' ? (
+            <button
+              type="button"
+              onClick={() => setMode('search')}
+              className="rounded-[4px] p-1 transition-colors hover:bg-secondary"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+            </button>
+          ) : (
+            <span className="font-display text-[20px] font-extrabold tracking-[0] text-[#121212]">
+              {MONTH_NAMES[month]} {day}
+            </span>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -129,26 +139,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
             className="rounded-[4px] p-1 transition-colors hover:bg-secondary"
           >
             <X className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
-
-        {/* Mode tabs */}
-        <div className="flex border-b border-border/50">
-          <button
-            onClick={() => setMode('search')}
-            className={`flex-1 rounded-none py-2.5 text-xs font-body font-medium tracking-normal transition-colors ${
-              mode === 'search' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
-            }`}
-          >
-            {bs.tabSearch}
-          </button>
-          <button
-            onClick={() => setMode('manual')}
-            className={`flex-1 rounded-none py-2.5 text-xs font-body font-medium tracking-normal transition-colors ${
-              mode === 'manual' ? 'border-b-2 border-foreground text-foreground' : 'text-muted-foreground'
-            }`}
-          >
-            {bs.tabManual}
           </button>
         </div>
 
@@ -195,13 +185,13 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
 
               {query && !loading && results.length === 0 && (
                 <div className="p-4 text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">No results found.</p>
+                  <p className="text-sm text-muted-foreground">{bs.noResults}</p>
                   <button
                     onClick={() => { setMode('manual'); setManualTitle(query); }}
                     className="inline-flex items-center gap-1.5 text-xs font-body text-foreground underline underline-offset-2 transition-opacity hover:opacity-70"
                   >
                     <PenLine className="w-3 h-3" />
-                    Enter manually
+                    {bs.cantFindEnterManually}
                   </button>
                 </div>
               )}

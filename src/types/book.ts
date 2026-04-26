@@ -102,7 +102,7 @@ export function isTemplateVisibleForBookCount(templateId: TemplateType, bookCoun
       if (n === 9) return true;
       return n >= 2 && n % 2 === 0;
     case 'timeline':
-      return n >= 3;
+      return n >= 3 && n <= 10;
     default:
       return true;
   }

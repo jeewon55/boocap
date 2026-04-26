@@ -7,6 +7,7 @@ import { PosterCanvas } from './PosterCanvas';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/contexts/LocaleContext';
 import { createFlowMessages } from '@/i18n/createFlow';
+import { toast } from '@/hooks/use-toast';
 
 const MONTHS = [
   'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
@@ -31,6 +32,27 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const [scale, setScale] = useState(0.5);
   const [downloading, setDownloading] = useState(false);
   const [showStartOverModal, setShowStartOverModal] = useState(false);
+  const [feedbackState, setFeedbackState] = useState<'hidden' | 'shown' | 'submitted'>('hidden');
+  const [feedbackRating, setFeedbackRating] = useState('');
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [hasShownFeedback, setHasShownFeedback] = useState(false);
+
+  useEffect(() => {
+    setHasShownFeedback(false);
+  }, [template]);
+
+  const handleFeedbackSubmit = async () => {
+    if (!feedbackRating) return;
+    setFeedbackState('submitted');
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbynXsxZMXeKOpVkGlYAt42apE2IEpdbabsfQxXA6Rvbub1-qHwRdoeLy-A1J6MsN0z9/exec', {
+        method: 'POST',
+        body: JSON.stringify({ rating: feedbackRating, comment: feedbackComment, template, month, year }),
+      });
+    } catch {
+      // silent fail
+    }
+  };
 
   useEffect(() => {
     const el = wrapperRef.current;
@@ -106,8 +128,13 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       link.download = `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`;
       link.href = dataUrl;
       link.click();
+      if (!hasShownFeedback) {
+        setFeedbackState('shown');
+        setHasShownFeedback(true);
+      }
     } catch (e) {
       console.error('Export failed', e);
+      toast({ title: flow.downloadFailedToast });
     } finally {
       for (const { el, prev } of swapBack) {
         el.src = prev;
@@ -238,6 +265,79 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           </motion.div>
         </div>
       ) : null}
+
+      {feedbackState === 'shown' && (
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-foreground/40 px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.16 }}
+            className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-6 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          >
+            <p className="font-display text-[18px] font-bold tracking-[0] text-foreground">
+              {flow.feedbackQuestion}
+            </p>
+            <div className="mt-5 flex justify-around">
+              {(['😍', '😊', '😐'] as const).map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => setFeedbackRating(emoji)}
+                  className={`flex flex-col items-center gap-1 rounded-[4px] px-5 py-3 text-3xl transition-all ${feedbackRating === emoji ? 'bg-secondary scale-110' : 'hover:bg-secondary'}`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={feedbackComment}
+              onChange={(e) => setFeedbackComment(e.target.value)}
+              placeholder={flow.feedbackPlaceholder}
+              rows={3}
+              className="mt-4 w-full resize-none rounded-[4px] border border-border bg-transparent px-3 py-2.5 text-sm font-body outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
+            />
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setFeedbackState('hidden')}
+                className="flex-1 rounded-[4px] border border-border py-3 text-xs font-semibold tracking-normal transition-colors hover:bg-secondary"
+              >
+                {flow.cancelLabel}
+              </button>
+              <button
+                type="button"
+                onClick={handleFeedbackSubmit}
+                disabled={!feedbackRating}
+                className="flex-1 rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-30"
+              >
+                {locale === 'ko' ? '보내기' : 'Submit'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {feedbackState === 'submitted' && (
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-foreground/40 px-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.16 }}
+            className="w-full max-w-sm rounded-[4px] border border-foreground/20 bg-card p-6 font-body shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          >
+            <p className="text-center font-display text-[18px] font-bold tracking-[0] text-foreground">
+              {flow.feedbackThanks}
+            </p>
+            <button
+              type="button"
+              onClick={() => setFeedbackState('hidden')}
+              className="mt-5 w-full rounded-[4px] bg-primary py-3 text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              OK
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

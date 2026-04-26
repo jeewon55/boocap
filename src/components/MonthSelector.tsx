@@ -1,5 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocale } from '@/contexts/LocaleContext';
+import { createFlowMessages } from '@/i18n/createFlow';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -31,6 +33,8 @@ export function MonthSelector({
   onPickerOpenChange,
   onRequestOpen,
 }: MonthSelectorProps) {
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const controlled = pickerOpenProp !== undefined;
   const open = controlled ? pickerOpenProp : uncontrolledOpen;
@@ -170,7 +174,7 @@ export function MonthSelector({
                   onClick={() => setPickerOpen(false)}
                   className="w-full rounded-[4px] border border-border py-3 text-xs font-body tracking-normal transition-colors hover:bg-muted"
                 >
-                  Cancel
+                  {flow.cancelLabel}
                 </button>
               </div>
             </motion.div>

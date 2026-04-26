@@ -19,6 +19,7 @@ export const bookSearchModalMessages: Record<
     manualPlaceholderCoverUrl: string;
     manualSave: string;
     manualCoverImageAlt: string;
+    noResults: string;
   }
 > = {
   en: {
@@ -37,6 +38,7 @@ export const bookSearchModalMessages: Record<
     manualPlaceholderCoverUrl: 'https://example.com/cover.jpg',
     manualSave: 'Save',
     manualCoverImageAlt: 'Book cover',
+    noResults: 'No results found.',
   },
   ko: {
     tabSearch: '검색',
@@ -54,5 +56,6 @@ export const bookSearchModalMessages: Record<
     manualPlaceholderCoverUrl: 'https://example.com/cover.jpg',
     manualSave: '저장',
     manualCoverImageAlt: '책 표지',
+    noResults: '검색 결과가 없어요.',
   },
 };

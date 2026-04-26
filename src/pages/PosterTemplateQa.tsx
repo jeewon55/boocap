@@ -4,7 +4,6 @@ import { PosterCanvas } from '@/components/PosterCanvas';
 import {
   Book,
   MoodType,
-  MOODS,
   TEMPLATES,
   TemplateType,
   isTemplateVisibleForBookCount,
@@ -81,8 +80,9 @@ export default function PosterTemplateQa() {
   const [accessPw, setAccessPw] = useState('');
   const [accessErr, setAccessErr] = useState(false);
 
-  const [mood, setMood] = useState<MoodType>('minimal');
-  const moodLabel = useMemo(() => MOODS.find((m) => m.id === mood)?.label ?? mood, [mood]);
+  const templateCountByBookCount = useMemo(() =>
+    Object.fromEntries(BOOK_COUNTS.map((n) => [n, TEMPLATES.filter((t) => isTemplateVisibleForBookCount(t.id, n)).length])),
+  []);
 
   const entriesByCount = useMemo(() => {
     const m: Record<number, Record<number, Book>> = {};
@@ -173,21 +173,6 @@ export default function PosterTemplateQa() {
                 Create flow (new tab)
               </a>
             ) : null}
-            <label className="flex items-center gap-2 font-body text-sm">
-              <span className="text-muted-foreground">Mood</span>
-              <select
-                className="rounded-md border border-border bg-card px-2 py-1.5 text-sm"
-                value={mood}
-                onChange={(e) => setMood(e.target.value as MoodType)}
-              >
-                {MOODS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <span className="text-xs text-muted-foreground">Current: {moodLabel}</span>
           </div>
         </div>
       </div>
@@ -210,7 +195,10 @@ export default function PosterTemplateQa() {
                     key={n}
                     className={cn(thBase, 'sticky top-0 z-20 min-w-[8.5rem] whitespace-nowrap bg-background text-center')}
                   >
-                    {n}권
+                    <div>{n}권</div>
+                    <div className="mt-0.5 font-body text-[10px] font-normal text-muted-foreground">
+                      {templateCountByBookCount[n]}개 템플릿
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -247,7 +235,7 @@ export default function PosterTemplateQa() {
                             year={QA_YEAR}
                             month={QA_MONTH}
                             entries={entriesByCount[n]}
-                            mood={mood}
+                            mood="minimal"
                             template={t.id}
                             scale={CELL_SCALE}
                           />

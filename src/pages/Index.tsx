@@ -5,7 +5,9 @@ import { WizardStep } from '@/components/WizardStep';
 import { Step1AddBooks } from '@/components/Step1AddBooks';
 import { Step2Template } from '@/components/Step2Template';
 import { Step3Download } from '@/components/Step3Download';
-import { Book, MoodType, TemplateType, MAX_BOOKS_PER_MONTH } from '@/types/book';
+import { Book, TemplateType, MAX_BOOKS_PER_MONTH } from '@/types/book';
+import { createFlowMessages } from '@/i18n/createFlow';
+import { useLocale } from '@/contexts/LocaleContext';
 import { toast } from '@/hooks/use-toast';
 
 /** Brief spinner when leaving book step so the template step does not pop in abruptly. */
@@ -24,6 +26,8 @@ function getInitial() {
 
 export default function Index() {
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const flow = createFlowMessages[locale];
   const init = getInitial();
   const [step, setStep] = useState(0);
   const [templateStepPending, setTemplateStepPending] = useState(false);
@@ -35,7 +39,6 @@ export default function Index() {
   useEffect(() => {
     entriesRef.current = entries;
   }, [entries]);
-  const [mood, setMood] = useState<MoodType>('minimal');
   const [template, setTemplate] = useState<TemplateType>('stack');
 
   const yearMonthRef = useRef({ year: init.year, month: init.month });
@@ -57,9 +60,7 @@ export default function Index() {
     const isNewDay = !prev[day];
     const count = Object.values(prev).filter(Boolean).length;
     if (isNewDay && count >= MAX_BOOKS_PER_MONTH) {
-      toast({
-        title: 'You can add up to 12 books.',
-      });
+      toast({ title: flow.maxBooksToast });
       return;
     }
     setEntries((p) => ({ ...p, [day]: book }));
@@ -76,7 +77,6 @@ export default function Index() {
   const handleReset = () => {
     setStep(0);
     setEntries({});
-    setMood('minimal');
     setTemplate('stack');
     templateAdvanceLock.current = false;
     setTemplateStepPending(false);
@@ -124,7 +124,7 @@ export default function Index() {
           year={year}
           month={month}
           entries={entries}
-          mood={mood}
+          mood="minimal"
           template={template}
           onTemplateChange={setTemplate}
           onBack={() => setStep(0)}
@@ -137,7 +137,7 @@ export default function Index() {
           year={year}
           month={month}
           entries={entries}
-          mood={mood}
+          mood="minimal"
           template={template}
           onBack={() => setStep(1)}
           onReset={handleReset}

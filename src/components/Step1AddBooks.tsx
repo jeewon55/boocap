@@ -171,7 +171,7 @@ export function Step1AddBooks({
                             const filledCount = Object.values(entries).filter(Boolean).length;
                             if (!book && filledCount >= MAX_BOOKS_PER_MONTH) {
                               toast({
-                                title: 'You can add up to 12 books.',
+                                title: flow.maxBooksToast,
                               });
                               return;
                             }
@@ -261,13 +261,13 @@ export function Step1AddBooks({
                 onClick={() => { onRemoveBook(selectedDay); setSelectedDay(null); }}
                 className="flex-1 rounded-[4px] border border-border py-3 font-body text-xs font-medium tracking-normal transition-colors hover:bg-secondary"
               >
-                Delete
+                {flow.deleteBook}
               </button>
               <button
                 onClick={() => setIsReplacing(true)}
                 className="flex-1 rounded-[4px] bg-primary py-3 font-body text-xs font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Replace
+                {flow.replaceBook}
               </button>
             </div>
             </motion.div>

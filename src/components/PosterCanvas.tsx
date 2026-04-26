@@ -1452,7 +1452,8 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 >
                   <span
                     style={{
-                      display: 'inline-block',
+                      flex: '1 1 0%',
+                      minWidth: 0,
                       fontSize: essayTitlePx,
                       lineHeight: 1,
                       fontWeight: 600,
@@ -1460,7 +1461,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      maxWidth: '100%',
                     }}
                   >
                     {book.title}
@@ -1469,8 +1469,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     src={book.coverDataUrl ?? book.coverUrl}
                     alt=""
                     style={{
-                      display: 'inline-block',
-                      verticalAlign: 'middle',
+                      flexShrink: 0,
                       height: essayCoverThumbH,
                       width: essayCoverThumbW,
                       borderRadius: 2,

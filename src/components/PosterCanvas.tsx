@@ -1414,7 +1414,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
             <p style={essayHeadlineIntro}>
               In {monthName},
               <br />
-              <span style={{ display: 'inline-block', transform: 'translateY(-14px)' }}>I read:</span>
+              <span style={{ display: 'inline-block', transform: 'translateY(-14px)', whiteSpace: 'nowrap' }}>I read:</span>
             </p>
           </div>
           <div

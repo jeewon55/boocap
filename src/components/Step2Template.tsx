@@ -51,7 +51,7 @@ function PosterScaled({
       style={{ aspectRatio: '4/5', overflow: 'hidden' }}
     >
       <div style={{ width: scaledW, height: scaledH, overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        <div style={{ width: 600, height: 750, transform: `scale(${scale})`, transformOrigin: 'top left', pointerEvents: 'none' }}>
           <PosterCanvas
             year={year}
             month={month}

@@ -24,21 +24,24 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
 
 /** Pre-fetch a book cover as data URL so export works without CORS. Non-blocking. */
 async function prefetchCoverDataUrl(coverUrl: string): Promise<string | undefined> {
-  if (!coverUrl || coverUrl.startsWith('data:') || coverUrl.startsWith('/') || coverUrl.startsWith('blob:')) {
+  if (!coverUrl || coverUrl.startsWith('data:') || coverUrl.startsWith('blob:')) {
     return undefined;
   }
-  const proxies = [
-    `/api/img-proxy?url=${encodeURIComponent(coverUrl)}`,
-    `https://images.weserv.nl/?url=${encodeURIComponent(coverUrl)}&w=600&h=840&fit=cover&output=webp`,
-  ];
-  for (const url of proxies) {
-    try {
-      const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
-      if (!res.ok) continue;
-      return await blobToDataUrl(await res.blob());
-    } catch { /* try next proxy */ }
+  let fetchUrl: string;
+  if (coverUrl.startsWith('/api/img-proxy')) {
+    fetchUrl = coverUrl;
+  } else if (/^https?:\/\//i.test(coverUrl)) {
+    fetchUrl = `/api/img-proxy?url=${encodeURIComponent(coverUrl)}`;
+  } else {
+    return undefined;
   }
-  return undefined;
+  try {
+    const res = await fetch(fetchUrl, { mode: 'cors', credentials: 'omit' });
+    if (!res.ok) return undefined;
+    return await blobToDataUrl(await res.blob());
+  } catch {
+    return undefined;
+  }
 }
 
 function getInitial() {

@@ -1411,11 +1411,14 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               overflow: 'hidden',
             }}
           >
-            <p style={essayHeadlineIntro}>
-              In {monthName},
-              <br />
-              <span style={{ display: 'inline-block', transform: 'translateY(-14px)', whiteSpace: 'nowrap' }}>I read:</span>
-            </p>
+            <div style={{ transform: 'translate(-2px, -2px)' }}>
+              <div style={{ ...essayHeadlineBase, fontSize: essayIntroHeadingPx, lineHeight: 1.1, whiteSpace: 'nowrap' }}>
+                In {monthName},
+              </div>
+              <div style={{ ...essayHeadlineBase, fontSize: essayIntroHeadingPx, lineHeight: 1.1, marginTop: -14, whiteSpace: 'nowrap' }}>
+                I read:
+              </div>
+            </div>
           </div>
           <div
             style={{
@@ -1478,21 +1481,17 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
               ))
             )}
           </div>
-          <p style={{ ...essayHeadlineOutro, flexShrink: 0, width: '100%', boxSizing: 'border-box' }}>
-            and these pages have{' '}
-            <span style={{ display: 'inline-block', transform: 'translateY(-2px)' }}>
-              <span
-                style={{
-                  display: 'inline-block',
-                  transform: 'skewX(-10deg)',
-                  transformOrigin: '50% 55%',
-                }}
-              >
+          <div style={{ flexShrink: 0, width: '100%', boxSizing: 'border-box', height: 157, overflow: 'hidden' }}>
+            <div style={{ ...essayHeadlineBase, fontSize: 48, lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+              and these pages have
+            </div>
+            <div style={{ ...essayHeadlineBase, fontSize: 48, lineHeight: 1.2, display: 'flex', alignItems: 'baseline', flexWrap: 'nowrap' }}>
+              <span style={{ display: 'inline-block', transform: 'skewX(-10deg)', transformOrigin: '50% 55%', flexShrink: 0, whiteSpace: 'nowrap' }}>
                 reshaped
-              </span>{' '}
-              my thoughts.
-            </span>
-          </p>
+              </span>
+              <span style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>&nbsp;my thoughts.</span>
+            </div>
+          </div>
         </div>
       );
     }

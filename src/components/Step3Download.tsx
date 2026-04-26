@@ -78,35 +78,65 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
           const prev = img.src;
           if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
           const proxyUrl = coverUrlForRasterExport(prev);
+
+          // Method 1: fetch proxy URL → blob → data URL
+          let dataUrl: string | null = null;
           try {
             const res = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit' });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
+            if (res.ok) {
+              const blob = await res.blob();
+              dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+              });
+            }
+          } catch { /* fall through to method 2 */ }
+
+          // Method 2: canvas draw fallback (works if server returns CORS headers)
+          if (!dataUrl) {
+            dataUrl = await new Promise<string | null>((resolve) => {
+              const tmp = new Image();
+              tmp.crossOrigin = 'anonymous';
+              tmp.onload = () => {
+                try {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = tmp.naturalWidth || 120;
+                  canvas.height = tmp.naturalHeight || 174;
+                  const ctx = canvas.getContext('2d');
+                  if (!ctx) { resolve(null); return; }
+                  ctx.drawImage(tmp, 0, 0);
+                  resolve(canvas.toDataURL('image/jpeg', 0.92));
+                } catch { resolve(null); }
+              };
+              tmp.onerror = () => resolve(null);
+              tmp.src = proxyUrl;
             });
+          }
+
+          if (dataUrl) {
             swapBack.push({ el: img, prev });
             img.src = dataUrl;
-          } catch {
-            if (proxyUrl !== prev) {
-              swapBack.push({ el: img, prev });
-              img.src = proxyUrl;
-              if (!img.complete) {
-                await new Promise<void>((resolve) => {
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve();
-                });
-              }
-            }
+            // Ensure img.currentSrc is updated before html-to-image clones the DOM.
+            // Without this, toPng may still see the original cross-origin URL and fail.
+            try { await img.decode(); } catch { /* ignore */ }
+          } else if (proxyUrl !== prev) {
+            // Last resort: point to proxy URL and wait for it to load
+            swapBack.push({ el: img, prev });
+            img.src = proxyUrl;
+            await new Promise<void>((resolve) => {
+              if (img.complete && img.naturalWidth > 0) { resolve(); return; }
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            });
           }
         })
       );
 
+      // Three frames — gives Safari time to flush decoded images to compositor
       await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       });
 
       const exportOptions = {

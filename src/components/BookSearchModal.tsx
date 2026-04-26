@@ -3,7 +3,6 @@ import { Search, X, Loader2, PenLine, Upload, BookOpen, ArrowLeft } from 'lucide
 import { searchBooks } from '@/lib/bookApi';
 import { Book } from '@/types/book';
 import { motion } from 'framer-motion';
-import { BottomSheetKeyboardLift } from '@/components/BottomSheetKeyboardLift';
 import { useVisualViewportLayout } from '@/hooks/useVisualViewportLayout';
 import { useLocale } from '@/contexts/LocaleContext';
 import { bookSearchModalMessages } from '@/i18n/bookSearchModal';
@@ -60,7 +59,7 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   const [manualCoverUrl, setManualCoverUrl] = useState('');
   const [previewError, setPreviewError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { visibleHeight } = useVisualViewportLayout();
+  const { visibleHeight, keyboardInset } = useVisualViewportLayout();
 
   const sheetMaxHeight = useMemo(() => {
     if (typeof window === 'undefined') return undefined;
@@ -108,13 +107,16 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/40" onClick={onClose}>
-      <BottomSheetKeyboardLift>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-foreground/40"
+      style={{ paddingBottom: keyboardInset, transition: 'padding 0.18s ease-out' }}
+      onClick={onClose}
+    >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           style={{ maxHeight: sheetMaxHeight }}
-          className="flex min-h-0 w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
+          className="flex min-h-0 w-full flex-col overflow-hidden rounded-t-[4px] border border-foreground/20 bg-card font-body sm:rounded-[4px] sm:mx-4 sm:max-w-md sm:shadow-[10px_10px_0_0_rgba(0,0,0,0.06)]"
           onClick={(e) => e.stopPropagation()}
         >
         {/* Header */}
@@ -291,7 +293,6 @@ export function BookSearchModal({ day, month, onSelect, onClose }: BookSearchMod
           </div>
         )}
         </motion.div>
-      </BottomSheetKeyboardLift>
     </div>
   );
 }

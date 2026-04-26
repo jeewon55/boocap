@@ -927,7 +927,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         paddingTop: 4,
                       }}
                     >
-                      <div style={{ boxShadow: '0 3px 12px rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden', width: pos.w }}>
+                      <div style={{ borderRadius: 3, overflow: 'hidden', width: pos.w }}>
                         <BookImg src={book.coverDataUrl ?? book.coverUrl} alt={book.title} style={{ width: pos.w, height: pos.h, display: 'block' }} />
                       </div>
                       <p

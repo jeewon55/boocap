@@ -67,11 +67,12 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const handleDownload = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
+    console.log('[log-download] sending', { template, bookCount: countBooksInEntries(entries), month, year });
     fetch('/api/log-download', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event: 'download', template, bookCount: countBooksInEntries(entries), month, year }),
-    }).catch(() => {});
+    }).then(() => console.log('[log-download] ok')).catch((e) => console.error('[log-download] error', e));
     const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];
     const swapBackBg: { el: HTMLElement; prev: string }[] = [];
     let prevBorder = '';

@@ -67,74 +67,67 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const handleDownload = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
-    const swapBack: { el: HTMLImageElement; prev: string }[] = [];
+    const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];
+    const swapBackBg: { el: HTMLElement; prev: string }[] = [];
+
+    async function fetchAsDataUrl(url: string): Promise<string | null> {
+      try {
+        const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch { return null; }
+    }
+
+    function extractBgUrl(bgValue: string): string | null {
+      let m = bgValue.match(/url\("([^"]+)"\)/);
+      if (m) return m[1];
+      m = bgValue.match(/url\('([^']+)'\)/);
+      if (m) return m[1];
+      m = bgValue.match(/url\(([^)]+)\)/);
+      if (m) return m[1].trim();
+      return null;
+    }
+
     try {
       const TARGET_W = 1080;
       const root = posterRef.current;
-      const images = Array.from(root.querySelectorAll('img'));
 
-      await Promise.all(
-        images.map(async (img) => {
-          const prev = img.src;
-          if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
-          const proxyUrl = coverUrlForRasterExport(prev);
+      // 1. Swap <img> elements (paper texture, etc.)
+      const imgs = Array.from(root.querySelectorAll('img'));
+      await Promise.all(imgs.map(async (img) => {
+        const prev = img.src;
+        if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
+        const proxyUrl = coverUrlForRasterExport(prev);
+        const dataUrl = await fetchAsDataUrl(proxyUrl);
+        if (dataUrl) {
+          swapBackImg.push({ el: img, prev });
+          img.src = dataUrl;
+          try { await img.decode(); } catch { /* ignore */ }
+        }
+      }));
 
-          // Method 1: fetch proxy URL → blob → data URL
-          let dataUrl: string | null = null;
-          try {
-            const res = await fetch(proxyUrl, { mode: 'cors', credentials: 'omit' });
-            if (res.ok) {
-              const blob = await res.blob();
-              dataUrl = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-              });
-            }
-          } catch { /* fall through to method 2 */ }
+      // 2. Swap background-image divs (book covers rendered as CSS background)
+      const coverEls = Array.from(root.querySelectorAll<HTMLElement>('[role="img"]'));
+      await Promise.all(coverEls.map(async (el) => {
+        const currentBg = el.style.backgroundImage;
+        if (!currentBg || currentBg === 'none') return;
+        const url = extractBgUrl(currentBg);
+        if (!url || url.startsWith('data:') || url.startsWith('blob:')) return;
+        const proxyUrl = coverUrlForRasterExport(url);
+        const dataUrl = await fetchAsDataUrl(proxyUrl);
+        if (dataUrl) {
+          swapBackBg.push({ el, prev: currentBg });
+          el.style.backgroundImage = `url("${dataUrl}")`;
+        }
+      }));
 
-          // Method 2: canvas draw fallback (works if server returns CORS headers)
-          if (!dataUrl) {
-            dataUrl = await new Promise<string | null>((resolve) => {
-              const tmp = new Image();
-              tmp.crossOrigin = 'anonymous';
-              tmp.onload = () => {
-                try {
-                  const canvas = document.createElement('canvas');
-                  canvas.width = tmp.naturalWidth || 120;
-                  canvas.height = tmp.naturalHeight || 174;
-                  const ctx = canvas.getContext('2d');
-                  if (!ctx) { resolve(null); return; }
-                  ctx.drawImage(tmp, 0, 0);
-                  resolve(canvas.toDataURL('image/jpeg', 0.92));
-                } catch { resolve(null); }
-              };
-              tmp.onerror = () => resolve(null);
-              tmp.src = proxyUrl;
-            });
-          }
-
-          if (dataUrl) {
-            swapBack.push({ el: img, prev });
-            img.src = dataUrl;
-            // Ensure img.currentSrc is updated before html-to-image clones the DOM.
-            // Without this, toPng may still see the original cross-origin URL and fail.
-            try { await img.decode(); } catch { /* ignore */ }
-          } else if (proxyUrl !== prev) {
-            // Last resort: point to proxy URL and wait for it to load
-            swapBack.push({ el: img, prev });
-            img.src = proxyUrl;
-            await new Promise<void>((resolve) => {
-              if (img.complete && img.naturalWidth > 0) { resolve(); return; }
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            });
-          }
-        })
-      );
-
-      // Three frames — gives Safari time to flush decoded images to compositor
+      // Three frames — give Safari time to flush decoded images to compositor
       await new Promise<void>((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       });
@@ -166,9 +159,8 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       console.error('Export failed', e);
       toast({ title: flow.downloadFailedToast });
     } finally {
-      for (const { el, prev } of swapBack) {
-        el.src = prev;
-      }
+      for (const { el, prev } of swapBackImg) el.src = prev;
+      for (const { el, prev } of swapBackBg) el.style.backgroundImage = prev;
       setDownloading(false);
     }
   };

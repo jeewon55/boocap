@@ -56,13 +56,15 @@ interface PosterCanvasProps {
 }
 
 const BookImg = ({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) => (
-  <img
-    src={makeCoverUrl(src)}
-    alt={alt}
-    referrerPolicy="no-referrer"
-    decoding="async"
-    style={{ objectFit: 'cover', ...style }}
-    onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0'; }}
+  <div
+    role="img"
+    aria-label={alt}
+    style={{
+      backgroundImage: `url("${makeCoverUrl(src)}")`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      ...style,
+    }}
   />
 );
 

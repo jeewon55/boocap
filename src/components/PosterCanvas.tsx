@@ -127,28 +127,15 @@ function MosaicBookCell({
         overflow: 'hidden',
       }}
     >
-      <div
-        style={{
-          maxWidth: '100%',
-          maxHeight: '100%',
-          filter: 'drop-shadow(5px 7px 3px rgba(0,0,0,0.42))',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{ filter: 'drop-shadow(0px 3px 8px rgba(0,0,0,0.18))' }}>
         <BookImg
           src={book.coverDataUrl ?? book.coverUrl}
           alt={book.title}
           style={{
-            width: '100%',
-            height: '100%',
-            maxWidth: coverMaxW,
-            maxHeight: coverMaxH,
-            aspectRatio: '5 / 7',
+            width: coverMaxW,
+            height: coverMaxH,
             borderRadius: 2,
             display: 'block',
-            objectFit: 'cover',
             transform: `scale(${displayScale})`,
             transformOrigin: 'center center',
           }}

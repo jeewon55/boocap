@@ -69,6 +69,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     setDownloading(true);
     const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];
     const swapBackBg: { el: HTMLElement; prev: string }[] = [];
+    let prevBorder = '';
 
     async function fetchAsDataUrl(url: string): Promise<string | null> {
       try {
@@ -132,6 +133,10 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
         requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       });
 
+      // Remove outer frame border for export (preview-only decoration)
+      prevBorder = root.style.border;
+      root.style.border = 'none';
+
       const exportOptions = {
         // Re-fetching every asset with a new query string makes export much slower.
         cacheBust: false,
@@ -161,6 +166,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     } finally {
       for (const { el, prev } of swapBackImg) el.src = prev;
       for (const { el, prev } of swapBackBg) el.style.backgroundImage = prev;
+      if (posterRef.current) posterRef.current.style.border = prevBorder ?? '';
       setDownloading(false);
     }
   };

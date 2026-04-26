@@ -166,12 +166,14 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
       [entries],
     );
 
-    /** Same list but with duplicate books removed — used in templates that don't show dates. */
+    /** Same list but with duplicate books removed — used in templates that don't show dates.
+     *  Deduplicates by title (normalized) so that the same book searched twice still merges. */
     const readsSortedByDayUnique = useMemo(() => {
       const seen = new Set<string>();
       return readsSortedByDay.filter(({ book }) => {
-        if (seen.has(book.key)) return false;
-        seen.add(book.key);
+        const dedupKey = book.title.trim().toLowerCase();
+        if (seen.has(dedupKey)) return false;
+        seen.add(dedupKey);
         return true;
       });
     }, [readsSortedByDay]);

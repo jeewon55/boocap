@@ -1380,21 +1380,6 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
       const essayCoverThumbH = essayTitlePx * essayCoverHeightToFont;
       const essayCoverThumbW = Math.round((essayCoverThumbH * 5) / 7);
-      const essayMaxTitleW = essayContentW - essayCoverThumbW - 10;
-
-      function truncateEssayTitle(title: string): string {
-        const isCJK = (ch: string) => /[　-鿿가-힯豈-﫿]/.test(ch);
-        const charW = (ch: string) => isCJK(ch) ? essayTitlePx : essayTitlePx * 0.52;
-        const ellipsisW = 3 * essayTitlePx * 0.52;
-        let w = 0;
-        for (let i = 0; i < title.length; i++) {
-          w += charW(title[i]);
-          if (w + ellipsisW > essayMaxTitleW && i < title.length - 1) {
-            return title.slice(0, i) + '...';
-          }
-        }
-        return title;
-      }
 
       return (
         <div
@@ -1470,8 +1455,7 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 <div
                   key={`${book.key}-${i}`}
                   style={{
-                    width: '100%',
-                    minWidth: 0,
+                    width: essayContentW,
                     boxSizing: 'border-box',
                     color: moodConfig.textColor,
                     height: essayGridCell,
@@ -1482,14 +1466,19 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 >
                   <span
                     style={{
+                      flex: '1 1 0%',
+                      minWidth: 0,
                       fontSize: essayTitlePx,
                       lineHeight: 1,
                       fontWeight: 600,
                       letterSpacing: '-0.02em',
                       whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: 'block',
                     }}
                   >
-                    {truncateEssayTitle(book.title)}
+                    {book.title}
                   </span>
                   <BookImg
                     src={book.coverDataUrl ?? book.coverUrl}

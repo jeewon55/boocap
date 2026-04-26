@@ -168,7 +168,7 @@ export default function Landing() {
       <main className="landing-tall-main flex min-h-0 flex-1 flex-col max-md:min-h-0 md:min-h-0">
         {/* Copy — 모바일: 맨 위 / md+: 히어로 중앙 + CTA 동반 */}
         <section className="landing-tall-hero shrink-0 px-4 pt-14 text-center max-md:pb-4 sm:px-6 md:flex md:flex-none md:flex-col md:items-center md:justify-center md:px-6 md:pb-[40px] md:pt-[72px]">
-          <h1 className="mx-auto max-w-[20rem] font-display text-[1.45rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-foreground max-md:max-w-[min(100%,19rem)] sm:max-w-xl sm:text-4xl sm:leading-[1.12] md:max-w-2xl md:text-5xl md:leading-[58px]">
+          <h1 className={`mx-auto max-w-[20rem] font-display text-[1.45rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-foreground max-md:max-w-[min(100%,19rem)] sm:max-w-xl sm:text-4xl sm:leading-[1.12] md:max-w-2xl md:text-5xl md:leading-[58px]${locale === 'ko' ? ' max-md:leading-[1.28] max-sm:text-[1.7rem]' : ''}`}>
             {t.heroSingleLines ? (
               <>
                 {t.heroSingleLines[0]}

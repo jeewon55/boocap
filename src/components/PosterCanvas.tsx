@@ -1380,6 +1380,21 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
 
       const essayCoverThumbH = essayTitlePx * essayCoverHeightToFont;
       const essayCoverThumbW = Math.round((essayCoverThumbH * 5) / 7);
+      const essayMaxTitleW = essayContentW - essayCoverThumbW - 10;
+
+      function truncateEssayTitle(title: string): string {
+        const isCJK = (ch: string) => /[　-鿿가-힯豈-﫿]/.test(ch);
+        const charW = (ch: string) => isCJK(ch) ? essayTitlePx : essayTitlePx * 0.52;
+        const ellipsisW = 3 * essayTitlePx * 0.52;
+        let w = 0;
+        for (let i = 0; i < title.length; i++) {
+          w += charW(title[i]);
+          if (w + ellipsisW > essayMaxTitleW && i < title.length - 1) {
+            return title.slice(0, i) + '...';
+          }
+        }
+        return title;
+      }
 
       return (
         <div
@@ -1467,26 +1482,20 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 >
                   <span
                     style={{
-                      display: 'inline-block',
-                      maxWidth: essayContentW - essayCoverThumbW - 10,
                       fontSize: essayTitlePx,
                       lineHeight: 1,
                       fontWeight: 600,
                       letterSpacing: '-0.02em',
                       whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      verticalAlign: 'middle',
                     }}
                   >
-                    {book.title}
+                    {truncateEssayTitle(book.title)}
                   </span>
                   <BookImg
                     src={book.coverDataUrl ?? book.coverUrl}
                     alt=""
                     style={{
-                      display: 'inline-block',
-                      verticalAlign: 'middle',
+                      flexShrink: 0,
                       height: essayCoverThumbH,
                       width: essayCoverThumbW,
                       borderRadius: 2,

@@ -1465,32 +1465,42 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     overflow: 'hidden',
                   }}
                 >
-                  <span
+                  <div
                     style={{
-                      flex: '0 1 auto',
+                      display: 'inline-flex',
+                      maxWidth: '100%',
                       minWidth: 0,
-                      fontSize: essayTitlePx,
-                      lineHeight: 1,
-                      fontWeight: 600,
-                      letterSpacing: '-0.02em',
-                      whiteSpace: 'nowrap',
+                      alignItems: 'center',
                       overflow: 'hidden',
-                      textOverflow: 'ellipsis',
                     }}
                   >
-                    {book.title}
-                  </span>
-                  <BookImg
-                    src={book.coverDataUrl ?? book.coverUrl}
-                    alt=""
-                    style={{
-                      flexShrink: 0,
-                      height: essayCoverThumbH,
-                      width: essayCoverThumbW,
-                      borderRadius: 2,
-                      marginLeft: 10,
-                    }}
-                  />
+                    <span
+                      style={{
+                        flex: '0 1 auto',
+                        minWidth: 0,
+                        fontSize: essayTitlePx,
+                        lineHeight: 1,
+                        fontWeight: 600,
+                        letterSpacing: '-0.02em',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {book.title}
+                    </span>
+                    <BookImg
+                      src={book.coverDataUrl ?? book.coverUrl}
+                      alt=""
+                      style={{
+                        flexShrink: 0,
+                        height: essayCoverThumbH,
+                        width: essayCoverThumbW,
+                        borderRadius: 2,
+                        marginLeft: 10,
+                      }}
+                    />
+                  </div>
                 </div>
               ))
             )}

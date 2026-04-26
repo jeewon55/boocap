@@ -70,13 +70,12 @@ function getLandingTiltScale(i: number, total: number): TiltScale {
 
 function getDefaultMonth() {
   const now = new Date();
-  let m = now.getMonth() - 1;
-  let y = now.getFullYear();
-  if (m < 0) {
-    m = 11;
-    y -= 1;
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  if (now.getDate() >= 15) {
+    return { year: y, month: m };
   }
-  return { year: y, month: m };
+  return m === 0 ? { year: y - 1, month: 11 } : { year: y, month: m - 1 };
 }
 
 function LandingExamplePoster({

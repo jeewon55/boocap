@@ -144,7 +144,7 @@ export function Step1AddBooks({
             {weekRows.map((row, ri) => (
               <div
                 key={`w-${ri}`}
-                className="grid grid-cols-7 border-b border-border/35 last:border-b-0"
+                className="grid grid-cols-7 border-b border-border/35 last:border-b-0 overflow-hidden"
               >
                 {row.map((cell, ci) => {
                   const cellKey = `cell-${ri}-${ci}`;
@@ -178,12 +178,12 @@ export function Step1AddBooks({
                             setSelectedDay(day);
                           }}
                           aria-label={`${MONTHS_SHORT[month]} ${twoDigitDay(day)}${book ? `, ${book.title}` : ''}`}
-                          className={`group relative flex aspect-[3/4] w-full min-w-0 flex-col rounded-none text-left transition-colors hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground/25 ${
-                            book ? 'overflow-hidden p-0' : 'items-start justify-start p-1.5'
+                          className={`group flex aspect-[3/4] w-full min-w-0 flex-col rounded-none text-left transition-colors hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground/25 ${
+                            book ? 'overflow-hidden p-0' : 'items-start justify-start p-1.5 relative'
                           }`}
                         >
                           {book ? (
-                            <div className="absolute inset-0 overflow-hidden shadow-sm ring-1 ring-inset ring-border">
+                            <div className="relative flex-1 w-full min-h-0 overflow-hidden shadow-sm ring-1 ring-inset ring-border">
                               <CalendarCover
                                 book={book}
                                 onRemove={(e) => {

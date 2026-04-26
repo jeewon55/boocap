@@ -61,6 +61,13 @@ export default function Index() {
   const flow = createFlowMessages[locale];
   const init = getInitial();
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav?.type === 'reload') {
+      navigate('/', { replace: true });
+    }
+  }, [navigate]);
   const [templateStepPending, setTemplateStepPending] = useState(false);
   const templateAdvanceLock = useRef(false);
   const [year, setYear] = useState(init.year);

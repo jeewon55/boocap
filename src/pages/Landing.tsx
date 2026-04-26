@@ -154,6 +154,7 @@ export default function Landing() {
 
   const handleCreate = () => {
     const { year, month } = getDefaultMonth();
+    sessionStorage.setItem('createEntry', '1');
     navigate(`/create?year=${year}&month=${month}`);
   };
 

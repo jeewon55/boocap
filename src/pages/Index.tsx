@@ -63,6 +63,11 @@ export default function Index() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
+    const fromApp = sessionStorage.getItem('createEntry');
+    if (fromApp) {
+      sessionStorage.removeItem('createEntry');
+      return;
+    }
     const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
     if (nav?.type === 'reload') {
       navigate('/', { replace: true });

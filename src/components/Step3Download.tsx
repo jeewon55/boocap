@@ -69,6 +69,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     setDownloading(true);
     fetch('https://script.google.com/macros/s/AKfycbynXsxZMXeKOpVkGlYAt42apE2IEpdbabsfQxXA6Rvbub1-qHwRdoeLy-A1J6MsN0z9/exec', {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event: 'download', template, bookCount: countBooksInEntries(entries), month, year }),
     }).catch(() => {});
     const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];

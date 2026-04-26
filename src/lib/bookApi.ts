@@ -25,7 +25,7 @@ async function searchKakao(query: string): Promise<Book[]> {
         return {
           title: doc.title?.replace(/<[^>]*>/g, '') || '',
           author: (doc.authors?.[0] || '').replace(/<[^>]*>/g, ''),
-          coverUrl: doc.thumbnail,
+          coverUrl: `/api/img-proxy?url=${encodeURIComponent(doc.thumbnail)}`,
           key,
         } satisfies Book;
       });
@@ -60,7 +60,7 @@ async function searchAladin(query: string): Promise<Book[]> {
         return {
           title: item.title || '',
           author: item.author?.split('(')[0]?.trim() || '',
-          coverUrl: item.cover,
+          coverUrl: `/api/img-proxy?url=${encodeURIComponent(item.cover)}`,
           key: item.isbn13 || item.isbn || `aladin-${Date.now()}-${Math.random()}`,
         } satisfies Book;
       });

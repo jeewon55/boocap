@@ -1068,6 +1068,9 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
         }
       }
 
+      const listCoverH = Math.max(0, listRowMaxH - listCoverShyOfRowPx);
+      const listCoverW = Math.floor(listCoverH * 5 / 7);
+
       return (
         <div
           ref={ref}
@@ -1189,18 +1192,16 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                     >
                       <div
                         style={{
-                          height: `calc(100% - ${listCoverShyOfRowPx}px)`,
-                          maxHeight: `calc(100% - ${listCoverShyOfRowPx}px)`,
-                          aspectRatio: '5 / 7',
+                          width: listCoverW,
+                          height: listCoverH,
                           overflow: 'hidden',
-                          minWidth: 0,
                           flexShrink: 0,
                         }}
                       >
                         <BookImg
                           src={book.coverDataUrl ?? book.coverUrl}
                           alt={book.title}
-                          style={{ width: '100%', height: '100%', display: 'block' }}
+                          style={{ width: listCoverW, height: listCoverH, display: 'block' }}
                         />
                       </div>
                       <div

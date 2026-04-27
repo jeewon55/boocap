@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft, Share2 } from 'lucide-react';
+import { Download, ArrowLeft, Share } from 'lucide-react';
 import { Book, MoodType, TemplateType, countBooksInEntries } from '@/types/book';
 import { coverUrlForRasterExport } from '@/lib/coverExportUrl';
 import { PosterCanvas } from './PosterCanvas';
@@ -123,6 +123,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       });
       prevBorder = root.style.border;
       root.style.border = 'none';
+      root.style.borderRadius = '0';
       const dataUrl = await toPng(root, {
         cacheBust: false,
         includeQueryParams: true,
@@ -136,7 +137,10 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     } finally {
       for (const { el, prev } of swapBackImg) el.src = prev;
       for (const { el, prev } of swapBackBg) el.style.backgroundImage = prev;
-      if (posterRef.current) posterRef.current.style.border = prevBorder ?? '';
+      if (posterRef.current) {
+        posterRef.current.style.border = prevBorder ?? '';
+        posterRef.current.style.borderRadius = '';
+      }
     }
   }
 
@@ -237,24 +241,26 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       </div>
 
       <div className="mx-auto w-full max-w-[26rem] space-y-3 pt-2 pb-[max(1rem,calc(1rem+env(safe-area-inset-bottom,0px)))]">
-        <button
-          onClick={handleDownload}
-          disabled={downloading || sharing}
-          className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          <Download className="w-3.5 h-3.5" />
-          {downloading ? flow.downloadExporting : flow.downloadImageCta}
-        </button>
-        {canShare && (
+        <div className="flex gap-2">
           <button
-            onClick={handleShare}
-            disabled={sharing || downloading}
-            className="flex w-full items-center justify-center gap-2 rounded-[4px] border border-border py-4 text-xs font-body font-semibold tracking-normal transition-colors hover:bg-secondary disabled:opacity-50"
+            onClick={handleDownload}
+            disabled={downloading || sharing}
+            className="flex flex-1 items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            <Share2 className="w-3.5 h-3.5" />
-            {sharing ? flow.shareSharing : flow.shareImageCta}
+            <Download className="w-3.5 h-3.5" />
+            {downloading ? flow.downloadExporting : flow.downloadImageCta}
           </button>
-        )}
+          {canShare && (
+            <button
+              onClick={handleShare}
+              disabled={sharing || downloading}
+              aria-label={sharing ? flow.shareSharing : flow.shareImageCta}
+              className="flex items-center justify-center rounded-[4px] border border-border px-4 py-4 transition-colors hover:bg-secondary disabled:opacity-50"
+            >
+              <Share className="w-4 h-4" />
+            </button>
+          )}
+        </div>
         <div className="flex gap-3">
           <button
             onClick={onBack}

@@ -1466,8 +1466,9 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                 >
                   <span
                     style={{
-                      flex: '1 1 0%',
+                      flex: '0 1 auto',
                       minWidth: 0,
+                      maxWidth: essayContentW - essayCoverThumbW - 10,
                       fontSize: essayTitlePx,
                       lineHeight: 1,
                       fontWeight: 600,

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft, Share } from 'lucide-react';
+import { Download, ArrowLeft, Share2 } from 'lucide-react';
 import { Book, MoodType, TemplateType, countBooksInEntries } from '@/types/book';
 import { coverUrlForRasterExport } from '@/lib/coverExportUrl';
 import { PosterCanvas } from './PosterCanvas';
@@ -257,7 +257,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
               aria-label={sharing ? flow.shareSharing : flow.shareImageCta}
               className="flex items-center justify-center rounded-[4px] border border-border px-4 py-4 transition-colors hover:bg-secondary disabled:opacity-50"
             >
-              <Share className="w-4 h-4" />
+              <Share2 className="w-4 h-4" />
             </button>
           )}
         </div>

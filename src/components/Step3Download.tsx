@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ArrowLeft } from 'lucide-react';
+import { Download, ArrowLeft, Share2 } from 'lucide-react';
 import { Book, MoodType, TemplateType, countBooksInEntries } from '@/types/book';
 import { coverUrlForRasterExport } from '@/lib/coverExportUrl';
 import { PosterCanvas } from './PosterCanvas';
@@ -31,6 +31,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
   const [downloading, setDownloading] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [showStartOverModal, setShowStartOverModal] = useState(false);
   const [feedbackState, setFeedbackState] = useState<'hidden' | 'shown' | 'submitted'>('hidden');
   const [feedbackRating, setFeedbackRating] = useState('');
@@ -64,6 +65,81 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
     return () => obs.disconnect();
   }, []);
 
+  async function fetchAsDataUrl(url: string): Promise<string | null> {
+    try {
+      const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch { return null; }
+  }
+
+  function extractBgUrl(bgValue: string): string | null {
+    let m = bgValue.match(/url\("([^"]+)"\)/);
+    if (m) return m[1];
+    m = bgValue.match(/url\('([^']+)'\)/);
+    if (m) return m[1];
+    m = bgValue.match(/url\(([^)]+)\)/);
+    if (m) return m[1].trim();
+    return null;
+  }
+
+  async function generatePosterDataUrl(): Promise<string> {
+    const root = posterRef.current!;
+    const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];
+    const swapBackBg: { el: HTMLElement; prev: string }[] = [];
+    let prevBorder = '';
+    try {
+      const imgs = Array.from(root.querySelectorAll('img'));
+      await Promise.all(imgs.map(async (img) => {
+        const prev = img.src;
+        if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
+        const dataUrl = await fetchAsDataUrl(coverUrlForRasterExport(prev));
+        if (dataUrl) {
+          swapBackImg.push({ el: img, prev });
+          img.src = dataUrl;
+          try { await img.decode(); } catch { /* ignore */ }
+        }
+      }));
+      const coverEls = Array.from(root.querySelectorAll<HTMLElement>('[role="img"]'));
+      await Promise.all(coverEls.map(async (el) => {
+        const currentBg = el.style.backgroundImage;
+        if (!currentBg || currentBg === 'none') return;
+        const url = extractBgUrl(currentBg);
+        if (!url || url.startsWith('data:') || url.startsWith('blob:')) return;
+        const dataUrl = await fetchAsDataUrl(coverUrlForRasterExport(url));
+        if (dataUrl) {
+          swapBackBg.push({ el, prev: currentBg });
+          el.style.backgroundImage = `url("${dataUrl}")`;
+        }
+      }));
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      });
+      prevBorder = root.style.border;
+      root.style.border = 'none';
+      const dataUrl = await toPng(root, {
+        cacheBust: false,
+        includeQueryParams: true,
+        pixelRatio: 1,
+        canvasWidth: 1080,
+        canvasHeight: 1350,
+        skipFonts: true,
+        backgroundColor: null,
+      } as const);
+      return dataUrl;
+    } finally {
+      for (const { el, prev } of swapBackImg) el.src = prev;
+      for (const { el, prev } of swapBackBg) el.style.backgroundImage = prev;
+      if (posterRef.current) posterRef.current.style.border = prevBorder ?? '';
+    }
+  }
+
   const handleDownload = async () => {
     if (!posterRef.current) return;
     setDownloading(true);
@@ -72,91 +148,8 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event: 'download', template, bookCount: countBooksInEntries(entries), month, year }),
     }).catch(() => {});
-    const swapBackImg: { el: HTMLImageElement; prev: string }[] = [];
-    const swapBackBg: { el: HTMLElement; prev: string }[] = [];
-    let prevBorder = '';
-
-    async function fetchAsDataUrl(url: string): Promise<string | null> {
-      try {
-        const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
-        if (!res.ok) return null;
-        const blob = await res.blob();
-        return await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      } catch { return null; }
-    }
-
-    function extractBgUrl(bgValue: string): string | null {
-      let m = bgValue.match(/url\("([^"]+)"\)/);
-      if (m) return m[1];
-      m = bgValue.match(/url\('([^']+)'\)/);
-      if (m) return m[1];
-      m = bgValue.match(/url\(([^)]+)\)/);
-      if (m) return m[1].trim();
-      return null;
-    }
-
     try {
-      const TARGET_W = 1080;
-      const root = posterRef.current;
-
-      // 1. Swap <img> elements (paper texture, etc.)
-      const imgs = Array.from(root.querySelectorAll('img'));
-      await Promise.all(imgs.map(async (img) => {
-        const prev = img.src;
-        if (!prev || prev.startsWith('data:') || prev.startsWith('blob:')) return;
-        const proxyUrl = coverUrlForRasterExport(prev);
-        const dataUrl = await fetchAsDataUrl(proxyUrl);
-        if (dataUrl) {
-          swapBackImg.push({ el: img, prev });
-          img.src = dataUrl;
-          try { await img.decode(); } catch { /* ignore */ }
-        }
-      }));
-
-      // 2. Swap background-image divs (book covers rendered as CSS background)
-      const coverEls = Array.from(root.querySelectorAll<HTMLElement>('[role="img"]'));
-      await Promise.all(coverEls.map(async (el) => {
-        const currentBg = el.style.backgroundImage;
-        if (!currentBg || currentBg === 'none') return;
-        const url = extractBgUrl(currentBg);
-        if (!url || url.startsWith('data:') || url.startsWith('blob:')) return;
-        const proxyUrl = coverUrlForRasterExport(url);
-        const dataUrl = await fetchAsDataUrl(proxyUrl);
-        if (dataUrl) {
-          swapBackBg.push({ el, prev: currentBg });
-          el.style.backgroundImage = `url("${dataUrl}")`;
-        }
-      }));
-
-      // Three frames — give Safari time to flush decoded images to compositor
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      });
-
-      // Remove outer frame border for export (preview-only decoration)
-      prevBorder = root.style.border;
-      root.style.border = 'none';
-
-      const exportOptions = {
-        // Re-fetching every asset with a new query string makes export much slower.
-        cacheBust: false,
-        includeQueryParams: true,
-        pixelRatio: 1,
-        canvasWidth: TARGET_W,
-        canvasHeight: 1350,
-        // Embedding all @font-face files (Google Fonts, Pretendard, …) is usually the slowest step;
-        // fonts are already loaded for on-screen poster — skip duplicate downloads.
-        skipFonts: true,
-        backgroundColor: null,
-      } as const;
-
-      const dataUrl = await toPng(root, exportOptions);
-
+      const dataUrl = await generatePosterDataUrl();
       const link = document.createElement('a');
       link.download = `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`;
       link.href = dataUrl;
@@ -169,10 +162,27 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       console.error('Export failed', e);
       toast({ title: flow.downloadFailedToast });
     } finally {
-      for (const { el, prev } of swapBackImg) el.src = prev;
-      for (const { el, prev } of swapBackBg) el.style.backgroundImage = prev;
-      if (posterRef.current) posterRef.current.style.border = prevBorder ?? '';
       setDownloading(false);
+    }
+  };
+
+  const canShare = typeof navigator !== 'undefined' && 'share' in navigator;
+
+  const handleShare = async () => {
+    if (!posterRef.current) return;
+    setSharing(true);
+    try {
+      const dataUrl = await generatePosterDataUrl();
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], `book-recap-${MONTHS[month].toLowerCase()}-${year}.png`, { type: 'image/png' });
+      await navigator.share({ files: [file] });
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        toast({ title: flow.downloadFailedToast });
+      }
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -229,12 +239,22 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       <div className="mx-auto w-full max-w-[26rem] space-y-3 pt-2 pb-[max(1rem,calc(1rem+env(safe-area-inset-bottom,0px)))]">
         <button
           onClick={handleDownload}
-          disabled={downloading}
+          disabled={downloading || sharing}
           className="flex w-full items-center justify-center gap-2 rounded-[4px] bg-primary py-4 text-xs font-body font-semibold tracking-normal text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Download className="w-3.5 h-3.5" />
           {downloading ? flow.downloadExporting : flow.downloadImageCta}
         </button>
+        {canShare && (
+          <button
+            onClick={handleShare}
+            disabled={sharing || downloading}
+            className="flex w-full items-center justify-center gap-2 rounded-[4px] border border-border py-4 text-xs font-body font-semibold tracking-normal transition-colors hover:bg-secondary disabled:opacity-50"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            {sharing ? flow.shareSharing : flow.shareImageCta}
+          </button>
+        )}
         <div className="flex gap-3">
           <button
             onClick={onBack}

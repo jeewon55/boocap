@@ -13,6 +13,8 @@ export const createFlowMessages: Record<
     downloadImageCta: string;
     downloadExporting: string;
     downloadFailedToast: string;
+    shareImageCta: string;
+    shareSharing: string;
     startOverCta: string;
     startOverModalTitle: string;
     startOverModalBody: string;
@@ -44,6 +46,8 @@ export const createFlowMessages: Record<
     downloadImageCta: 'Download Poster',
     downloadExporting: 'Exporting…',
     downloadFailedToast: 'Failed to save the poster.',
+    shareImageCta: 'Share',
+    shareSharing: 'Sharing…',
     startOverCta: 'Start over',
     startOverModalTitle: 'Start over?',
     startOverModalBody: 'All books and settings for this recap will be cleared.',
@@ -76,6 +80,8 @@ export const createFlowMessages: Record<
     downloadImageCta: '포스터 다운로드',
     downloadExporting: '이미지 저장 중…',
     downloadFailedToast: '포스터 저장에 실패했어요.',
+    shareImageCta: '공유하기',
+    shareSharing: '공유 중…',
     startOverCta: '처음부터 다시',
     startOverModalTitle: '처음부터 다시 할까요?',
     startOverModalBody: '지금까지 입력한 독서 데이터가 모두 사라져요.',

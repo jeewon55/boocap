@@ -377,22 +377,11 @@ export const PosterCanvas = forwardRef<HTMLDivElement, PosterCanvasProps>(
                         }}
                       >
                         {book ? (
-                          <>
-                            <BookImg
-                              src={book.coverDataUrl ?? book.coverUrl}
-                              alt={book.title}
-                              style={{ position: 'absolute', inset: '-1px' }}
-                            />
-                            <div
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                pointerEvents: 'none',
-                                boxShadow: `inset 0 0 0 1px ${rowBorder}`,
-                              }}
-                              aria-hidden
-                            />
-                          </>
+                          <BookImg
+                            src={book.coverDataUrl ?? book.coverUrl}
+                            alt={book.title}
+                            style={{ position: 'absolute', inset: '-1px' }}
+                          />
                         ) : (
                           <span
                             style={{

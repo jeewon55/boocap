@@ -127,9 +127,7 @@ export function Step3Download({ year, month, entries, mood, template, onBack, on
       const dataUrl = await toPng(root, {
         cacheBust: false,
         includeQueryParams: true,
-        pixelRatio: 1,
-        canvasWidth: 1080,
-        canvasHeight: 1350,
+        pixelRatio: 1.8,
         skipFonts: true,
         backgroundColor: null,
       } as const);
